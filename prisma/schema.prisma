@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id                Int       @id @default(autoincrement())
+  uuid              String    @unique(map: "uuid") @db.VarChar(60)
+  email             String    @unique(map: "email") @db.VarChar(255)
+  password          String    @db.VarChar(255)
+  first_name        String    @db.VarChar(255)
+  last_name         String    @db.VarChar(255)
+  role              String    @default("GENERAL") @db.VarChar(255)
+  password_verified Boolean   @default(false)
+  last_login        DateTime? @db.DateTime(0)
+  date_created      DateTime  @default(now()) @db.DateTime(0)
+}
