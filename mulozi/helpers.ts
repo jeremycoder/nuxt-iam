@@ -1,3 +1,5 @@
+// TODO: Please separate helpers for user model and helpers for Mulozi Auth. Remember,, Mulozi is for auth only
+
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
@@ -111,8 +113,9 @@ export function validateEmail(email: string): boolean {
  * @param email The email string
  */
 export async function emailExists(email: string): Promise<boolean> {
-  let user = undefined;
+  if (!email) return false;
 
+  let user = undefined;
   await prisma.user
     .findFirst({
       where: {
@@ -140,6 +143,8 @@ export async function emailExists(email: string): Promise<boolean> {
  * @return { Promise<boolean> }
  */
 export async function userExists(uuid: string): Promise<boolean> {
+  if (!uuid) return false;
+
   let user = undefined;
 
   await prisma.user
@@ -150,7 +155,6 @@ export async function userExists(uuid: string): Promise<boolean> {
     })
     .then(async (result) => {
       user = result;
-      console.log("USER: ", user);
       await prisma.$disconnect();
     })
     .catch(async (e) => {
@@ -195,6 +199,76 @@ export async function createUser(
     });
 
   return { email: registeredUser.email };
+}
+
+/**
+ * @desc Creates a user
+ * @param UnregUser Unregistered user with properties e.g first_name, email
+ */
+export async function updateUser(event: H3Event): Promise<Object> {
+  const body = await readBody(event);
+  const { fromRoute } = event.context.params;
+  let registeredUser = {} as RegisteredUser;
+
+  // If no uuid given
+  if (!fromRoute.uuid)
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Uuid not supplied",
+    });
+
+  // If uuid exists, but user does not exist
+  if (!(await userExists(fromRoute.uuid)))
+    throw createError({
+      statusCode: 400,
+      statusMessage: "User not found",
+    });
+
+  // If first name and last name do not exist in body
+  if ("first_name" in body === false && "last_name" in body === false)
+    return createError({
+      statusCode: 400,
+      statusMessage: "No updatable properties supplied",
+    });
+
+  // If first_name empty
+  if (!body.first_name)
+    return createError({
+      statusCode: 400,
+      statusMessage: "first_name must have data",
+    });
+
+  // If last_name empty
+  if (!body.last_name)
+    return createError({
+      statusCode: 400,
+      statusMessage: "last_name must have data",
+    });
+
+  await prisma.user
+    .update({
+      where: {
+        uuid: fromRoute.uuid,
+      },
+      data: {
+        first_name: body.first_name,
+        last_name: body.last_name,
+      },
+    })
+    .then(async (result) => {
+      registeredUser = result;
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+      process.exit(1);
+    });
+
+  return {
+    success: true,
+    email: registeredUser.email,
+  };
 }
 
 export function validatePassword(password: string): boolean {

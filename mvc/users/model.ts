@@ -1,13 +1,10 @@
 import { H3Event } from "h3";
 import { PrismaClient } from "@prisma/client";
 import {
-  validateRegisterBody,
-  validateEmail,
-  emailExists,
-  validatePassword,
   createUser,
   userExists,
   validateUserRegistration,
+  updateUser,
 } from "~~/mulozi/helpers";
 
 const prisma = new PrismaClient();
@@ -37,6 +34,8 @@ export async function index(event: H3Event): Promise<Object | null> {
       process.exit(1);
     });
 
+  // TODO: should be getAllUsers() or indexUsers()
+
   return users;
 }
 
@@ -60,6 +59,7 @@ export async function store(event: H3Event): Promise<Object> {
 
   const body = await readBody(event);
   const user = await createUser(body);
+  // TODO: should be createUser(event) or storeUser()
 
   return user;
 }
@@ -90,6 +90,8 @@ export async function show(event: H3Event): Promise<Object | null> {
       process.exit(1);
     });
 
+  // TODO: should be showUser(event)
+
   return user;
 }
 
@@ -105,10 +107,14 @@ export async function edit(event: H3Event): Promise<void> {
 /**
  * @desc Update particular user
  * @param event H3 Event passed from api
- * @returns {Promise<JSON>} Object mentioning success or failure of editing user or error
+ * @returns {Promise<Object>} Object mentioning success or failure of editing user or error
  */
-export async function update(event: H3Event): Promise<JSON> {
-  return event.context.params;
+export async function update(event: H3Event): Promise<Object> {
+  const result = await updateUser(event);
+  // TODO throws an error, is there a better way to check if it's an error than by checking statusCode?
+  if ("statusCode" in result) throw result;
+
+  return result;
 }
 
 /**
@@ -117,8 +123,15 @@ export async function update(event: H3Event): Promise<JSON> {
  * @returns {Promise<Object>} Object mentioning success or failure of deleting user or error
  */
 export async function destroy(event: H3Event): Promise<Object> {
+  // If no uuid given
   const { uuid } = event.context.params.fromRoute;
+  if (!uuid)
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Uuid not supplied",
+    });
 
+  // If uuid exists, but user does not exist
   if (!(await userExists(uuid)))
     throw createError({
       statusCode: 400,
@@ -142,6 +155,8 @@ export async function destroy(event: H3Event): Promise<Object> {
       await prisma.$disconnect();
       process.exit(1);
     });
+
+  // TODO: should be destroyUser(event)
 
   return user;
 }

@@ -3,15 +3,7 @@
  */
 
 import UrlPattern from "url-pattern";
-import {
-  index,
-  create,
-  store,
-  show,
-  edit,
-  update,
-  destroy,
-} from "../models/users";
+import { index, create, store, show, edit, update, destroy } from "./model";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
