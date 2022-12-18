@@ -168,39 +168,6 @@ export async function userExists(uuid: string): Promise<boolean> {
   return true;
 }
 
-/**
- * @desc Creates a user
- * @param UnregUser Unregistered user with properties e.g first_name, email
- */
-export async function createUser(
-  UnregisteredUser: UnregisteredUser
-): Promise<Object> {
-  let registeredUser = {} as RegisteredUser;
-
-  const hashedPassword = await hashPassword(UnregisteredUser.password);
-  await prisma.user
-    .create({
-      data: {
-        first_name: UnregisteredUser.first_name,
-        last_name: UnregisteredUser.last_name,
-        uuid: uuidv4(),
-        email: UnregisteredUser.email,
-        password: hashedPassword,
-      },
-    })
-    .then(async (result) => {
-      registeredUser = result;
-      await prisma.$disconnect();
-    })
-    .catch(async (e) => {
-      console.error(e);
-      await prisma.$disconnect();
-      process.exit(1);
-    });
-
-  return { email: registeredUser.email };
-}
-
 export function validatePassword(password: string): boolean {
   // Has at least 8 characters
   if (password.length <= 8) return false;

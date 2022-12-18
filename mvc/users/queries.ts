@@ -4,12 +4,76 @@ import { UnregisteredUser, RegisteredUser, ApiResult } from "./types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();
+const rowLimit = 100;
+
+/**
+ * @desc Gets all users
+ * @param event H3Event
+ */
+export async function getAllUsers(
+  event: H3Event
+): Promise<ApiResult | H3Error> {
+  const result = {} as ApiResult;
+  let users = {};
+
+  await prisma.user
+    .findMany({
+      take: rowLimit,
+    })
+    .then(async (result) => {
+      users = result;
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+    });
+
+  // Create api result
+  result.success = true;
+  // TODO: Fix this type error please
+  result.data = users;
+
+  return result;
+}
+
+/**
+ * @desc Gets one user
+ * @param event H3Event
+ */
+export async function showUser(event: H3Event): Promise<ApiResult | H3Error> {
+  const { uuid } = event.context.params.fromRoute;
+  const result = {} as ApiResult;
+  let user = {};
+
+  await prisma.user
+    .findUnique({
+      where: {
+        uuid: uuid,
+      },
+    })
+    .then(async (result) => {
+      if (result) user = result;
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+    });
+
+  // Create api result
+  result.success = true;
+  result.data = user;
+
+  return result;
+}
 
 /**
  * @desc Updates a user
- * @param UnregUser Unregistered user with properties e.g first_name, email
+ * @param event H3Event
  */
 export async function updateUser(event: H3Event): Promise<ApiResult | H3Error> {
+  const result = {} as ApiResult;
   const body = await readBody(event);
   const { fromRoute } = event.context.params;
   let registeredUser = {} as RegisteredUser;
@@ -69,8 +133,7 @@ export async function updateUser(event: H3Event): Promise<ApiResult | H3Error> {
       process.exit(1);
     });
 
-  // Create api result
-  const result = {} as ApiResult;
+  // Prepare api result
   result.success = true;
   result.data = { email: registeredUser.email };
 

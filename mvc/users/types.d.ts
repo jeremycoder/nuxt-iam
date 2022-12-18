@@ -19,7 +19,7 @@ export type RegisteredUser = {
 
 export type ApiResult = {
   success: boolean;
-  data: Object;
+  data: { any };
 };
 
 enum Role {

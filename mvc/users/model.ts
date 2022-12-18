@@ -5,38 +5,21 @@ import {
   userExists,
   validateUserRegistration,
 } from "~~/mulozi/helpers";
-import { updateUser } from "./queries";
+import { getAllUsers, showUser, updateUser } from "./queries";
+import { ApiResult } from "./types";
 
 const prisma = new PrismaClient();
-
-// Add limits to how many rows are returned
-const rowLimit = 100;
 
 /**
  * @desc Shows all users
  * @param event H3 Event passed from api
- * @returns {Promise<Object|null>} object returns all users|error
+ * @returns {Promise<ApiResult|H3Error>} object returns all users|error
  */
-export async function index(event: H3Event): Promise<Object | null> {
-  let users = null;
+export async function index(event: H3Event): Promise<ApiResult | H3Error> {
+  const result = await getAllUsers(event);
+  if (result instanceof H3Error) throw result;
 
-  await prisma.user
-    .findMany({
-      take: rowLimit,
-    })
-    .then(async (result) => {
-      users = result;
-      await prisma.$disconnect();
-    })
-    .catch(async (e) => {
-      console.error(e);
-      await prisma.$disconnect();
-      process.exit(1);
-    });
-
-  // TODO: should be getUsers() or indexUsers()
-
-  return users;
+  return result;
 }
 
 /**
@@ -70,29 +53,10 @@ export async function store(event: H3Event): Promise<Object> {
  * @returns {Promise<Object|null>} User object or error
  */
 export async function show(event: H3Event): Promise<Object | null> {
-  const { uuid } = event.context.params.fromRoute;
+  const result = await showUser(event);
+  if (result instanceof H3Error) throw result;
 
-  let user = {};
-  await prisma.user
-    .findUnique({
-      where: {
-        uuid: uuid,
-      },
-    })
-    .then(async (result) => {
-      if (result) user = result;
-
-      await prisma.$disconnect();
-    })
-    .catch(async (e) => {
-      console.error(e);
-      await prisma.$disconnect();
-      process.exit(1);
-    });
-
-  // TODO: should be showUser(event)
-
-  return user;
+  return result;
 }
 
 /**
