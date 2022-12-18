@@ -1,11 +1,11 @@
-import { H3Event } from "h3";
+import { H3Event, H3Error } from "h3";
 import { PrismaClient } from "@prisma/client";
 import {
   createUser,
   userExists,
   validateUserRegistration,
-  updateUser,
 } from "~~/mulozi/helpers";
+import { updateUser } from "./queries";
 
 const prisma = new PrismaClient();
 
@@ -34,7 +34,7 @@ export async function index(event: H3Event): Promise<Object | null> {
       process.exit(1);
     });
 
-  // TODO: should be getAllUsers() or indexUsers()
+  // TODO: should be getUsers() or indexUsers()
 
   return users;
 }
@@ -111,8 +111,7 @@ export async function edit(event: H3Event): Promise<void> {
  */
 export async function update(event: H3Event): Promise<Object> {
   const result = await updateUser(event);
-  // TODO throws an error, is there a better way to check if it's an error than by checking statusCode?
-  if ("statusCode" in result) throw result;
+  if (result instanceof H3Error) throw result;
 
   return result;
 }
