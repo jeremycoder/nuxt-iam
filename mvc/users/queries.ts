@@ -1,6 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { userExists } from "./helpers";
-import { UnregisteredUser, RegisteredUser, ApiResult } from "./types";
+import {
+  userExists,
+  hashPassword,
+  validateUserRegistration,
+  makeUuid,
+} from "./helpers";
+import { User, RegisteredUser, ApiResult } from "./types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();
@@ -31,8 +36,55 @@ export async function getAllUsers(
 
   // Create api result
   result.success = true;
-  // TODO: Fix this type error please
   result.data = users;
+
+  return result;
+}
+
+/**
+ * @desc Stores a user in database
+ * @param event H3Event
+ */
+export async function storeUser(event: H3Event): Promise<ApiResult | H3Error> {
+  const error = await validateUserRegistration(event);
+  if (error) return error;
+
+  const body = await readBody(event);
+
+  // Attempt to hash password, if error, return error
+  const hashedPasswordOrError = await hashPassword(body.password);
+  if (hashedPasswordOrError instanceof H3Error) return hashedPasswordOrError;
+
+  // If no password hash error, get password as string
+  const hashedPassword = hashedPasswordOrError as string;
+
+  const result = {} as ApiResult;
+  let user = {};
+
+  await prisma.user
+    .create({
+      data: {
+        first_name: body.first_name,
+        last_name: body.last_name,
+        uuid: makeUuid(),
+        email: body.email,
+        password: hashedPassword,
+      },
+    })
+    .then(async (response) => {
+      user = response;
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+    });
+
+  // Create api result
+  result.success = true;
+  if ("email" in user) {
+    result.data = { email: user.email };
+  }
 
   return result;
 }
@@ -69,7 +121,7 @@ export async function showUser(event: H3Event): Promise<ApiResult | H3Error> {
 }
 
 /**
- * @desc Updates a user
+ * @desc Update a user
  * @param event H3Event
  */
 export async function updateUser(event: H3Event): Promise<ApiResult | H3Error> {

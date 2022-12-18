@@ -6,7 +6,7 @@ import { PrismaClient } from "@prisma/client";
 import { UnregisteredUser, RegisteredUser } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
-import { H3Event } from "h3";
+import { H3Event, H3Error } from "h3";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -15,20 +15,31 @@ const prisma = new PrismaClient();
  * @desc Hashes a password or any string using Argon 2
  * @param password Unhashed password
  */
-export async function hashPassword(password: string): Promise<string> {
+export async function hashPassword(
+  password: string
+): Promise<string | H3Error> {
   try {
     return await argon2.hash(password);
   } catch (err) {
-    throw createError({ statusCode: 500, statusMessage: "Password error" });
+    return createError({ statusCode: 500, statusMessage: "Password error" });
   }
 }
 
 /**
+ * @desc Makes a uuid
+ */
+export function makeUuid(): string {
+  return uuidv4();
+}
+
+/**
  * @desc Suite of checks to validate user before registration
- * @param body Body object passed in HTTP request
+ * @param event Event from Api
  * @info returns NuxtError HTTP status code if comething is wrong
  */
-export async function validateUserRegistration(event: H3Event) {
+export async function validateUserRegistration(
+  event: H3Event
+): Promise<H3Error | void> {
   const body = await readBody(event);
 
   // Check if body contains first_name, last_name, email, and password

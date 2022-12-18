@@ -14,8 +14,13 @@ model user {
   password          String    @db.VarChar(255)
   first_name        String    @db.VarChar(255)
   last_name         String    @db.VarChar(255)
-  role              String    @default("GENERAL") @db.VarChar(255)
+  role              Role      @default(GENERAL)
   password_verified Boolean   @default(false)
   last_login        DateTime? @db.DateTime(0)
   date_created      DateTime  @default(now()) @db.DateTime(0)
+}
+
+enum Role {
+  GENERAL
+  ADMIN
 }

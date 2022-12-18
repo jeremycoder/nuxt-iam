@@ -5,7 +5,7 @@ import {
   userExists,
   validateUserRegistration,
 } from "~~/mulozi/helpers";
-import { getAllUsers, showUser, updateUser } from "./queries";
+import { getAllUsers, storeUser, showUser, updateUser } from "./queries";
 import { ApiResult } from "./types";
 
 const prisma = new PrismaClient();
@@ -34,17 +34,14 @@ export async function create(event: H3Event): Promise<void> {
 /**
  * @desc Store a particular user in database
  * @param event H3 Event passed from api
- * @returns {Promise<Object>} Object mentioning success or failure of storing user or error
+ * @returns {Promise<ApiResult | H3Error>} Object mentioning success or failure of storing user or error
  */
-export async function store(event: H3Event): Promise<Object> {
-  const error = await validateUserRegistration(event);
-  if (error) throw error;
+export async function store(event: H3Event): Promise<ApiResult | H3Error> {
+  // TODO: should be storeUser()
+  const result = await storeUser(event);
+  if (result instanceof H3Error) throw result;
 
-  const body = await readBody(event);
-  const user = await createUser(body);
-  // TODO: should be createUser(event) or storeUser()
-
-  return user;
+  return result;
 }
 
 /**
