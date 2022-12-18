@@ -72,6 +72,83 @@ export async function validateUserRegistration(
 }
 
 /**
+ * @desc Suite of checks to validate data before updating user
+ * @param event Event from Api
+ * @info Expects fromRoute object in event.context.params
+ */
+export async function validateUserUpdate(
+  event: H3Event
+): Promise<H3Error | void> {
+  const { fromRoute } = event.context.params;
+  const body = await readBody(event);
+
+  // If fromRoute object not found
+  if (!fromRoute)
+    return createError({
+      statusCode: 400,
+      statusMessage: "fromRoute expected",
+    });
+
+  // If no uuid given
+  if (!fromRoute.uuid)
+    return createError({
+      statusCode: 400,
+      statusMessage: "Uuid not supplied",
+    });
+
+  // If uuid exists, but user does not exist
+  if (!(await userExists(fromRoute.uuid)))
+    return createError({
+      statusCode: 400,
+      statusMessage: "User not found",
+    });
+
+  // If first name and last name do not exist in body
+  if ("first_name" in body === false && "last_name" in body === false)
+    return createError({
+      statusCode: 400,
+      statusMessage: "No updatable properties supplied",
+    });
+
+  // If first_name empty
+  if (!body.first_name)
+    return createError({
+      statusCode: 400,
+      statusMessage: "first_name must have data",
+    });
+
+  // If last_name empty
+  if (!body.last_name)
+    return createError({
+      statusCode: 400,
+      statusMessage: "last_name must have data",
+    });
+}
+
+/**
+ * @desc Suite of checks to validate data before deleting user
+ * @param event Event from Api
+ * @info Expects fromRoute object in event.context.params
+ */
+export async function validateUserDelete(
+  event: H3Event
+): Promise<H3Error | void> {
+  const { uuid } = event.context.params.fromRoute;
+  if (!uuid)
+    return createError({
+      statusCode: 400,
+      statusMessage: "Uuid not supplied",
+    });
+
+  // If uuid exists, but user does not exist
+  if (!(await userExists(uuid)))
+    return createError({
+      statusCode: 400,
+      statusMessage: "User not found",
+    });
+}
+
+/**
  * @desc Checks whether the body in register post request is in correct format
  * @param body Body object passed in register post request
  */
@@ -235,7 +312,6 @@ async function updateLastLogin(email: string): Promise<null | RegisteredUser> {
         email: email,
       },
       data: {
-        //TODO; Running into problems with date, need to fix
         last_login: new Date(),
       },
     })

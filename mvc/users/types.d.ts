@@ -17,19 +17,6 @@ export type RegisteredUser = {
   date_created: Date;
 };
 
-export type User = {
-  id?: number;
-  first_name: string;
-  last_name: string;
-  uuid: string;
-  email: string;
-  password: string;
-  role?: Role;
-  password_verified?: boolean;
-  last_login?: Date | null;
-  date_created?: Date;
-};
-
 enum Role {
   GENERAL,
   ADMIN,

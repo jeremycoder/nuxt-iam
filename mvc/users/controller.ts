@@ -3,7 +3,7 @@
  */
 
 import UrlPattern from "url-pattern";
-import { index, create, store, show, edit, update, destroy } from "./model";
+import { index, register, login, show, update, destroy } from "./model";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -23,13 +23,6 @@ export default defineEventHandler(async (event) => {
           return await index(event);
         }
 
-        // show form to create all users
-        result = new route("/api/users/new").match(url);
-        if (result) {
-          event.context.params.fromRoute = result;
-          return await create(event);
-        }
-
         // show a particular user
         result = new route("/api/users(/:uuid)").match(url);
         if (result) {
@@ -37,19 +30,19 @@ export default defineEventHandler(async (event) => {
           return await show(event);
         }
 
-        // show edit form for one user
-        result = new route("/api/users(/:uuid)/edit").match(url);
-        if (result) {
-          event.context.params.fromRoute = result;
-          return await edit(event);
-        }
-
       case "POST":
         // add new user to database
-        result = new route("/api/users").match(url);
+        result = new route("/api/users/register").match(url);
         if (result) {
           event.context.params.fromRoute = result;
-          return await store(event);
+          return await register(event);
+        }
+
+        // log into database
+        result = new route("/api/users/login").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await login(event);
         }
         break;
 
