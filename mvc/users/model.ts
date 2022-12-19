@@ -6,6 +6,7 @@ import {
   updateUser,
   destroyUser,
   loginUser,
+  refreshTokens,
 } from "./queries";
 import { ApiResult } from "./types";
 
@@ -76,6 +77,18 @@ export async function destroy(event: H3Event): Promise<ApiResult | H3Error> {
  */
 export async function login(event: H3Event): Promise<ApiResult | H3Error> {
   const result = await loginUser(event);
+  if (result instanceof H3Error) throw result;
+
+  return result;
+}
+
+/**
+ * @desc Refresh user's tokens
+ * @param event H3 Event passed from api
+ * @returns {Promise<ApiResult | H3Error>} Object mentioning success or failure of authenticating user or error
+ */
+export async function refresh(event: H3Event): Promise<ApiResult | H3Error> {
+  const result = await refreshTokens(event);
   if (result instanceof H3Error) throw result;
 
   return result;

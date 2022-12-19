@@ -7,6 +7,8 @@ import {
   validateUserDelete,
   validateUserLogin,
   login,
+  getRefreshTokens,
+  createNewTokensFromRefresh,
 } from "./helpers";
 import { ApiResult, Tokens } from "./types";
 import { H3Event, H3Error } from "h3";
@@ -223,6 +225,45 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
 
   const validateError = await validateUserLogin(event);
   if (validateError instanceof H3Error) return validateError;
+
+  const loginErrorOrTokens = await login(event);
+  if (loginErrorOrTokens instanceof H3Error) return loginErrorOrTokens;
+
+  const tokens = loginErrorOrTokens as Tokens;
+
+  // Create api result
+  result.success = true;
+
+  result.data = {
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  };
+
+  return result;
+}
+
+/**
+ * @desc Refresh user tokens
+ * @param event H3Event
+ */
+export async function refreshTokens(
+  event: H3Event
+): Promise<ApiResult | H3Error> {
+  const result = {} as ApiResult;
+
+  const errorOrTokens = await getRefreshTokens(event);
+  if (errorOrTokens instanceof H3Error) return errorOrTokens;
+
+  // Get new access and refresh tokens
+  const newTokens = createNewTokensFromRefresh(event.context.refreshToken);
+
+  if (newTokens === null) {
+    console.log("Failed to get user from refresh token");
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
 
   const loginErrorOrTokens = await login(event);
   if (loginErrorOrTokens instanceof H3Error) return loginErrorOrTokens;

@@ -3,10 +3,11 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { UnregisteredUser, RegisteredUser, Tokens } from "./types";
+import { RegisteredUser, Tokens } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
+import { randomBytes } from "crypto";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -151,7 +152,6 @@ export async function validateUserDelete(
 /**
  * @desc Suite of checks to validate data before logging user in
  * @param event Event from Api
- * @info Expects fromRoute object in event.context.params
  */
 export async function validateUserLogin(
   event: H3Event
@@ -168,6 +168,85 @@ export async function validateUserLogin(
   if (!validateEmail(body.email)) {
     return createError({ statusCode: 400, statusMessage: "Bad email format" });
   }
+}
+
+/**
+ * @desc Suite of checks to validate data before issuing refresh token
+ * @param event Event from Api
+ */
+export async function getRefreshTokens(
+  event: H3Event
+): Promise<H3Error | Tokens> {
+  const authHeader = event.node.req.headers.authorization;
+
+  // Check for authorization header
+  if (!authHeader) {
+    console.log("Missing authorization header");
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+
+  // Get Bearer token
+  const bearerToken = authHeader.split(" ");
+
+  // Check for word "Bearer"
+  if (bearerToken[0] !== "Bearer") {
+    console.log("Missing word 'Bearer' in token");
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+
+  // Check for token
+  if (!bearerToken[1]) {
+    console.log("Missing token");
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+
+  // Get user from token
+  const user = verifyRefreshToken(bearerToken[1]);
+
+  // Check if user was retrieved from token
+  if (user === null) {
+    console.log("Failed to retrieve user from token");
+    return createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+    });
+  }
+
+  // Check if user has email attribute
+  if (!user.email)
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+
+  // Check if user exists in the database
+  const userInDb = await getUser(user.email);
+
+  // TODO: Must also check if user is ACTIVE
+
+  if (userInDb === null) {
+    console.log("User not found in database");
+    return createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+    });
+  }
+
+  // Get new access and refresh tokens
+  const errorOrTokens = createNewTokensFromRefresh(bearerToken[1]);
+  if (errorOrTokens instanceof H3Error) return errorOrTokens;
+
+  const tokens = errorOrTokens as Tokens;
+  return tokens;
 }
 
 /**
@@ -392,7 +471,7 @@ export function verifyAccessToken(token: string): null | RegisteredUser {
  * @desc Creates new tokens given a valid refresh token
  * @param token JSON web token
  */
-export function createNewTokensFromRefresh(token: string): null | Object {
+export function createNewTokensFromRefresh(token: string): Tokens | H3Error {
   const user = verifyRefreshToken(token);
 
   const publicUser = {
@@ -419,7 +498,10 @@ export function createNewTokensFromRefresh(token: string): null | Object {
     };
   }
 
-  return null;
+  return createError({
+    statusCode: 500,
+    statusMessage: "Error creating tokens",
+  });
 }
 
 /**
@@ -428,6 +510,7 @@ export function createNewTokensFromRefresh(token: string): null | Object {
  */
 export function verifyRefreshToken(token: string): null | RegisteredUser {
   let verifiedUser = null;
+  // TODO: Need to store dynamic secret in database and retrive it
   jwt.verify(token, config.muloziRefreshTokenSecret, (err, user) => {
     if (err) {
       console.log(err);
@@ -464,16 +547,22 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     };
 
     // Create access and refresh tokens
-    // TODO: Secrets should be dynamically generated
+
+    // Dynamically generate 64-character hexadecimal string
+    const accessSecret = randomBytes(64).toString("hex");
+
     // TODO: Create a logins table perhaps
-    const accessSecret = uuidv4();
+
+    // TODO: Access secret must be stored in database, is needed by verifyAccessToken()
     const accessToken = jwt.sign(publicUser, accessSecret, {
       expiresIn: "15m",
       issuer: "MuloziAuth",
       jwtid: uuidv4(),
     });
 
-    const refreshSecret = uuidv4();
+    const refreshSecret = randomBytes(64).toString("hex");
+
+    // TODO: Refresh secret must be stored in database, is needed by verifyRefreshToken()
     const refreshToken = jwt.sign(publicUser, refreshSecret, {
       expiresIn: "14d",
       issuer: "MuloziAuth",

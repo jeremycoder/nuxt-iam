@@ -3,7 +3,15 @@
  */
 
 import UrlPattern from "url-pattern";
-import { index, register, login, show, update, destroy } from "./model";
+import {
+  index,
+  register,
+  login,
+  refresh,
+  show,
+  update,
+  destroy,
+} from "./model";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -43,6 +51,13 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await login(event);
+        }
+
+        // refresh jwt tokens
+        result = new route("/api/users/refresh").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await refresh(event);
         }
         break;
 
