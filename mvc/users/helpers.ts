@@ -3,7 +3,7 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { UnregisteredUser, RegisteredUser } from "./types";
+import { UnregisteredUser, RegisteredUser, Tokens } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
@@ -146,6 +146,28 @@ export async function validateUserDelete(
       statusCode: 400,
       statusMessage: "User not found",
     });
+}
+
+/**
+ * @desc Suite of checks to validate data before logging user in
+ * @param event Event from Api
+ * @info Expects fromRoute object in event.context.params
+ */
+export async function validateUserLogin(
+  event: H3Event
+): Promise<H3Error | void> {
+  const body = await readBody(event);
+
+  // Check if body contains email, and password
+  const bodyError = validateLoginBody(body);
+  if (bodyError) {
+    return createError({ statusCode: 400, statusMessage: bodyError });
+  }
+
+  // Check email is in a valid format
+  if (!validateEmail(body.email)) {
+    return createError({ statusCode: 400, statusMessage: "Bad email format" });
+  }
 }
 
 /**
@@ -423,33 +445,18 @@ export function verifyRefreshToken(token: string): null | RegisteredUser {
 }
 
 /**
- * @desc Logs a user into database
- * @param registeredUser Registered user
+ * @desc Authenticates user
+ * @param event Event from Api
  */
-export async function login(
-  registeredUser: RegisteredUser
-): Promise<null | Object> {
-  const user = await getUser(registeredUser.email);
-  if (user === null) return null;
+export async function login(event: H3Event): Promise<H3Error | Tokens> {
+  const body = await readBody(event);
+  const user = await getUser(body.email);
+  if (user === null)
+    return createError({ statusCode: 401, statusMessage: "Invalid login" });
 
-  if (await verifyPassword(user.password, registeredUser.password)) {
+  if (await verifyPassword(user.password, body.password)) {
     updateLastLogin(user.email);
 
-    // TODO: Maybe create a logins table
-
-    // Public user profile does not show password or internal user id
-    // const publicUser = {
-    //   uuid: user.uuid,
-    //   first_name: user.first_name,
-    //   last_name: user.last_name,
-    //   email: user.email,
-    //   role: user.role,
-    //   password_verified: user.password_verified,
-    //   last_login: user.last_login,
-    //   date_created: user.date_created,
-    // };
-
-    // The rest of info can be exposed in /getProfile(uuid) endpoint
     const publicUser = {
       uuid: user.uuid,
       email: user.email,
@@ -457,12 +464,20 @@ export async function login(
     };
 
     // Create access and refresh tokens
-    const accessToken = jwt.sign(publicUser, config.muloziAccessTokenSecret, {
+    // TODO: Secrets should be dynamically generated
+    // TODO: Create a logins table perhaps
+    const accessSecret = uuidv4();
+    const accessToken = jwt.sign(publicUser, accessSecret, {
       expiresIn: "15m",
+      issuer: "MuloziAuth",
+      jwtid: uuidv4(),
     });
-    const refreshToken = jwt.sign(publicUser, config.muloziRefreshTokenSecret, {
+
+    const refreshSecret = uuidv4();
+    const refreshToken = jwt.sign(publicUser, refreshSecret, {
       expiresIn: "14d",
       issuer: "MuloziAuth",
+      jwtid: uuidv4(),
     });
 
     return {
@@ -471,5 +486,5 @@ export async function login(
     };
   }
 
-  return null;
+  return createError({ statusCode: 401, statusMessage: "Invalid login" });
 }

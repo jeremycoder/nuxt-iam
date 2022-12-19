@@ -26,3 +26,8 @@ export type ApiResult = {
   success: boolean;
   data: any;
 };
+
+export type Tokens = {
+  accessToken: string;
+  refreshToken: string;
+};

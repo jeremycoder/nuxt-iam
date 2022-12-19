@@ -5,8 +5,10 @@ import {
   makeUuid,
   validateUserUpdate,
   validateUserDelete,
+  validateUserLogin,
+  login,
 } from "./helpers";
-import { ApiResult } from "./types";
+import { ApiResult, Tokens } from "./types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();
@@ -219,9 +221,21 @@ export async function destroyUser(
 export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
   const result = {} as ApiResult;
 
+  const validateError = await validateUserLogin(event);
+  if (validateError instanceof H3Error) return validateError;
+
+  const loginErrorOrTokens = await login(event);
+  if (loginErrorOrTokens instanceof H3Error) return loginErrorOrTokens;
+
+  const tokens = loginErrorOrTokens as Tokens;
+
   // Create api result
   result.success = true;
-  result.data = { result: `welcome to authentication endpoint` };
+
+  result.data = {
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  };
 
   return result;
 }
