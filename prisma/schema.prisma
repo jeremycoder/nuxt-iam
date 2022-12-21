@@ -49,8 +49,7 @@ model logins {
 model login_attempts {
   id                Int       @id @default(autoincrement())  
   email             String    @db.VarChar(255)
-  known             Boolean
-  login_id          String    @db.VarChar(255)
+  known             Boolean 
   ip_address        String?    @db.VarChar(255)  
   date_created      DateTime  @default(now()) @db.DateTime(0)
 }

@@ -528,14 +528,55 @@ export function verifyRefreshToken(token: string): null | RegisteredUser {
 }
 
 /**
+ * @desc Records any login attempt
+ * @param event Event from Api
+ */
+async function _recordLoginAttempt(event: H3Event, known: boolean) {
+  const body = await readBody(event);
+
+  await prisma.login_attempts
+    .create({
+      data: {
+        email: body.email,
+        known: known,
+      },
+    })
+    .then(async () => {
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+    });
+}
+
+/**
+ * @desc Deactivates any refresh tokens by user
+ * @param event Event from Api
+ */
+function _deactivateRefreshToken(user_id: number) {}
+
+/**
+ * @desc Records any login attempt
+ * @param event Event from Api
+ */
+function _storeRefreshToken(user_id: number) {}
+
+/**
  * @desc Authenticates user
  * @param event Event from Api
  */
 export async function login(event: H3Event): Promise<H3Error | Tokens> {
   const body = await readBody(event);
+
   const user = await getUser(body.email);
-  if (user === null)
+
+  if (user === null) {
+    _recordLoginAttempt(event, false);
     return createError({ statusCode: 401, statusMessage: "Invalid login" });
+  }
+
+  _recordLoginAttempt(event, true);
 
   if (await verifyPassword(user.password, body.password)) {
     updateLastLogin(user.email);
@@ -549,12 +590,7 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     // Create access and refresh tokens
 
     // Dynamically generate 64-character hexadecimal string
-    const accessSecret = randomBytes(64).toString("hex");
-
-    // TODO: Create a logins table perhaps
-
-    // TODO: Access secret must be stored in database, is needed by verifyAccessToken()
-    const accessToken = jwt.sign(publicUser, accessSecret, {
+    const accessToken = jwt.sign(publicUser, config.muloziAccessTokenSecret, {
       expiresIn: "15m",
       issuer: "MuloziAuth",
       jwtid: uuidv4(),
@@ -563,11 +599,16 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     const refreshSecret = randomBytes(64).toString("hex");
 
     // TODO: Refresh secret must be stored in database, is needed by verifyRefreshToken()
+    // store refresh token in db
+    // deactivate any other refresh token used by user
+
     const refreshToken = jwt.sign(publicUser, refreshSecret, {
       expiresIn: "14d",
       issuer: "MuloziAuth",
       jwtid: uuidv4(),
     });
+
+    // recordLogin
 
     return {
       accessToken: accessToken,
