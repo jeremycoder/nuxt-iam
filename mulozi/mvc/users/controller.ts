@@ -1,17 +1,9 @@
 /* Users controller
- * The users controller routes requests to the model
+ * Routes all user requests
  */
 
 import UrlPattern from "url-pattern";
-import {
-  index,
-  register,
-  login,
-  refresh,
-  show,
-  update,
-  destroy,
-} from "./model";
+import { index, create, show, update, destroy } from "./model";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -25,45 +17,32 @@ export default defineEventHandler(async (event) => {
     switch (method) {
       case "GET":
         // show all users
-        result = new route("/api/users").match(url);
+        result = new route("/api/mulozi/users").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await index(event);
         }
 
         // show a particular user
-        result = new route("/api/users(/:uuid)").match(url);
+        result = new route("/api/mulozi/users(/:uuid)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await show(event);
         }
+        break;
 
       case "POST":
         // add new user to database
-        result = new route("/api/users/register").match(url);
+        result = new route("/api/mulozi/users/create").match(url);
         if (result) {
           event.context.params.fromRoute = result;
-          return await register(event);
-        }
-
-        // log into database
-        result = new route("/api/users/login").match(url);
-        if (result) {
-          event.context.params.fromRoute = result;
-          return await login(event);
-        }
-
-        // refresh jwt tokens
-        result = new route("/api/users/refresh").match(url);
-        if (result) {
-          event.context.params.fromRoute = result;
-          return await refresh(event);
+          return await create(event);
         }
         break;
 
       case "PUT":
         // update particular user then redirect
-        result = new route("/api/users(/:uuid)").match(url);
+        result = new route("/api/mulozi/users(/:uuid)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await update(event);
@@ -72,7 +51,7 @@ export default defineEventHandler(async (event) => {
 
       case "DELETE":
         // delete particular user
-        result = new route("/api/users(/:uuid)").match(url);
+        result = new route("/api/mulozi/users(/:uuid)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await destroy(event);

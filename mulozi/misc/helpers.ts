@@ -1,9 +1,7 @@
-// TODO: Please separate helpers for user model and helpers for Mulozi Auth. Remember,, Mulozi is for auth only
-
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { RegisteredUser, Tokens } from "./types";
+import { RegisteredUser, Tokens } from "~~/mulozi/misc/types";
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
@@ -528,17 +526,31 @@ export function verifyRefreshToken(token: string): null | RegisteredUser {
 }
 
 /**
+ * @desc Deactivates any refresh tokens by user
+ * @param event Event from Api
+ */
+function _deactivateRefreshToken(user_id: number) {}
+
+/**
  * @desc Records any login attempt
  * @param event Event from Api
  */
-async function _recordLoginAttempt(event: H3Event, known: boolean) {
-  const body = await readBody(event);
+async function _storeRefreshToken(
+  user_id: number,
+  token_id: string,
+  secret: string
+) {
+  // TODO: expires should be 14 days from now
+  // TODO: CONTINUE
 
-  await prisma.login_attempts
+  await prisma.refresh_tokens
     .create({
       data: {
-        email: body.email,
-        known: known,
+        token_id: token_id,
+        user_id: user_id,
+        secret: secret,
+        // expires: 14 days from now,
+        is_active: true,
       },
     })
     .then(async () => {
@@ -551,18 +563,6 @@ async function _recordLoginAttempt(event: H3Event, known: boolean) {
 }
 
 /**
- * @desc Deactivates any refresh tokens by user
- * @param event Event from Api
- */
-function _deactivateRefreshToken(user_id: number) {}
-
-/**
- * @desc Records any login attempt
- * @param event Event from Api
- */
-function _storeRefreshToken(user_id: number) {}
-
-/**
  * @desc Authenticates user
  * @param event Event from Api
  */
@@ -572,11 +572,8 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
   const user = await getUser(body.email);
 
   if (user === null) {
-    _recordLoginAttempt(event, false);
     return createError({ statusCode: 401, statusMessage: "Invalid login" });
   }
-
-  _recordLoginAttempt(event, true);
 
   if (await verifyPassword(user.password, body.password)) {
     updateLastLogin(user.email);
@@ -587,9 +584,7 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
       role: user.role,
     };
 
-    // Create access and refresh tokens
-
-    // Dynamically generate 64-character hexadecimal string
+    // Create access tokens
     const accessToken = jwt.sign(publicUser, config.muloziAccessTokenSecret, {
       expiresIn: "15m",
       issuer: "MuloziAuth",
@@ -597,6 +592,7 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     });
 
     const refreshSecret = randomBytes(64).toString("hex");
+    const tokenId = uuidv4();
 
     // TODO: Refresh secret must be stored in database, is needed by verifyRefreshToken()
     // store refresh token in db
@@ -605,10 +601,8 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     const refreshToken = jwt.sign(publicUser, refreshSecret, {
       expiresIn: "14d",
       issuer: "MuloziAuth",
-      jwtid: uuidv4(),
+      jwtid: tokenId,
     });
-
-    // recordLogin
 
     return {
       accessToken: accessToken,

@@ -9,8 +9,8 @@ import {
   login,
   getRefreshTokens,
   createNewTokensFromRefresh,
-} from "./helpers";
-import { ApiResult, Tokens } from "./types";
+} from "~~/mulozi/misc/helpers";
+import { ApiResult, Tokens } from "~~/mulozi/misc/types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();

@@ -1,14 +1,6 @@
 import { H3Event, H3Error } from "h3";
-import {
-  getAllUsers,
-  registerUser,
-  showUser,
-  updateUser,
-  destroyUser,
-  loginUser,
-  refreshTokens,
-} from "./queries";
-import { ApiResult } from "./types";
+import { getAllUsers, showUser, updateUser, destroyUser } from "./queries";
+import { ApiResult } from "~~/mulozi/misc/types";
 
 /**
  * @desc Shows all users
@@ -23,15 +15,19 @@ export async function index(event: H3Event): Promise<ApiResult | H3Error> {
 }
 
 /**
- * @desc Registers (creates) a new user in database
+ * @desc Creates a new user in database
  * @param event H3 Event passed from api
  * @returns {Promise<ApiResult | H3Error>} Object mentioning success or failure of storing user or error
  */
-export async function register(event: H3Event): Promise<ApiResult | H3Error> {
-  const result = await registerUser(event);
-  if (result instanceof H3Error) throw result;
+export async function create(event: H3Event): Promise<ApiResult | H3Error> {
+  // Return error because all users will be created from /mulozi/authn/register endpoint
+  const error = createError({
+    statusCode: 422,
+    statusMessage:
+      "All users must be created from mulozi/authn/register endpoint",
+  });
 
-  return result;
+  return error;
 }
 
 /**
@@ -65,30 +61,6 @@ export async function update(event: H3Event): Promise<ApiResult | H3Error> {
  */
 export async function destroy(event: H3Event): Promise<ApiResult | H3Error> {
   const result = await destroyUser(event);
-  if (result instanceof H3Error) throw result;
-
-  return result;
-}
-
-/**
- * @desc Authenticate user into database
- * @param event H3 Event passed from api
- * @returns {Promise<ApiResult | H3Error>} Object mentioning success or failure of authenticating user or error
- */
-export async function login(event: H3Event): Promise<ApiResult | H3Error> {
-  const result = await loginUser(event);
-  if (result instanceof H3Error) throw result;
-
-  return result;
-}
-
-/**
- * @desc Refresh user's tokens
- * @param event H3 Event passed from api
- * @returns {Promise<ApiResult | H3Error>} Object mentioning success or failure of authenticating user or error
- */
-export async function refresh(event: H3Event): Promise<ApiResult | H3Error> {
-  const result = await refreshTokens(event);
   if (result instanceof H3Error) throw result;
 
   return result;

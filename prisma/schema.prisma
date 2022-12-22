@@ -34,22 +34,3 @@ model refresh_tokens {
   is_active         Boolean  
   date_created      DateTime  @default(now()) @db.DateTime(0)
 }
-
-model logins {
-  id                Int       @id @default(autoincrement())  
-  user_id           Int
-  login_id          String    @db.VarChar(255)
-  ip_address        String?    @db.VarChar(255)
-  expires           Int
-  is_active         Boolean  
-  login_time        DateTime  @default(now()) @db.DateTime(0)
-  logout_time       DateTime
-}
-
-model login_attempts {
-  id                Int       @id @default(autoincrement())  
-  email             String    @db.VarChar(255)
-  known             Boolean 
-  ip_address        String?    @db.VarChar(255)  
-  date_created      DateTime  @default(now()) @db.DateTime(0)
-}
