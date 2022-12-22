@@ -4,6 +4,7 @@
 
 import UrlPattern from "url-pattern";
 import { usersMiddleware } from "./middleware";
+import { H3Error } from "h3";
 import { index, create, show, update, destroy } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -13,8 +14,8 @@ export default defineEventHandler(async (event) => {
   let result = null;
 
   // Middleware for all user routes
-  const middlewareError = usersMiddleware(event);
-  if (middlewareError) throw middlewareError;
+  const errorOrPlatform = usersMiddleware(event);
+  if (errorOrPlatform instanceof H3Error) throw errorOrPlatform;
 
   // Routes
   if (method && url)

@@ -20,8 +20,8 @@ const prisma = new PrismaClient();
 export async function registerUser(
   event: H3Event
 ): Promise<ApiResult | H3Error> {
-  const error = await validateUserRegistration(event);
-  if (error) return error;
+  const validationError = await validateUserRegistration(event);
+  if (validationError) return validationError;
 
   const body = await readBody(event);
 
@@ -35,7 +35,8 @@ export async function registerUser(
   const result = {} as ApiResult;
   let user = {};
 
-  await prisma.user
+  let registrationError = null;
+  await prisma.users
     .create({
       data: {
         first_name: body.first_name,
@@ -51,7 +52,14 @@ export async function registerUser(
     })
     .catch(async (e) => {
       console.error(e);
+      registrationError = e;
       await prisma.$disconnect();
+    });
+
+  if (registrationError)
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Server error",
     });
 
   // Create api result

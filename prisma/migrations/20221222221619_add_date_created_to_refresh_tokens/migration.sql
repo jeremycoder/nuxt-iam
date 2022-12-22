@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `refresh_tokens` ADD COLUMN `date_created` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0);

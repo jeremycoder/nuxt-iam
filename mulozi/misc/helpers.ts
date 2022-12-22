@@ -1,11 +1,12 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { RegisteredUser, Tokens } from "~~/mulozi/misc/types";
+import { User, Tokens } from "~~/mulozi/misc/types";
 import { v4 as uuidv4 } from "uuid";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
 import { randomBytes } from "crypto";
+import dayjs from "dayjs";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -208,16 +209,18 @@ export async function getRefreshTokens(
   }
 
   // Get user from token
-  const user = verifyRefreshToken(bearerToken[1]);
+  const errorOrUser = await verifyRefreshToken(bearerToken[1]);
 
   // Check if user was retrieved from token
-  if (user === null) {
+  if (errorOrUser instanceof H3Error) {
     console.log("Failed to retrieve user from token");
     return createError({
       statusCode: 403,
       statusMessage: "Forbidden",
     });
   }
+
+  const user = errorOrUser as User;
 
   // Check if user has email attribute
   if (!user.email)
@@ -243,7 +246,7 @@ export async function getRefreshTokens(
   const errorOrTokens = createNewTokensFromRefresh(bearerToken[1]);
   if (errorOrTokens instanceof H3Error) return errorOrTokens;
 
-  const tokens = errorOrTokens as Tokens;
+  const tokens = (await errorOrTokens) as Tokens;
   return tokens;
 }
 
@@ -303,7 +306,7 @@ export async function emailExists(email: string): Promise<boolean> {
   if (!email) return false;
 
   let user = undefined;
-  await prisma.user
+  await prisma.users
     .findFirst({
       where: {
         email: email,
@@ -334,7 +337,7 @@ export async function userExists(uuid: string): Promise<boolean> {
 
   let user = undefined;
 
-  await prisma.user
+  await prisma.users
     .findFirst({
       where: {
         uuid: uuid,
@@ -383,9 +386,9 @@ export function validatePassword(password: string): boolean {
  * @desc Returns user by email
  * @param email User's email
  */
-export async function getUser(email: string): Promise<RegisteredUser | null> {
+export async function getUser(email: string): Promise<User | null> {
   let user = null;
-  await prisma.user
+  await prisma.users
     .findFirst({
       where: {
         email: email,
@@ -408,9 +411,9 @@ export async function getUser(email: string): Promise<RegisteredUser | null> {
  * @desc Updates user's last login value
  * @param email User's email
  */
-async function updateLastLogin(email: string): Promise<null | RegisteredUser> {
+async function updateLastLogin(email: string): Promise<null | User> {
   let result = null;
-  await prisma.user
+  await prisma.users
     .update({
       where: {
         email: email,
@@ -457,7 +460,7 @@ async function verifyPassword(
  * @desc Verifies user after token is passed
  * @param token JSON web token
  */
-export function verifyAccessToken(token: string): null | RegisteredUser {
+export function verifyAccessToken(token: string): null | User {
   let verifiedUser = null;
   jwt.verify(token, config.muloziAccessTokenSecret, (err, user) => {
     if (err) {
@@ -474,8 +477,13 @@ export function verifyAccessToken(token: string): null | RegisteredUser {
  * @desc Creates new tokens given a valid refresh token
  * @param token JSON web token
  */
-export function createNewTokensFromRefresh(token: string): Tokens | H3Error {
-  const user = verifyRefreshToken(token);
+export async function createNewTokensFromRefresh(
+  token: string
+): Promise<Tokens | H3Error> {
+  const errorOrUser = await verifyRefreshToken(token);
+  if (errorOrUser instanceof H3Error) return errorOrUser;
+
+  const user = errorOrUser as User;
 
   const publicUser = {
     uuid: user?.uuid,
@@ -488,12 +496,21 @@ export function createNewTokensFromRefresh(token: string): Tokens | H3Error {
     const accessToken = jwt.sign(publicUser, config.muloziAccessTokenSecret, {
       expiresIn: "15m",
     });
+
+    const refreshTokenId = makeUuid();
     const refreshToken = jwt.sign(publicUser, config.muloziRefreshTokenSecret, {
       expiresIn: "14d",
       issuer: "MuloziAuth",
+      jwtid: refreshTokenId,
     });
 
-    // TODO: Deactivate current token
+    // Deactivate current token
+    const deactivateTokenError = await _deactivateRefreshTokens(user.id);
+    if (deactivateTokenError) return deactivateTokenError;
+
+    // Store tokens
+    const storeTokenError = await _storeRefreshToken(refreshTokenId, user.id);
+    if (storeTokenError) return storeTokenError;
 
     return {
       accessToken: accessToken,
@@ -501,60 +518,23 @@ export function createNewTokensFromRefresh(token: string): Tokens | H3Error {
     };
   }
 
+  console.log("Error creating tokens");
   return createError({
     statusCode: 500,
-    statusMessage: "Error creating tokens",
+    statusMessage: "Server error",
   });
 }
 
 /**
- * @desc Verifies refresh token
- * @param token JSON web token
+ * @desc Checks if refresh token is active
+ * @param tokenId Token's id
  */
-export function verifyRefreshToken(token: string): null | RegisteredUser {
-  let verifiedUser = null;
-  // TODO: Need to store dynamic secret in database and retrive it
-  jwt.verify(token, config.muloziRefreshTokenSecret, (err, user) => {
-    if (err) {
-      console.log(err);
-      return null;
-    }
-
-    // Checks for token issuer
-    if (user?.iss !== "MuloziAuth") {
-      return null;
-    }
-    verifiedUser = user;
-  });
-
-  return verifiedUser;
-}
-
-/**
- * @desc Deactivates any refresh tokens by user
- * @param event Event from Api
- */
-function _deactivateRefreshToken(user_id: number) {}
-
-/**
- * @desc Records any login attempt
- * @param event Event from Api
- */
-async function _storeRefreshToken(
-  user_id: number,
-  token_id: string,
-  secret: string
-) {
-  // TODO: expires should be 14 days from now
-  // TODO: CONTINUE
-
+async function _refreshTokenActive(tokenId: string): Promise<H3Error | void> {
+  let error = null;
   await prisma.refresh_tokens
-    .create({
-      data: {
-        token_id: token_id,
-        user_id: user_id,
-        secret: secret,
-        // expires: 14 days from now,
+    .findFirstOrThrow({
+      where: {
+        token_id: tokenId,
         is_active: true,
       },
     })
@@ -563,8 +543,126 @@ async function _storeRefreshToken(
     })
     .catch(async (e) => {
       console.error(e);
+      error = e;
       await prisma.$disconnect();
     });
+
+  if (error)
+    return createError({ statusCode: 500, statusMessage: "Server error" });
+}
+
+/**
+ * @desc Verifies refresh token
+ * @param token JSON web token
+ */
+export async function verifyRefreshToken(
+  token: string
+): Promise<H3Error | User> {
+  const forbiddenError = createError({
+    statusCode: 403,
+    statusMessage: "Forbidden",
+  });
+
+  jwt.verify(token, config.muloziRefreshTokenSecret, async (err, user) => {
+    if (err) {
+      console.log(err);
+      return createError({
+        statusCode: 403,
+        statusMessage: "Forbidden",
+      });
+    }
+
+    const jwt = user as JwtPayload;
+
+    // Checks for token issuer
+    if (jwt.iss !== "MuloziAuth") {
+      console.log("Token issuer unknown");
+      return forbiddenError;
+    }
+
+    // Check if refresh token is active
+    const tokenId = jwt.jti;
+
+    // Checks for token id
+    if (!tokenId) {
+      console.log("Token id not found");
+      return forbiddenError;
+    }
+
+    // Checks if refresh token is active
+    const tokenNotActiveError = await _refreshTokenActive(tokenId);
+    if (!tokenNotActiveError) {
+      console.log("Token not active");
+      return tokenNotActiveError;
+    }
+
+    // TODO: Check if user is active
+
+    return user;
+  });
+
+  return forbiddenError;
+}
+
+/**
+ * @desc Stores refresh token in database
+ * @param tokenId Token's id
+ * @param userId User's id
+ */
+async function _storeRefreshToken(
+  tokenId: string,
+  userId: number
+): Promise<H3Error | void> {
+  let error = null;
+  await prisma.refresh_tokens
+    .create({
+      data: {
+        token_id: tokenId,
+        user_id: userId,
+        is_active: true,
+      },
+    })
+    .then(async () => {
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+      await prisma.$disconnect();
+    });
+
+  if (error)
+    return createError({ statusCode: 500, statusMessage: "Server error" });
+}
+
+/**
+ * @desc Deactivates a user's refresh tokens in database
+ * @param userId User's id
+ */
+async function _deactivateRefreshTokens(
+  userId: number
+): Promise<H3Error | void> {
+  let error = null;
+  await prisma.refresh_tokens
+    .updateMany({
+      where: {
+        user_id: userId,
+      },
+      data: {
+        is_active: false,
+      },
+    })
+    .then(async () => {
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+      await prisma.$disconnect();
+    });
+
+  if (error)
+    return createError({ statusCode: 500, statusMessage: "Server error" });
 }
 
 /**
@@ -593,21 +691,24 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     const accessToken = jwt.sign(publicUser, config.muloziAccessTokenSecret, {
       expiresIn: "15m",
       issuer: "MuloziAuth",
-      jwtid: uuidv4(),
+      jwtid: makeUuid(),
     });
 
-    const refreshSecret = randomBytes(64).toString("hex");
-    const tokenId = uuidv4();
-
-    // TODO: Refresh secret must be stored in database, is needed by verifyRefreshToken()
-    // store refresh token in db
-    // deactivate any other refresh token used by user
-
-    const refreshToken = jwt.sign(publicUser, refreshSecret, {
+    // Create new tokens
+    const tokenId = makeUuid();
+    const refreshToken = jwt.sign(publicUser, config.muloziRefreshTokenSecret, {
       expiresIn: "14d",
       issuer: "MuloziAuth",
       jwtid: tokenId,
     });
+
+    // Deactivate any other tokens
+    const deactivateTokenError = await _deactivateRefreshTokens(user.id);
+    if (deactivateTokenError) return deactivateTokenError;
+
+    // Store tokens
+    const storeTokenError = await _storeRefreshToken(tokenId, user.id);
+    if (storeTokenError) return storeTokenError;
 
     return {
       accessToken: accessToken,

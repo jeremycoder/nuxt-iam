@@ -4,6 +4,7 @@
 
 import UrlPattern from "url-pattern";
 import { authnMiddleware } from "./middleware";
+import { H3Error } from "h3";
 import { register, login, refresh, logout, authenticated } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -13,8 +14,8 @@ export default defineEventHandler(async (event) => {
   let result = null;
 
   // Middleware for all authn routes
-  const middlewareError = authnMiddleware(event);
-  if (middlewareError) throw middlewareError;
+  const errorOrPlatform = authnMiddleware(event);
+  if (errorOrPlatform instanceof H3Error) throw errorOrPlatform;
 
   if (method && url)
     switch (method) {

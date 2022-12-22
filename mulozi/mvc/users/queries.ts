@@ -26,7 +26,7 @@ export async function getAllUsers(
   const result = {} as ApiResult;
   let users = {};
 
-  await prisma.user
+  await prisma.users
     .findMany({
       take: rowLimit,
     })
@@ -68,7 +68,7 @@ export async function registerUser(
   const result = {} as ApiResult;
   let user = {};
 
-  await prisma.user
+  await prisma.users
     .create({
       data: {
         first_name: body.first_name,
@@ -105,7 +105,7 @@ export async function showUser(event: H3Event): Promise<ApiResult | H3Error> {
   const result = {} as ApiResult;
   let user = {};
 
-  await prisma.user
+  await prisma.users
     .findUnique({
       where: {
         uuid: uuid,
@@ -148,7 +148,7 @@ export async function updateUser(event: H3Event): Promise<ApiResult | H3Error> {
   const { fromRoute } = event.context.params;
   let user = {};
 
-  await prisma.user
+  await prisma.users
     .update({
       where: {
         uuid: fromRoute.uuid,
@@ -191,7 +191,7 @@ export async function destroyUser(
   const { uuid } = event.context.params.fromRoute;
 
   let user = {};
-  await prisma.user
+  await prisma.users
     .delete({
       where: {
         uuid: uuid,

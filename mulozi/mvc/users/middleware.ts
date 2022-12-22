@@ -3,17 +3,13 @@
  * Middleware should only return error or void
  */
 import { H3Event, H3Error } from "h3";
-import { checkClientPlatform } from "~~/mulozi/middleware/";
+import { getClientPlatform } from "~~/mulozi/middleware/";
 
 /**
  * @desc Middleware for all user routes
  * @param event
  * @returns
  */
-export function usersMiddleware(event: H3Event): H3Error | void {
-  let error = null;
-
-  // Check if 'client-platform' header is present
-  error = checkClientPlatform(event);
-  if (error) return error;
+export function usersMiddleware(event: H3Event): H3Error | string {
+  return getClientPlatform(event);
 }

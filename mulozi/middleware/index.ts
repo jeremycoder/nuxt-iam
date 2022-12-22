@@ -8,7 +8,7 @@ import { H3Event, H3Error } from "h3";
  * @info Allows us to create a more secure backend for frontend strategy
  * @returns {<H3Error|void>} Object mentioning success or failure of refreshing user's tokens
  */
-export function checkClientPlatform(event: H3Event): H3Error | void {
+export function getClientPlatform(event: H3Event): H3Error | string {
   const clientPlatforms = ["app", "browser"];
   const clientPlatform = event.node.req.headers["client-platform"] as string;
 
@@ -26,4 +26,6 @@ export function checkClientPlatform(event: H3Event): H3Error | void {
       statusMessage:
         "Required header 'client-platform' must be 'app' or 'browser' only",
     });
+
+  return clientPlatform;
 }
