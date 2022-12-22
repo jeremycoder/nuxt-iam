@@ -355,6 +355,11 @@ export async function userExists(uuid: string): Promise<boolean> {
   return true;
 }
 
+/**
+ * @desc Checks whether password matches a certain strength
+ * @param password User's password
+ * @return { <boolean> }
+ */
 export function validatePassword(password: string): boolean {
   // Has at least 8 characters
   if (password.length <= 8) return false;

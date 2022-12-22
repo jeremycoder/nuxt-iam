@@ -3,6 +3,7 @@
  */
 
 import UrlPattern from "url-pattern";
+import { usersMiddleware } from "./middleware";
 import { index, create, show, update, destroy } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -11,8 +12,11 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method;
   let result = null;
 
-  // Middleware for all user routes could go here
+  // Middleware for all user routes
+  const middlewareError = usersMiddleware(event);
+  if (middlewareError) throw middlewareError;
 
+  // Routes
   if (method && url)
     switch (method) {
       case "GET":

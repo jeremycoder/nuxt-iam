@@ -3,6 +3,7 @@
  */
 
 import UrlPattern from "url-pattern";
+import { authnMiddleware } from "./middleware";
 import { register, login, refresh, logout, authenticated } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -11,7 +12,9 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method;
   let result = null;
 
-  // Middleware for all user routes could go here
+  // Middleware for all authn routes
+  const middlewareError = authnMiddleware(event);
+  if (middlewareError) throw middlewareError;
 
   if (method && url)
     switch (method) {
