@@ -572,6 +572,7 @@ export async function verifyRefreshToken(
       });
     }
 
+    const verifiedUser = user as User;
     const jwt = user as JwtPayload;
 
     // Checks for token issuer
@@ -591,8 +592,14 @@ export async function verifyRefreshToken(
 
     // Checks if refresh token is active
     const tokenNotActiveError = await _refreshTokenActive(tokenId);
-    if (!tokenNotActiveError) {
+    if (tokenNotActiveError) {
       console.log("Token not active");
+
+      // This indicates a stolen token there deactivate all refresh tokens
+      if (user) {
+        await _deactivateRefreshTokens(verifiedUser.id);
+      }
+
       return tokenNotActiveError;
     }
 
