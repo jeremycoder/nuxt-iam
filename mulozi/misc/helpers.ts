@@ -3,7 +3,7 @@ import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
 import { User, Tokens } from "~~/mulozi/misc/types";
 import { v4 as uuidv4 } from "uuid";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
 import { randomBytes } from "crypto";
 import dayjs from "dayjs";
@@ -176,6 +176,10 @@ export async function validateUserLogin(
 export async function getRefreshTokens(
   event: H3Event
 ): Promise<H3Error | Tokens> {
+  // TODO: Need to check based on platform
+  // TODO: If platform is app, get from authorization header
+  // TODO: If platform is browser, get from cookies
+
   const authHeader = event.node.req.headers.authorization;
 
   // Check for authorization header
@@ -319,7 +323,6 @@ export async function emailExists(email: string): Promise<boolean> {
     .catch(async (e) => {
       console.error(e);
       await prisma.$disconnect();
-      process.exit(1);
     });
 
   if (user === null) return false;
@@ -350,7 +353,6 @@ export async function userExists(uuid: string): Promise<boolean> {
     .catch(async (e) => {
       console.error(e);
       await prisma.$disconnect();
-      process.exit(1);
     });
 
   if (user === null) return false;
@@ -401,7 +403,6 @@ export async function getUser(email: string): Promise<User | null> {
     .catch(async (e) => {
       console.error(e);
       await prisma.$disconnect();
-      process.exit(1);
     });
 
   return user;
@@ -429,7 +430,6 @@ async function updateLastLogin(email: string): Promise<null | User> {
     .catch(async (e) => {
       console.error(e);
       await prisma.$disconnect();
-      process.exit(1);
     });
 
   return result;
@@ -460,17 +460,48 @@ async function verifyPassword(
  * @desc Verifies user after token is passed
  * @param token JSON web token
  */
-export function verifyAccessToken(token: string): null | User {
+export function verifyAccessToken(token: string): H3Error | User {
+  let error = null;
   let verifiedUser = null;
+
   jwt.verify(token, config.muloziAccessTokenSecret, (err, user) => {
     if (err) {
       console.log(err);
-      return null;
+
+      // Check token error is due to expired time
+      // if (err instanceof jwt.TokenExpiredError)
+      // TODO with code above
+
+      // TODO: Autorenew expired access and refresh tokens
+      // TODO: Will need to determine if token is expired
+      // TODO: Then renew
+      // TODO: If not expired, then is unauthorized
+
+      error = createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized",
+      });
+    } else {
+      verifiedUser = user as User;
+      console.log("USER: ", user);
     }
-    verifiedUser = user;
   });
 
-  return verifiedUser;
+  // If error, return error
+  if (error)
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+
+  // If token was valid and we got back a user, return the user
+  if (verifiedUser) return verifiedUser;
+
+  // Otherwise return the error
+  return createError({
+    statusCode: 401,
+    statusMessage: "Unauthorized",
+  });
 }
 
 /**
@@ -724,4 +755,40 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
   }
 
   return createError({ statusCode: 401, statusMessage: "Invalid login" });
+}
+
+/**
+ * @desc Logs a user out
+ * @param event Event from Api
+ */
+export async function logout(event: H3Event): Promise<H3Error | void> {
+  const body = await readBody(event);
+  const user = await getUser(body.email);
+
+  // Check if email is provided
+  if ("email" in body === false) {
+    console.log("Email not found in body for logging out");
+    return createError({
+      statusCode: 400,
+      statusMessage: "User email required",
+    });
+  }
+
+  // If email is provided but user not found
+  if (!user) {
+    console.log("User not found for logging out");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Logout failed",
+    });
+  }
+
+  // Deactivate all refresh tokens
+  await _deactivateRefreshTokens(user.id);
+
+  // Remove cookie
+  deleteCookie(event, "access_token");
+  deleteCookie(event, "refresh_token");
+
+  // Not sure how to log out in app
 }

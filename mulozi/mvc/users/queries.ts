@@ -165,7 +165,6 @@ export async function updateUser(event: H3Event): Promise<ApiResult | H3Error> {
     .catch(async (e) => {
       console.error(e);
       await prisma.$disconnect();
-      process.exit(1);
     });
 
   // Prepare api result

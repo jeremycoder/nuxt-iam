@@ -1,5 +1,11 @@
 import { H3Event, H3Error } from "h3";
-import { registerUser, loginUser, refreshTokens, logoutUser } from "./queries";
+import {
+  registerUser,
+  loginUser,
+  refreshTokens,
+  logoutUser,
+  isAuthenticated,
+} from "./queries";
 import { ApiResult } from "~~/mulozi/misc/types";
 
 /**
@@ -58,13 +64,8 @@ export async function logout(event: H3Event): Promise<ApiResult | H3Error> {
 export async function authenticated(
   event: H3Event
 ): Promise<ApiResult | H3Error> {
-  // const result = await isAuthenticated(event);
-  // if (result instanceof H3Error) throw result;
-  const result = {} as ApiResult;
-  result.success = false;
-  result.data = {
-    isAuthenticated: false,
-  };
+  const result = await isAuthenticated(event);
+  if (result instanceof H3Error) throw result;
 
   return result;
 }
