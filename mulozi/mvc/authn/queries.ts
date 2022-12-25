@@ -90,9 +90,35 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
 
   const tokens = loginErrorOrTokens as Tokens;
 
-  // Send tokens in response headers
-  setHeader(event, "access-token", "Bearer " + tokens.accessToken);
-  setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+  // Get client platform
+  const errorOrPlatform = getClientPlatform(event);
+  if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
+
+  // Get access token from header or cookie
+  const platform = errorOrPlatform as string;
+
+  // If platform is app, set tokens in header
+  if (platform === "app") {
+    setHeader(event, "access-token", "Bearer " + tokens.accessToken);
+    setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+  }
+
+  // If platform is browser, set tokens in secure, httpOnly cookies
+  if (platform === "browser") {
+    // TODO: For dev development, have a place where these can be changed, like in env variables
+    // TODO: Or maybe have a platform like 'browser-dev'?
+    // TODO: Browser will need tested
+    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+  }
 
   // Create api result
   const body = await readBody(event);
@@ -119,10 +145,34 @@ export async function refreshTokens(
 
   const tokens = errorOrTokens as Tokens;
 
-  // TODO: Send tokens to header if app
-  // TODO: Send tokens to cookie if browser
-  setHeader(event, "access-token", "Bearer " + tokens.accessToken);
-  setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+  const errorOrPlatform = getClientPlatform(event);
+  if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
+
+  // Get access token from header or cookie
+  const platform = errorOrPlatform as string;
+
+  // If platform is app, set tokens in header
+  if (platform === "app") {
+    setHeader(event, "access-token", "Bearer " + tokens.accessToken);
+    setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+  }
+
+  // If platform is browser, set tokens in secure, httpOnly cookies
+  if (platform === "browser") {
+    // TODO: For dev development, have a place where these can be changed, like in env variables
+    // TODO: Or maybe have a platform like 'browser-dev'?
+    // TODO: Browser will need tested
+    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+  }
 
   // Create api result
   result.success = true;
@@ -178,7 +228,7 @@ export async function isAuthenticated(
   const errorOrPlatform = getClientPlatform(event);
   if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
 
-  // Get access token from authorization header or cookie
+  // Get access token from header or cookie
   const platform = errorOrPlatform as string;
   if (platform === "app")
     accessToken = event.node.req.headers["access-token"] as string;
@@ -212,9 +262,34 @@ export async function isAuthenticated(
     // Otherwise, get tokens
     const tokens = errorOrTokens as Tokens;
 
-    // Send tokens in header
-    setHeader(event, "access-token", "Bearer " + tokens.accessToken);
-    setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+    const errorOrPlatform = getClientPlatform(event);
+    if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
+
+    // Get access token from header or cookie
+    const platform = errorOrPlatform as string;
+
+    // If platform is app, set tokens in header
+    if (platform === "app") {
+      setHeader(event, "access-token", "Bearer " + tokens.accessToken);
+      setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+    }
+
+    // If platform is browser, set tokens in secure, httpOnly cookies
+    if (platform === "browser") {
+      // TODO: For dev development, have a place where these can be changed, like in env variables
+      // TODO: Or maybe have a platform like 'browser-dev'?
+      // TODO: Browser will need tested
+      setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      });
+      setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      });
+    }
 
     // Return authenticated
     return authenticated;
