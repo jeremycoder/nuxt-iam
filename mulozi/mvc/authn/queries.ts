@@ -108,6 +108,7 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
     // TODO: For dev development, have a place where these can be changed, like in env variables
     // TODO: Or maybe have a platform like 'browser-dev'?
     // TODO: Browser will need tested
+    // TODO: Does expires matter? Cookie should expire in 14 days.
     setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
       httpOnly: true,
       secure: true,
@@ -162,6 +163,7 @@ export async function refreshTokens(
     // TODO: For dev development, have a place where these can be changed, like in env variables
     // TODO: Or maybe have a platform like 'browser-dev'?
     // TODO: Browser will need tested
+    // TODO: Does expires matter? Cookie should expire in 14 days.
     setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
       httpOnly: true,
       secure: true,
@@ -279,6 +281,7 @@ export async function isAuthenticated(
       // TODO: For dev development, have a place where these can be changed, like in env variables
       // TODO: Or maybe have a platform like 'browser-dev'?
       // TODO: Browser will need tested
+      // TODO: Does expires matter? Cookie should expire in 14 days.
       setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
         httpOnly: true,
         secure: true,
