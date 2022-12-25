@@ -1,12 +1,10 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { User, Tokens, ApiResult } from "~~/mulozi/misc/types";
+import { User, Tokens } from "~~/mulozi/misc/types";
 import { v4 as uuidv4 } from "uuid";
-import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
-import { randomBytes } from "crypto";
-import dayjs from "dayjs";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -511,8 +509,6 @@ export function verifyAccessToken(token: string): H3Error | User {
 export async function createNewTokensFromRefresh(
   token: string
 ): Promise<Tokens | H3Error> {
-  // TODO: Fix does not return user, only return errors if errors occurred
-  // TODO: If user is needed, would have to return token, and then get user from token by email
   const errorOrUser = await verifyRefreshToken(token);
   if (errorOrUser instanceof H3Error) return errorOrUser;
 
@@ -640,10 +636,12 @@ export async function verifyRefreshToken(
       console.log("Token not active");
 
       // This indicates a stolen token therefore deactivate all refresh tokens
+      console.log("Detecting a stolen refresh token");
       const user = await getUserByEmail(verifiedTokenPayload.email);
 
       if (!user) {
         console.log("User not found from verified refresh token");
+        console.log("This should not happen. Please check system integrity.");
         return createError({
           statusCode: 403,
           statusMessage: "Forbidden",
@@ -651,7 +649,20 @@ export async function verifyRefreshToken(
       }
 
       // Deactivate all user's refresh tokens
-      await _deactivateRefreshTokens(user.id);
+      console.log(
+        `Attempt to deactivate all user:${user.email}'s refresh tokens`
+      );
+      const deactivateError = await _deactivateRefreshTokens(user.id);
+
+      if (deactivateError) {
+        console.log(
+          `Deactivate all user:${user.email}'s refresh tokens failed`
+        );
+        console.log(
+          `Should attempt to lock user's account if feature is available`
+        );
+        return deactivateError;
+      }
 
       return tokenNotActiveError;
     }

@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import {
   hashPassword,
   validateUserRegistration,
@@ -7,13 +7,13 @@ import {
   validateUserLogin,
   login,
   getRefreshTokens,
-  createNewTokensFromRefresh,
   logout,
 } from "~~/mulozi/misc/helpers";
 import { verifyAccessToken } from "~~/mulozi/misc/helpers";
 import { ApiResult, Tokens, User } from "~~/mulozi/misc/types";
 import { getClientPlatform } from "~~/mulozi/middleware";
 import { H3Event, H3Error } from "h3";
+import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
@@ -97,28 +97,32 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
   // Get access token from header or cookie
   const platform = errorOrPlatform as string;
 
-  // If platform is app, set tokens in header
+  // If platform is app dev/production, set tokens in header
   if (platform === "app") {
     setHeader(event, "access-token", "Bearer " + tokens.accessToken);
     setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
   }
 
-  // If platform is browser, set tokens in secure, httpOnly cookies
+  // If platform is browser production, set tokens in secure, httpOnly cookies
   if (platform === "browser") {
-    // TODO: For dev development, have a place where these can be changed, like in env variables
-    // TODO: Or maybe have a platform like 'browser-dev'?
-    // TODO: Browser will need tested
-    // TODO: Does expires matter? Cookie should expire in 14 days.
     setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
     });
+
+    // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
+    // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
     setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      expires: dayjs().add(14, "day").toDate(),
     });
+  }
+
+  // Development cookies are not secure. Use only in development
+  if (platform === "browser-dev") {
+    setCookie(event, "access-token", "Bearer " + tokens.accessToken);
+    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
   }
 
   // Create api result
@@ -152,28 +156,32 @@ export async function refreshTokens(
   // Get access token from header or cookie
   const platform = errorOrPlatform as string;
 
-  // If platform is app, set tokens in header
+  // If platform is app dev/production, set tokens in header
   if (platform === "app") {
     setHeader(event, "access-token", "Bearer " + tokens.accessToken);
     setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
   }
 
-  // If platform is browser, set tokens in secure, httpOnly cookies
+  // If platform is browser production, set tokens in secure, httpOnly cookies
   if (platform === "browser") {
-    // TODO: For dev development, have a place where these can be changed, like in env variables
-    // TODO: Or maybe have a platform like 'browser-dev'?
-    // TODO: Browser will need tested
-    // TODO: Does expires matter? Cookie should expire in 14 days.
     setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
     });
+
+    // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
+    // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
     setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      expires: dayjs().add(14, "day").toDate(),
     });
+  }
+
+  // Development cookies are not secure. Use only in development
+  if (platform === "browser-dev") {
+    setCookie(event, "access-token", "Bearer " + tokens.accessToken);
+    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
   }
 
   // Create api result
@@ -230,11 +238,12 @@ export async function isAuthenticated(
   const errorOrPlatform = getClientPlatform(event);
   if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
 
-  // Get access token from header or cookie
+  // If app, get token from header
   const platform = errorOrPlatform as string;
   if (platform === "app")
+    // If browser, get token from cookies
     accessToken = event.node.req.headers["access-token"] as string;
-  else if (platform === "browser")
+  else if (["browser", "browser-dev"].includes(platform))
     accessToken = getCookie(event, "access-token") as string;
 
   // If no token, user is not authenticated
@@ -270,31 +279,36 @@ export async function isAuthenticated(
     // Get access token from header or cookie
     const platform = errorOrPlatform as string;
 
-    // If platform is app, set tokens in header
+    // If platform is app dev/production, set tokens in header
     if (platform === "app") {
       setHeader(event, "access-token", "Bearer " + tokens.accessToken);
       setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
     }
 
-    // If platform is browser, set tokens in secure, httpOnly cookies
+    // If platform is browser production, set tokens in secure, httpOnly cookies
     if (platform === "browser") {
-      // TODO: For dev development, have a place where these can be changed, like in env variables
-      // TODO: Or maybe have a platform like 'browser-dev'?
-      // TODO: Browser will need tested
-      // TODO: Does expires matter? Cookie should expire in 14 days.
       setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
       });
+
+      // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
+      // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
       setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
+        expires: dayjs().add(14, "day").toDate(),
       });
     }
 
+    // Development cookies are not secure. Use only in development
+    if (platform === "browser-dev") {
+      setCookie(event, "access-token", "Bearer " + tokens.accessToken);
+      setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
+    }
+
     // Return authenticated
+    console.log("Reauthentication successful");
     return authenticated;
   }
 
