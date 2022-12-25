@@ -57,16 +57,6 @@ export default defineEventHandler(async (event) => {
         break;
     }
 
-  // TODO: Set response headers here?
-  //
-  setHeader(
-    event,
-    "Content-Security-Policy",
-    "default-src 'self';base-uri 'self';font-src"
-  );
-
-  setCookie(event, "name", "jeremy");
-
   throw createError({
     statusCode: 405,
     statusMessage: "Method not allowed",

@@ -1,7 +1,7 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { User, Tokens } from "~~/mulozi/misc/types";
+import { User, Tokens, ApiResult } from "~~/mulozi/misc/types";
 import { v4 as uuidv4 } from "uuid";
 import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
@@ -180,19 +180,19 @@ export async function getRefreshTokens(
   // TODO: If platform is app, get from authorization header
   // TODO: If platform is browser, get from cookies
 
-  const authHeader = event.node.req.headers.authorization;
+  const refreshTokenHeader = event.node.req.headers["refresh-token"] as string;
 
   // Check for authorization header
-  if (!authHeader) {
+  if (!refreshTokenHeader) {
     console.log("Missing authorization header");
     return createError({
       statusCode: 401,
-      statusMessage: "Unauthorized",
+      statusMessage: "Missing refresh token",
     });
   }
 
   // Get Bearer token
-  const bearerToken = authHeader.split(" ");
+  const bearerToken = refreshTokenHeader.split(" ");
 
   // Check for word "Bearer"
   if (bearerToken[0] !== "Bearer") {
@@ -234,9 +234,7 @@ export async function getRefreshTokens(
     });
 
   // Check if user exists in the database
-  const userInDb = await getUser(user.email);
-
-  // TODO: Must also check if user is ACTIVE
+  const userInDb = await getUserByEmail(user.email);
 
   if (userInDb === null) {
     console.log("User not found in database");
@@ -388,7 +386,7 @@ export function validatePassword(password: string): boolean {
  * @desc Returns user by email
  * @param email User's email
  */
-export async function getUser(email: string): Promise<User | null> {
+export async function getUserByEmail(email: string): Promise<User | null> {
   let user = null;
   await prisma.users
     .findFirst({
@@ -462,32 +460,34 @@ async function verifyPassword(
  */
 export function verifyAccessToken(token: string): H3Error | User {
   let error = null;
+  let tokenExpiredError = null;
   let verifiedUser = null;
 
   jwt.verify(token, config.muloziAccessTokenSecret, (err, user) => {
     if (err) {
       console.log(err);
 
-      // Check token error is due to expired time
-      // if (err instanceof jwt.TokenExpiredError)
-      // TODO with code above
+      // If access token expired, return for attempt to reauthenticate
+      if (err instanceof jwt.TokenExpiredError) {
+        console.log("Expired access token");
+        console.log("Attempt reauthentication");
+        tokenExpiredError = err;
+      }
 
-      // TODO: Autorenew expired access and refresh tokens
-      // TODO: Will need to determine if token is expired
-      // TODO: Then renew
-      // TODO: If not expired, then is unauthorized
-
+      // If not, just return the error
       error = createError({
         statusCode: 401,
         statusMessage: "Unauthorized",
       });
     } else {
       verifiedUser = user as User;
-      console.log("USER: ", user);
     }
   });
 
-  // If error, return error
+  // Check token expiration error first
+  if (tokenExpiredError) return tokenExpiredError;
+
+  // If other error, return error
   if (error)
     return createError({
       statusCode: 401,
@@ -511,6 +511,8 @@ export function verifyAccessToken(token: string): H3Error | User {
 export async function createNewTokensFromRefresh(
   token: string
 ): Promise<Tokens | H3Error> {
+  // TODO: Fix does not return user, only return errors if errors occurred
+  // TODO: If user is needed, would have to return token, and then get user from token by email
   const errorOrUser = await verifyRefreshToken(token);
   if (errorOrUser instanceof H3Error) return errorOrUser;
 
@@ -562,6 +564,7 @@ export async function createNewTokensFromRefresh(
  */
 async function _refreshTokenActive(tokenId: string): Promise<H3Error | void> {
   let error = null;
+
   await prisma.refresh_tokens
     .findFirstOrThrow({
       where: {
@@ -586,39 +589,49 @@ async function _refreshTokenActive(tokenId: string): Promise<H3Error | void> {
  * @desc Verifies refresh token
  * @param token JSON web token
  */
+// TODO: Fix bug, should return H3Error or void
 export async function verifyRefreshToken(
   token: string
 ): Promise<H3Error | User> {
-  const forbiddenError = createError({
-    statusCode: 403,
-    statusMessage: "Forbidden",
-  });
+  let error = null;
+  let verifiedUser = null;
+  let verifiedTokenPayload = null as JwtPayload | null;
 
-  jwt.verify(token, config.muloziRefreshTokenSecret, async (err, user) => {
+  jwt.verify(token, config.muloziRefreshTokenSecret, async (err, token) => {
     if (err) {
       console.log(err);
+      error = createError({
+        statusCode: 403,
+        statusMessage: "Forbidden",
+      });
+    }
+
+    // Get verified token
+    verifiedTokenPayload = token as JwtPayload;
+  });
+
+  if (error) return error;
+
+  if (verifiedTokenPayload) {
+    // Checks for token issuer
+    if (verifiedTokenPayload.iss !== "MuloziAuth") {
+      console.log("Token issuer unknown");
       return createError({
         statusCode: 403,
         statusMessage: "Forbidden",
       });
     }
 
-    const verifiedUser = user as User;
-    const jwt = user as JwtPayload;
-
-    // Checks for token issuer
-    if (jwt.iss !== "MuloziAuth") {
-      console.log("Token issuer unknown");
-      return forbiddenError;
-    }
-
-    // Check if refresh token is active
-    const tokenId = jwt.jti;
+    // Get token id
+    const tokenId = verifiedTokenPayload.jti;
 
     // Checks for token id
     if (!tokenId) {
       console.log("Token id not found");
-      return forbiddenError;
+      return createError({
+        statusCode: 403,
+        statusMessage: "Forbidden",
+      });
     }
 
     // Checks if refresh token is active
@@ -626,20 +639,42 @@ export async function verifyRefreshToken(
     if (tokenNotActiveError) {
       console.log("Token not active");
 
-      // This indicates a stolen token there deactivate all refresh tokens
-      if (user) {
-        await _deactivateRefreshTokens(verifiedUser.id);
+      // This indicates a stolen token therefore deactivate all refresh tokens
+      const user = await getUserByEmail(verifiedTokenPayload.email);
+
+      if (!user) {
+        console.log("User not found from verified refresh token");
+        return createError({
+          statusCode: 403,
+          statusMessage: "Forbidden",
+        });
       }
+
+      // Deactivate all user's refresh tokens
+      await _deactivateRefreshTokens(user.id);
 
       return tokenNotActiveError;
     }
 
-    // TODO: Check if user is active
+    // Try to get user by email
+    const user = await getUserByEmail(verifiedTokenPayload.email);
+    if (!user) {
+      console.log("Failed to return user by email");
+      return createError({
+        statusCode: 403,
+        statusMessage: "Forbidden",
+      });
+    }
 
-    return user;
+    verifiedUser = user;
+  }
+
+  if (verifiedUser) return verifiedUser;
+
+  return createError({
+    statusCode: 403,
+    statusMessage: "Forbidden",
   });
-
-  return forbiddenError;
 }
 
 /**
@@ -710,7 +745,7 @@ async function _deactivateRefreshTokens(
 export async function login(event: H3Event): Promise<H3Error | Tokens> {
   const body = await readBody(event);
 
-  const user = await getUser(body.email);
+  const user = await getUserByEmail(body.email);
 
   if (user === null) {
     return createError({ statusCode: 401, statusMessage: "Invalid login" });
@@ -763,7 +798,7 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
  */
 export async function logout(event: H3Event): Promise<H3Error | void> {
   const body = await readBody(event);
-  const user = await getUser(body.email);
+  const user = await getUserByEmail(body.email);
 
   // Check if email is provided
   if ("email" in body === false) {

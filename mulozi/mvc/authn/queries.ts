@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
 import {
   hashPassword,
   validateUserRegistration,
@@ -89,12 +90,16 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
 
   const tokens = loginErrorOrTokens as Tokens;
 
-  // Create api result
-  result.success = true;
+  // Send tokens in response headers
+  setHeader(event, "access-token", "Bearer " + tokens.accessToken);
+  setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
 
+  // Create api result
+  const body = await readBody(event);
+
+  result.success = true;
   result.data = {
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
+    result: `user with email ${body.email} successfully logged in`,
   };
 
   return result;
@@ -112,28 +117,17 @@ export async function refreshTokens(
   const errorOrTokens = await getRefreshTokens(event);
   if (errorOrTokens instanceof H3Error) return errorOrTokens;
 
-  // Get new access and refresh tokens
-  const newTokens = createNewTokensFromRefresh(event.context.refreshToken);
+  const tokens = errorOrTokens as Tokens;
 
-  if (newTokens === null) {
-    console.log("Failed to get user from refresh token");
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Unauthorized",
-    });
-  }
-
-  const loginErrorOrTokens = await login(event);
-  if (loginErrorOrTokens instanceof H3Error) return loginErrorOrTokens;
-
-  const tokens = loginErrorOrTokens as Tokens;
+  // TODO: Send tokens to header if app
+  // TODO: Send tokens to cookie if browser
+  setHeader(event, "access-token", "Bearer " + tokens.accessToken);
+  setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
 
   // Create api result
   result.success = true;
-
   result.data = {
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
+    result: `tokens refreshed successfully`,
   };
 
   return result;
@@ -187,18 +181,46 @@ export async function isAuthenticated(
   // Get access token from authorization header or cookie
   const platform = errorOrPlatform as string;
   if (platform === "app")
-    accessToken = event.node.req.headers.authorization as string;
+    accessToken = event.node.req.headers["access-token"] as string;
   else if (platform === "browser")
-    accessToken = getCookie(event, "access_token") as string;
+    accessToken = getCookie(event, "access-token") as string;
 
   // If no token, user is not authenticated
-  if (!accessToken) return notAuthenticated;
+  if (!accessToken) {
+    console.log("Error: No access token provided");
+    notAuthenticated.data.reason = "No access token provided";
+    return notAuthenticated;
+  }
 
   // Parse Bearer token (Bearer xxxx)
   const accessTokenArr = accessToken.split(" ");
 
   // Verify access token
   const errorOrUser = verifyAccessToken(accessTokenArr[1]);
+
+  // If error is an expired access token, attempt to reauthenticate
+  if (errorOrUser instanceof jwt.TokenExpiredError) {
+    console.log("Yes, attempt to reauthenticate");
+    const errorOrTokens = await getRefreshTokens(event);
+
+    // If get an error, reauthentication failed
+    if (errorOrTokens instanceof H3Error) {
+      console.log("Reauthentication failed");
+      return notAuthenticated;
+    }
+
+    // Otherwise, get tokens
+    const tokens = errorOrTokens as Tokens;
+
+    // Send tokens in header
+    setHeader(event, "access-token", "Bearer " + tokens.accessToken);
+    setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+
+    // Return authenticated
+    return authenticated;
+  }
+
+  // If other error, return error
   if (errorOrUser instanceof H3Error) {
     return notAuthenticated;
   }
