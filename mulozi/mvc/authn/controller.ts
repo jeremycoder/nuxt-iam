@@ -5,7 +5,7 @@
 import UrlPattern from "url-pattern";
 import { authnMiddleware } from "./middleware";
 import { H3Error } from "h3";
-import { register, login, refresh, logout, authenticated } from "./model";
+import { register, login, refresh, logout, isauthenticated } from "./model";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -35,10 +35,10 @@ export default defineEventHandler(async (event) => {
         }
 
         // determine if user is authenticated
-        result = new route("/api/mulozi/authn/authenticated").match(url);
+        result = new route("/api/mulozi/authn/isauthenticated").match(url);
         if (result) {
           event.context.params.fromRoute = result;
-          return await authenticated(event);
+          return await isauthenticated(event);
         }
 
         // refresh jwt tokens

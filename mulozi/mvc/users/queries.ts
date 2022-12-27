@@ -10,7 +10,7 @@ import {
   getRefreshTokens,
   createNewTokensFromRefresh,
 } from "~~/mulozi/misc/helpers";
-import { ApiResult, Tokens } from "~~/mulozi/misc/types";
+import { JSONResponse, Tokens } from "~~/mulozi/misc/types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();
@@ -22,8 +22,8 @@ const rowLimit = 100;
  */
 export async function getAllUsers(
   event: H3Event
-): Promise<ApiResult | H3Error> {
-  const result = {} as ApiResult;
+): Promise<JSONResponse | H3Error> {
+  const result = {} as JSONResponse;
   let users = {};
 
   await prisma.users
@@ -40,7 +40,7 @@ export async function getAllUsers(
     });
 
   // Create api result
-  result.success = true;
+  result.status = "success";
   result.data = users;
 
   return result;
@@ -52,7 +52,7 @@ export async function getAllUsers(
  */
 export async function registerUser(
   event: H3Event
-): Promise<ApiResult | H3Error> {
+): Promise<JSONResponse | H3Error> {
   const error = await validateUserRegistration(event);
   if (error) return error;
 
@@ -65,7 +65,7 @@ export async function registerUser(
   // If no password hash error, get password as string
   const hashedPassword = hashedPasswordOrError as string;
 
-  const result = {} as ApiResult;
+  const result = {} as JSONResponse;
   let user = {};
 
   await prisma.users
@@ -88,9 +88,9 @@ export async function registerUser(
     });
 
   // Create api result
-  result.success = true;
+  result.status = "success";
   if ("email" in user) {
-    result.data = { result: `user with email '${user.email}' created` };
+    result.data = { email: user.email };
   }
 
   return result;
@@ -100,9 +100,11 @@ export async function registerUser(
  * @desc Gets one user
  * @param event H3Event
  */
-export async function showUser(event: H3Event): Promise<ApiResult | H3Error> {
+export async function showUser(
+  event: H3Event
+): Promise<JSONResponse | H3Error> {
   const { uuid } = event.context.params.fromRoute;
-  const result = {} as ApiResult;
+  const result = {} as JSONResponse;
   let user = {};
 
   await prisma.users
@@ -121,7 +123,7 @@ export async function showUser(event: H3Event): Promise<ApiResult | H3Error> {
     });
 
   // Create api result
-  result.success = true;
+  result.status = "success";
   result.data = user;
 
   // Prisma returns empty object if user not found, so check if user has email
@@ -139,11 +141,13 @@ export async function showUser(event: H3Event): Promise<ApiResult | H3Error> {
  * @desc Update a user
  * @param event H3Event
  */
-export async function updateUser(event: H3Event): Promise<ApiResult | H3Error> {
+export async function updateUser(
+  event: H3Event
+): Promise<JSONResponse | H3Error> {
   const error = await validateUserUpdate(event);
   if (error instanceof H3Error) return error;
 
-  const result = {} as ApiResult;
+  const result = {} as JSONResponse;
   const body = await readBody(event);
   const { fromRoute } = event.context.params;
   let user = {};
@@ -168,9 +172,9 @@ export async function updateUser(event: H3Event): Promise<ApiResult | H3Error> {
     });
 
   // Prepare api result
-  result.success = true;
+  result.status = "success";
   if ("email" in user) {
-    result.data = { result: `user with email '${user.email}' updated` };
+    result.data = { email: user.email };
   }
 
   return result;
@@ -182,11 +186,11 @@ export async function updateUser(event: H3Event): Promise<ApiResult | H3Error> {
  */
 export async function destroyUser(
   event: H3Event
-): Promise<ApiResult | H3Error> {
+): Promise<JSONResponse | H3Error> {
   const error = await validateUserDelete(event);
   if (error instanceof H3Error) return error;
 
-  const result = {} as ApiResult;
+  const result = {} as JSONResponse;
   const { uuid } = event.context.params.fromRoute;
 
   let user = {};
@@ -207,9 +211,9 @@ export async function destroyUser(
     });
 
   // Create api result
-  result.success = true;
+  result.status = "success";
   if ("email" in user) {
-    result.data = { result: `user with email '${user.email}' deleted` };
+    result.data = { email: user.email };
   }
 
   return result;
@@ -219,8 +223,10 @@ export async function destroyUser(
  * @desc Authenticate user into database
  * @param event H3Event
  */
-export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
-  const result = {} as ApiResult;
+export async function loginUser(
+  event: H3Event
+): Promise<JSONResponse | H3Error> {
+  const result = {} as JSONResponse;
 
   const validateError = await validateUserLogin(event);
   if (validateError instanceof H3Error) return validateError;
@@ -231,7 +237,7 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
   const tokens = loginErrorOrTokens as Tokens;
 
   // Create api result
-  result.success = true;
+  result.status = "success";
 
   result.data = {
     accessToken: tokens.accessToken,
@@ -247,8 +253,8 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
  */
 export async function refreshTokens(
   event: H3Event
-): Promise<ApiResult | H3Error> {
-  const result = {} as ApiResult;
+): Promise<JSONResponse | H3Error> {
+  const result = {} as JSONResponse;
 
   const errorOrTokens = await getRefreshTokens(event);
   if (errorOrTokens instanceof H3Error) return errorOrTokens;
@@ -270,7 +276,7 @@ export async function refreshTokens(
   const tokens = loginErrorOrTokens as Tokens;
 
   // Create api result
-  result.success = true;
+  result.status = "success";
 
   result.data = {
     accessToken: tokens.accessToken,

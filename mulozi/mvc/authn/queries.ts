@@ -10,7 +10,7 @@ import {
   logout,
 } from "~~/mulozi/misc/helpers";
 import { verifyAccessToken } from "~~/mulozi/misc/helpers";
-import { ApiResult, Tokens, User } from "~~/mulozi/misc/types";
+import { JSONResponse, Tokens, User } from "~~/mulozi/misc/types";
 import { getClientPlatform } from "~~/mulozi/middleware";
 import { H3Event, H3Error } from "h3";
 import dayjs from "dayjs";
@@ -23,7 +23,7 @@ const prisma = new PrismaClient();
  */
 export async function registerUser(
   event: H3Event
-): Promise<ApiResult | H3Error> {
+): Promise<JSONResponse | H3Error> {
   const validationError = await validateUserRegistration(event);
   if (validationError) return validationError;
 
@@ -36,7 +36,7 @@ export async function registerUser(
   // If no password hash error, get password as string
   const hashedPassword = hashedPasswordOrError as string;
 
-  const result = {} as ApiResult;
+  const result = {} as JSONResponse;
   let user = {};
 
   let registrationError = null;
@@ -67,9 +67,9 @@ export async function registerUser(
     });
 
   // Create api result
-  result.success = true;
+  result.status = "success";
   if ("email" in user) {
-    result.data = { result: `user with email '${user.email}' created` };
+    result.data = { email: user.email };
   }
 
   return result;
@@ -79,8 +79,10 @@ export async function registerUser(
  * @desc Authenticate user into database
  * @param event H3Event
  */
-export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
-  const result = {} as ApiResult;
+export async function loginUser(
+  event: H3Event
+): Promise<JSONResponse | H3Error> {
+  const result = {} as JSONResponse;
 
   const validateError = await validateUserLogin(event);
   if (validateError instanceof H3Error) return validateError;
@@ -128,7 +130,7 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
   // Create api result
   const body = await readBody(event);
 
-  result.success = true;
+  result.status = "success";
   result.data = {
     result: `user with email ${body.email} successfully logged in`,
   };
@@ -142,8 +144,8 @@ export async function loginUser(event: H3Event): Promise<ApiResult | H3Error> {
  */
 export async function refreshTokens(
   event: H3Event
-): Promise<ApiResult | H3Error> {
-  const result = {} as ApiResult;
+): Promise<JSONResponse | H3Error> {
+  const result = {} as JSONResponse;
 
   const errorOrTokens = await getRefreshTokens(event);
   if (errorOrTokens instanceof H3Error) return errorOrTokens;
@@ -185,7 +187,7 @@ export async function refreshTokens(
   }
 
   // Create api result
-  result.success = true;
+  result.status = "success";
   result.data = {
     result: `tokens refreshed successfully`,
   };
@@ -197,15 +199,16 @@ export async function refreshTokens(
  * @desc Log user out
  * @param event H3Event
  */
-export async function logoutUser(event: H3Event): Promise<ApiResult | H3Error> {
-  const result = {} as ApiResult;
-
+export async function logoutUser(
+  event: H3Event
+): Promise<JSONResponse | H3Error> {
+  const result = {} as JSONResponse;
   const error = await logout(event);
   if (error instanceof H3Error) return error;
 
   // Create api result
-  result.success = true;
-  result.data = { result: `user logged out successfully` };
+  result.status = "success";
+  result.data = null;
 
   return result;
 }
@@ -216,23 +219,9 @@ export async function logoutUser(event: H3Event): Promise<ApiResult | H3Error> {
  */
 export async function isAuthenticated(
   event: H3Event
-): Promise<ApiResult | H3Error> {
+): Promise<boolean | H3Error> {
   // Check client platform
   let accessToken = null;
-
-  // Return object if authenticated
-  const authenticated = {} as ApiResult;
-  authenticated.success = true;
-  authenticated.data = {
-    isAuthenticated: true,
-  };
-
-  // Return object if not authenticated
-  const notAuthenticated = {} as ApiResult;
-  notAuthenticated.success = false;
-  notAuthenticated.data = {
-    isAuthenticated: false,
-  };
 
   // Get client platform
   const errorOrPlatform = getClientPlatform(event);
@@ -249,8 +238,10 @@ export async function isAuthenticated(
   // If no token, user is not authenticated
   if (!accessToken) {
     console.log("Error: No access token provided");
-    notAuthenticated.data.reason = "No access token provided";
-    return notAuthenticated;
+    return createError({
+      statusCode: 400,
+      statusMessage: "No access token provided",
+    });
   }
 
   // Parse Bearer token (Bearer xxxx)
@@ -267,7 +258,10 @@ export async function isAuthenticated(
     // If get an error, reauthentication failed
     if (errorOrTokens instanceof H3Error) {
       console.log("Reauthentication failed");
-      return notAuthenticated;
+      return createError({
+        statusCode: 500,
+        statusMessage: "Reauthentication failed. Login required.",
+      });
     }
 
     // Otherwise, get tokens
@@ -309,19 +303,18 @@ export async function isAuthenticated(
 
     // Return authenticated
     console.log("Reauthentication successful");
-    return authenticated;
+    return true;
   }
 
   // If other error, return error
   if (errorOrUser instanceof H3Error) {
-    return notAuthenticated;
+    return errorOrUser;
   }
 
+  // Otherwise, we have the user // should return user, so we can use user
   const user = errorOrUser as User;
-  if (user) {
-    authenticated.data.email = user.email;
-    return authenticated;
-  }
+  if (user) return true;
 
-  return notAuthenticated;
+  // Probably some other error
+  return false;
 }

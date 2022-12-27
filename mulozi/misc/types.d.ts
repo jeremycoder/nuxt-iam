@@ -16,9 +16,11 @@ enum Role {
   ADMIN,
 }
 
-export type ApiResult = {
-  success: boolean;
+// JSend-compliant https://github.com/omniti-labs/jsend API response
+export type JSONResponse = {
+  status: "success" | "fail";
   data: any;
+  error?: any;
 };
 
 export type Tokens = {

@@ -661,9 +661,12 @@ export async function verifyRefreshToken(
         console.log(
           `Should attempt to lock user's account if feature is available`
         );
+
         return deactivateError;
       }
-
+      console.log(
+        `All user:${user.email}'s refresh tokens deactivated. User must login`
+      );
       return tokenNotActiveError;
     }
 
@@ -808,6 +811,12 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
  * @param event Event from Api
  */
 export async function logout(event: H3Event): Promise<H3Error | void> {
+  // Delete access and refresh cookies
+  deleteCookie(event, "access-token");
+  deleteCookie(event, "refresh-token");
+
+  // The rest of the code is for deactivating user's refresh tokens
+
   const body = await readBody(event);
   const user = await getUserByEmail(body.email);
 
@@ -830,11 +839,14 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
   }
 
   // Deactivate all refresh tokens
-  await _deactivateRefreshTokens(user.id);
-
-  // Remove cookie
-  deleteCookie(event, "access_token");
-  deleteCookie(event, "refresh_token");
+  const deactivateError = await _deactivateRefreshTokens(user.id);
+  if (deactivateError) {
+    console.log(`Failed to deactivate user:${user.email}'s refresh tokens`);
+    return createError({
+      statusCode: 500,
+      statusMessage: "Logout failed",
+    });
+  }
 
   // Not sure how to log out in app
 }
