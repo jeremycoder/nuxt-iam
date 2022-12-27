@@ -5,4 +5,7 @@ export default defineNuxtConfig({
     muloziRefreshTokenSecret: process.env.MULOZI_REFRESH_TOKEN_SECRET,
     public: {},
   },
+  typescript: {
+    shim: false,
+  },
 });
