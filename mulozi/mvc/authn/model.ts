@@ -6,7 +6,7 @@ import {
   logoutUser,
   isAuthenticated,
 } from "./queries";
-import { JSONResponse } from "~~/mulozi/misc/types";
+import { JSONResponse, JSONResponseStatus } from "~~/mulozi/misc/types";
 
 /**
  * @desc Registers (creates) a new user in database
@@ -68,18 +68,19 @@ export async function isauthenticated(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
 
   if (authenticated instanceof H3Error) {
-    response.status = "fail";
+    response.status = JSONResponseStatus.FAIL;
+    response.data = { isAuthenticated: false };
     response.error = authenticated;
   }
 
   if (authenticated === false) {
-    response.status = "fail";
-    response.data = { email: false };
+    response.status = JSONResponseStatus.FAIL;
+    response.data = { isAuthenticated: authenticated };
   }
 
   if (authenticated === true) {
-    response.status = "success";
-    response.data = { isAuthenticated: true };
+    response.status = JSONResponseStatus.SUCCESS;
+    response.data = { isAuthenticated: authenticated };
   }
 
   return response;

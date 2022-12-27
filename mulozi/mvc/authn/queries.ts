@@ -10,7 +10,12 @@ import {
   logout,
 } from "~~/mulozi/misc/helpers";
 import { verifyAccessToken } from "~~/mulozi/misc/helpers";
-import { JSONResponse, Tokens, User } from "~~/mulozi/misc/types";
+import {
+  JSONResponse,
+  JSONResponseStatus,
+  Tokens,
+  User,
+} from "~~/mulozi/misc/types";
 import { getClientPlatform } from "~~/mulozi/middleware";
 import { H3Event, H3Error } from "h3";
 import dayjs from "dayjs";
@@ -67,7 +72,7 @@ export async function registerUser(
     });
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   if ("email" in user) {
     result.data = { email: user.email };
   }
@@ -130,7 +135,7 @@ export async function loginUser(
   // Create api result
   const body = await readBody(event);
 
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   result.data = {
     result: `user with email ${body.email} successfully logged in`,
   };
@@ -187,7 +192,7 @@ export async function refreshTokens(
   }
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   result.data = {
     result: `tokens refreshed successfully`,
   };
@@ -207,15 +212,16 @@ export async function logoutUser(
   if (error instanceof H3Error) return error;
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   result.data = null;
 
   return result;
 }
 
 /**
- * @desc Log user out
- * @param event H3Event
+ * @desc Checks if user is authenticated (checks if access token is still valid)
+ * @param event
+ * @returns {Promise<boolean | H3Error>} Returns true or false or error
  */
 export async function isAuthenticated(
   event: H3Event
@@ -308,13 +314,10 @@ export async function isAuthenticated(
 
   // If other error, return error
   if (errorOrUser instanceof H3Error) {
-    return errorOrUser;
+    console.log("Error: ", errorOrUser);
+    return false;
+  } else {
+    // Otherwise, we have the user so return true
+    return true;
   }
-
-  // Otherwise, we have the user // should return user, so we can use user
-  const user = errorOrUser as User;
-  if (user) return true;
-
-  // Probably some other error
-  return false;
 }

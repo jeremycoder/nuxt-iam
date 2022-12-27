@@ -16,16 +16,20 @@ enum Role {
   ADMIN,
 }
 
-// JSend-compliant https://github.com/omniti-labs/jsend API response
 export type JSONResponse = {
-  status: "success" | "fail";
+  status: JSONResponseStatus.FAIL | JSONResponseStatus.SUCCESS;
   data: any;
   error?: any;
 };
+
+enum JSONResponseStatus {
+  SUCCESS = "success",
+  FAIL = "fail",
+}
 
 export type Tokens = {
   accessToken: string;
   refreshToken: string;
 };
 
-export type ClientPlatforms = "app" | "browser";
+export type ClientPlatforms = "app" | "browser" | "browser-dev";

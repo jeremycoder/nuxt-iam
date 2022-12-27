@@ -10,7 +10,7 @@ import {
   getRefreshTokens,
   createNewTokensFromRefresh,
 } from "~~/mulozi/misc/helpers";
-import { JSONResponse, Tokens } from "~~/mulozi/misc/types";
+import { JSONResponse, JSONResponseStatus, Tokens } from "~~/mulozi/misc/types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();
@@ -40,7 +40,7 @@ export async function getAllUsers(
     });
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   result.data = users;
 
   return result;
@@ -88,7 +88,7 @@ export async function registerUser(
     });
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   if ("email" in user) {
     result.data = { email: user.email };
   }
@@ -123,7 +123,7 @@ export async function showUser(
     });
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   result.data = user;
 
   // Prisma returns empty object if user not found, so check if user has email
@@ -172,7 +172,7 @@ export async function updateUser(
     });
 
   // Prepare api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   if ("email" in user) {
     result.data = { email: user.email };
   }
@@ -211,7 +211,7 @@ export async function destroyUser(
     });
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
   if ("email" in user) {
     result.data = { email: user.email };
   }
@@ -237,7 +237,7 @@ export async function loginUser(
   const tokens = loginErrorOrTokens as Tokens;
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
 
   result.data = {
     accessToken: tokens.accessToken,
@@ -276,7 +276,7 @@ export async function refreshTokens(
   const tokens = loginErrorOrTokens as Tokens;
 
   // Create api result
-  result.status = "success";
+  result.status = JSONResponseStatus.SUCCESS;
 
   result.data = {
     accessToken: tokens.accessToken,
