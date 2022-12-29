@@ -17,15 +17,10 @@ enum Role {
 }
 
 export type JSONResponse = {
-  status: JSONResponseStatus.FAIL | JSONResponseStatus.SUCCESS;
+  status: "success" | "fail";
   data: any;
   error?: any;
 };
-
-enum JSONResponseStatus {
-  SUCCESS = "success",
-  FAIL = "fail",
-}
 
 export type Tokens = {
   accessToken: string;

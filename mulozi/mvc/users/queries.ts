@@ -10,7 +10,7 @@ import {
   getRefreshTokens,
   createNewTokensFromRefresh,
 } from "~~/mulozi/misc/helpers";
-import { JSONResponse, JSONResponseStatus, Tokens } from "~~/mulozi/misc/types";
+import { JSONResponse, Tokens } from "~~/mulozi/misc/types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();
@@ -40,7 +40,7 @@ export async function getAllUsers(
     });
 
   // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
+  result.status = "success";
   result.data = users;
 
   return result;
@@ -88,7 +88,7 @@ export async function registerUser(
     });
 
   // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
+  result.status = "success";
   if ("email" in user) {
     result.data = { email: user.email };
   }
@@ -123,7 +123,7 @@ export async function showUser(
     });
 
   // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
+  result.status = "success";
   result.data = user;
 
   // Prisma returns empty object if user not found, so check if user has email
@@ -172,7 +172,7 @@ export async function updateUser(
     });
 
   // Prepare api result
-  result.status = JSONResponseStatus.SUCCESS;
+  result.status = "success";
   if ("email" in user) {
     result.data = { email: user.email };
   }
@@ -211,7 +211,7 @@ export async function destroyUser(
     });
 
   // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
+  result.status = "success";
   if ("email" in user) {
     result.data = { email: user.email };
   }
@@ -223,65 +223,65 @@ export async function destroyUser(
  * @desc Authenticate user into database
  * @param event H3Event
  */
-export async function loginUser(
-  event: H3Event
-): Promise<JSONResponse | H3Error> {
-  const result = {} as JSONResponse;
+// export async function loginUser(
+//   event: H3Event
+// ): Promise<JSONResponse | H3Error> {
+//   const result = {} as JSONResponse;
 
-  const validateError = await validateUserLogin(event);
-  if (validateError instanceof H3Error) return validateError;
+//   const validateError = await validateUserLogin(event);
+//   if (validateError instanceof H3Error) return validateError;
 
-  const loginErrorOrTokens = await login(event);
-  if (loginErrorOrTokens instanceof H3Error) return loginErrorOrTokens;
+//   const loginErrorOrTokens = await login(event);
+//   if (loginErrorOrTokens instanceof H3Error) return loginErrorOrTokens;
 
-  const tokens = loginErrorOrTokens as Tokens;
+//   const tokens = loginErrorOrTokens as Tokens;
 
-  // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
+//   // Create api result
+//   result.status = "success";
 
-  result.data = {
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-  };
+//   result.data = {
+//     accessToken: tokens.accessToken,
+//     refreshToken: tokens.refreshToken,
+//   };
 
-  return result;
-}
+//   return result;
+// }
 
 /**
  * @desc Refresh user tokens
  * @param event H3Event
  */
-export async function refreshTokens(
-  event: H3Event
-): Promise<JSONResponse | H3Error> {
-  const result = {} as JSONResponse;
+// export async function refreshTokens(
+//   event: H3Event
+// ): Promise<JSONResponse | H3Error> {
+//   const result = {} as JSONResponse;
 
-  const errorOrTokens = await getRefreshTokens(event);
-  if (errorOrTokens instanceof H3Error) return errorOrTokens;
+//   const errorOrTokens = await getRefreshTokens(event);
+//   if (errorOrTokens instanceof H3Error) return errorOrTokens;
 
-  // Get new access and refresh tokens
-  const newTokens = createNewTokensFromRefresh(event.context.refreshToken);
+//   // Get new access and refresh tokens
+//   const newTokens = createNewTokensFromRefresh(event.context.refreshToken);
 
-  if (newTokens === null) {
-    console.log("Failed to get user from refresh token");
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Unauthorized",
-    });
-  }
+//   if (newTokens === null) {
+//     console.log("Failed to get user from refresh token");
+//     throw createError({
+//       statusCode: 401,
+//       statusMessage: "Unauthorized",
+//     });
+//   }
 
-  const loginErrorOrTokens = await login(event);
-  if (loginErrorOrTokens instanceof H3Error) return loginErrorOrTokens;
+//   const loginErrorOrTokens = await login(event);
+//   if (loginErrorOrTokens instanceof H3Error) return loginErrorOrTokens;
 
-  const tokens = loginErrorOrTokens as Tokens;
+//   const tokens = loginErrorOrTokens as Tokens;
 
-  // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
+//   // Create api result
+//   result.status = "success";
 
-  result.data = {
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-  };
+//   result.data = {
+//     accessToken: tokens.accessToken,
+//     refreshToken: tokens.refreshToken,
+//   };
 
-  return result;
-}
+//   return result;
+// }

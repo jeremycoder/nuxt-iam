@@ -10,12 +10,7 @@ import {
   logout,
 } from "~~/mulozi/misc/helpers";
 import { verifyAccessToken } from "~~/mulozi/misc/helpers";
-import {
-  JSONResponse,
-  JSONResponseStatus,
-  Tokens,
-  User,
-} from "~~/mulozi/misc/types";
+import { Tokens, User } from "~~/mulozi/misc/types";
 import { getClientPlatform } from "~~/mulozi/middleware";
 import { H3Event, H3Error } from "h3";
 import dayjs from "dayjs";
@@ -25,10 +20,9 @@ const prisma = new PrismaClient();
 /**
  * @desc Registers (creates) a new user in database
  * @param event H3Event
+ * @return {Promise<string>} Returns user if successful and error if not successful
  */
-export async function registerUser(
-  event: H3Event
-): Promise<JSONResponse | H3Error> {
+export async function registerUser(event: H3Event): Promise<User | H3Error> {
   const validationError = await validateUserRegistration(event);
   if (validationError) return validationError;
 
@@ -41,7 +35,6 @@ export async function registerUser(
   // If no password hash error, get password as string
   const hashedPassword = hashedPasswordOrError as string;
 
-  const result = {} as JSONResponse;
   let user = {};
 
   let registrationError = null;
@@ -72,23 +65,15 @@ export async function registerUser(
     });
 
   // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
-  if ("email" in user) {
-    result.data = { email: user.email };
-  }
-
-  return result;
+  const newUser = user as User;
+  return newUser;
 }
 
 /**
  * @desc Authenticate user into database
  * @param event H3Event
  */
-export async function loginUser(
-  event: H3Event
-): Promise<JSONResponse | H3Error> {
-  const result = {} as JSONResponse;
-
+export async function loginUser(event: H3Event): Promise<Tokens | H3Error> {
   const validateError = await validateUserLogin(event);
   if (validateError instanceof H3Error) return validateError;
 
@@ -97,125 +82,31 @@ export async function loginUser(
 
   const tokens = loginErrorOrTokens as Tokens;
 
-  // Get client platform
-  const errorOrPlatform = getClientPlatform(event);
-  if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
-
-  // Get access token from header or cookie
-  const platform = errorOrPlatform as string;
-
-  // If platform is app dev/production, set tokens in header
-  if (platform === "app") {
-    setHeader(event, "access-token", "Bearer " + tokens.accessToken);
-    setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
-  }
-
-  // If platform is browser production, set tokens in secure, httpOnly cookies
-  if (platform === "browser") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
-      httpOnly: true,
-      secure: true,
-    });
-
-    // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
-    // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      expires: dayjs().add(14, "day").toDate(),
-    });
-  }
-
-  // Development cookies are not secure. Use only in development
-  if (platform === "browser-dev") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken);
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
-  }
-
-  // Create api result
-  const body = await readBody(event);
-
-  result.status = JSONResponseStatus.SUCCESS;
-  result.data = {
-    result: `user with email ${body.email} successfully logged in`,
-  };
-
-  return result;
+  return tokens;
 }
 
 /**
  * @desc Refresh user tokens
  * @param event H3Event
  */
-export async function refreshTokens(
-  event: H3Event
-): Promise<JSONResponse | H3Error> {
-  const result = {} as JSONResponse;
-
+export async function refreshTokens(event: H3Event): Promise<Tokens | H3Error> {
   const errorOrTokens = await getRefreshTokens(event);
   if (errorOrTokens instanceof H3Error) return errorOrTokens;
 
   const tokens = errorOrTokens as Tokens;
-
-  const errorOrPlatform = getClientPlatform(event);
-  if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
-
-  // Get access token from header or cookie
-  const platform = errorOrPlatform as string;
-
-  // If platform is app dev/production, set tokens in header
-  if (platform === "app") {
-    setHeader(event, "access-token", "Bearer " + tokens.accessToken);
-    setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
-  }
-
-  // If platform is browser production, set tokens in secure, httpOnly cookies
-  if (platform === "browser") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
-      httpOnly: true,
-      secure: true,
-    });
-
-    // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
-    // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      expires: dayjs().add(14, "day").toDate(),
-    });
-  }
-
-  // Development cookies are not secure. Use only in development
-  if (platform === "browser-dev") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken);
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
-  }
-
-  // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
-  result.data = {
-    result: `tokens refreshed successfully`,
-  };
-
-  return result;
+  return tokens;
 }
 
 /**
  * @desc Log user out
  * @param event H3Event
  */
-export async function logoutUser(
-  event: H3Event
-): Promise<JSONResponse | H3Error> {
-  const result = {} as JSONResponse;
+export async function logoutUser(event: H3Event): Promise<boolean | H3Error> {
   const error = await logout(event);
   if (error instanceof H3Error) return error;
 
   // Create api result
-  result.status = JSONResponseStatus.SUCCESS;
-  result.data = null;
-
-  return result;
+  return true;
 }
 
 /**

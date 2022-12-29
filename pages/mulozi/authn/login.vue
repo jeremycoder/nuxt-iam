@@ -74,6 +74,7 @@ button {
 const { login, isAuthenticated } = useIam();
 
 const isLoggedIn = await isAuthenticated();
+console.log("isLoggedIn: ", isLoggedIn);
 
 const loginForm = {
   email: "",
