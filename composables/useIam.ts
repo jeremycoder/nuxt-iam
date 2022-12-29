@@ -8,6 +8,7 @@ export default function useIam() {
     logout,
     isAuthenticated,
     refresh,
+    getProfile,
   };
 }
 
@@ -64,6 +65,23 @@ async function login(email: string, password: string): Promise<JSONResponse> {
     body: {
       email: email,
       password: password,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Returns user profile if successful
+ * @returns {Promise<JSONResponse>}
+ */
+async function getProfile(): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  // Api response always has status, data, or error
+  const response = await $fetch("/api/iam/authn/profile", {
+    headers: {
+      "client-platform": clientPlatform,
     },
   });
 
