@@ -1,7 +1,7 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { User, Tokens } from "~~/mulozi/misc/types";
+import { User, Tokens } from "~~/iam/misc/types";
 import { v4 as uuidv4 } from "uuid";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";

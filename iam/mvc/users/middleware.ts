@@ -3,7 +3,7 @@
  * Middleware should only return error or void
  */
 import { H3Event, H3Error } from "h3";
-import { getClientPlatform } from "~~/mulozi/middleware/";
+import { getClientPlatform } from "~~/iam/middleware/";
 
 /**
  * @desc Middleware for all user routes

@@ -1,16 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import {
-  hashPassword,
-  validateUserRegistration,
-  makeUuid,
-  validateUserUpdate,
-  validateUserDelete,
-  validateUserLogin,
-  login,
-  getRefreshTokens,
-  createNewTokensFromRefresh,
-} from "~~/mulozi/misc/helpers";
-import { Tokens, User } from "~~/mulozi/misc/types";
+import { validateUserUpdate, validateUserDelete } from "~~/iam/misc/helpers";
+import { User } from "~~/iam/misc/types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();

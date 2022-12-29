@@ -6,8 +6,8 @@ import {
   logoutUser,
   isAuthenticated,
 } from "./queries";
-import { getClientPlatform } from "~~/mulozi/middleware";
-import { JSONResponse, User, Tokens } from "~~/mulozi/misc/types";
+import { getClientPlatform } from "~~/iam/middleware";
+import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
 import dayjs from "dayjs";
 
 /**

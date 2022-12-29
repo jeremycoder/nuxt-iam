@@ -8,10 +8,10 @@ import {
   login,
   getRefreshTokens,
   logout,
-} from "~~/mulozi/misc/helpers";
-import { verifyAccessToken } from "~~/mulozi/misc/helpers";
-import { Tokens, User } from "~~/mulozi/misc/types";
-import { getClientPlatform } from "~~/mulozi/middleware";
+} from "~~/iam/misc/helpers";
+import { verifyAccessToken } from "~~/iam/misc/helpers";
+import { Tokens, User } from "~~/iam/misc/types";
+import { getClientPlatform } from "~~/iam/middleware";
 import { H3Event, H3Error } from "h3";
 import dayjs from "dayjs";
 

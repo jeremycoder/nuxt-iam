@@ -1,6 +1,6 @@
 import { H3Event, H3Error } from "h3";
 import { getAllUsers, showUser, updateUser, destroyUser } from "./queries";
-import { JSONResponse, User } from "~~/mulozi/misc/types";
+import { JSONResponse, User } from "~~/iam/misc/types";
 
 /**
  * @desc Shows all users
