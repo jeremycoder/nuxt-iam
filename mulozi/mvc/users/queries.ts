@@ -10,7 +10,7 @@ import {
   getRefreshTokens,
   createNewTokensFromRefresh,
 } from "~~/mulozi/misc/helpers";
-import { JSONResponse, Tokens } from "~~/mulozi/misc/types";
+import { JSONResponse, Tokens, User } from "~~/mulozi/misc/types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();
@@ -22,9 +22,9 @@ const rowLimit = 100;
  */
 export async function getAllUsers(
   event: H3Event
-): Promise<JSONResponse | H3Error> {
-  const result = {} as JSONResponse;
-  let users = {};
+): Promise<Array<any> | H3Error> {
+  let users = [] as Array<User>;
+  let error = null;
 
   await prisma.users
     .findMany({
@@ -32,18 +32,18 @@ export async function getAllUsers(
     })
     .then(async (result) => {
       users = result;
+
       await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
+      error = e;
       await prisma.$disconnect();
     });
 
   // Create api result
-  result.status = "success";
-  result.data = users;
-
-  return result;
+  if (error) return error;
+  else return users;
 }
 
 /**

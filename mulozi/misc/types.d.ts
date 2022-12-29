@@ -5,16 +5,10 @@ export type User = {
   uuid: string;
   email: string;
   password: string;
-  role: Role;
+  role: "ADMIN" | "GENERAL";
   password_verified: boolean;
   last_login: Date | null;
-  refresh_token_id: string;
 };
-
-enum Role {
-  GENERAL,
-  ADMIN,
-}
 
 export type JSONResponse = {
   status: "success" | "fail";
