@@ -6,7 +6,14 @@ import UrlPattern from "url-pattern";
 import { authnMiddleware } from "./middleware";
 import { JSONResponse } from "~~/iam/misc/types";
 import { H3Error } from "h3";
-import { register, login, refresh, logout, isauthenticated } from "./model";
+import {
+  register,
+  login,
+  profile,
+  refresh,
+  logout,
+  isauthenticated,
+} from "./model";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -20,6 +27,21 @@ export default defineEventHandler(async (event) => {
 
   if (method && url)
     switch (method) {
+      case "GET":
+        // get authenticated user's profile
+        result = new route("/api/iam/authn/profile").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await profile(event);
+        }
+
+        // determine if user is authenticated
+        result = new route("/api/iam/authn/isauthenticated").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await isauthenticated(event);
+        }
+        break;
       case "POST":
         // add new user to database
         result = new route("/api/iam/authn/register").match(url);
@@ -33,13 +55,6 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await login(event);
-        }
-
-        // determine if user is authenticated
-        result = new route("/api/iam/authn/isauthenticated").match(url);
-        if (result) {
-          event.context.params.fromRoute = result;
-          return await isauthenticated(event);
         }
 
         // refresh jwt tokens

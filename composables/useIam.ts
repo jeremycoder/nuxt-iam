@@ -3,28 +3,58 @@ import { JSONResponse } from "~~/iam/misc/types";
 // Composable to make authentication tasks easier
 export default function useIam() {
   return {
+    register,
     login,
     logout,
     isAuthenticated,
+    refresh,
   };
 }
 
 /**
- * @desc Attempt to log user in
- * @email User's email
- * @password User's password
- * @param clientPlatform? What platform client is on, whether 'app', 'browser' (production), or 'browser-dev' (development)
- * @returns {Promise<boolean>}
+ * @desc Register new user
+ * @param firstName User's first name
+ * @param lastName User's last name
+ * @param email User's email address
+ * @param password User's password
+ * @returns {Promise<JSONResponse>}
  */
-async function login(
+async function register(
+  firstName: string,
+  lastName: string,
   email: string,
-  password: string,
-  clientPlatform?: "app" | "browser" | "browser-dev"
+  password: string
 ): Promise<JSONResponse> {
-  // Client platform defaults to browser production
-  if (!clientPlatform) {
-    clientPlatform = "browser";
-  }
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  // Attempt login
+  const response = await $fetch("/api/iam/authn/register", {
+    method: "POST",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+    body: {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      password: password,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Register new user
+ * @param firstName User's first name
+ * @param lastName User's last name
+ * @param email User's email address
+ * @param password User's password
+ * @returns {Promise<JSONResponse>}
+ */
+async function login(email: string, password: string): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
   // Attempt login
   const response = await $fetch("/api/iam/authn/login", {
     method: "POST",
@@ -42,16 +72,11 @@ async function login(
 
 /**
  * @desc Attempt to log user out
- * @param clientPlatform? What platform client is on, whether 'app', 'browser' (production), or 'browser-dev' (development)
- * @returns {Promise<boolean>}
+ * @returns {Promise<JSONResponse>}
  */
-async function logout(
-  clientPlatform?: "app" | "browser" | "browser-dev"
-): Promise<JSONResponse> {
-  // Client platform defaults to browser (production)
-  if (!clientPlatform) {
-    clientPlatform = "browser";
-  }
+async function logout(): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
   // Attempt logout
   const response = await $fetch("/api/iam/authn/logout", {
     method: "POST",
@@ -65,22 +90,14 @@ async function logout(
 
 /**
  * @desc Returns true/false depending on whether the user is logged in or not
- * @param clientPlatform? What platform client is on, whether 'app', 'browser' (production), or 'browser-dev' (development)
  * @returns {Promise<boolean>}
  */
-async function isAuthenticated(
-  clientPlatform?: "app" | "browser" | "browser-dev"
-): Promise<boolean> {
+async function isAuthenticated(): Promise<boolean> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
   let isAuthenticated = false;
-
-  // Client platform defaults to browser production
-  if (!clientPlatform) {
-    clientPlatform = "browser";
-  }
 
   // Api response always has status, data, or error
   const { status, error } = await $fetch("/api/iam/authn/isauthenticated", {
-    method: "POST",
     headers: {
       "client-platform": clientPlatform,
     },
@@ -98,4 +115,21 @@ async function isAuthenticated(
   }
 
   return isAuthenticated;
+}
+
+/**
+ * @desc Attempts to refresh tokens
+ * @returns {Promise<JSONResponse>}
+ */
+async function refresh(): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+  // Attempt login
+  const response = await $fetch("/api/iam/authn/refresh", {
+    method: "POST",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+  });
+
+  return response;
 }

@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-const { login, logout, isAuthenticated } = useIam();
+const { login, logout, refresh } = useIam();
 
 const loginForm = {
   email: "",
@@ -34,11 +34,7 @@ const loginForm = {
   confirmPassword: "",
 };
 
-const loginResponse = await login(
-  loginForm.email,
-  loginForm.password,
-  "browser-dev"
-);
+const loginResponse = await login(loginForm.email, loginForm.password);
 console.log("loginResponse: ", loginResponse);
 
 async function attemptLogin() {

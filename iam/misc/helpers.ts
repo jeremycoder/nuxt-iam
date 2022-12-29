@@ -5,6 +5,7 @@ import { User, Tokens } from "~~/iam/misc/types";
 import { v4 as uuidv4 } from "uuid";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
+import { getClientPlatform } from "../middleware";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -178,19 +179,31 @@ export async function getRefreshTokens(
   // TODO: If platform is app, get from authorization header
   // TODO: If platform is browser, get from cookies
 
-  const refreshTokenHeader = event.node.req.headers["refresh-token"] as string;
+  let refreshToken = null;
 
-  // Check for authorization header
-  if (!refreshTokenHeader) {
-    console.log("Missing authorization header");
+  // Get client platform
+  const errorOrPlatform = getClientPlatform(event);
+  if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
+
+  // If app, get token from header
+  const platform = errorOrPlatform as string;
+  if (platform === "app")
+    // If browser, get token from cookies
+    refreshToken = event.node.req.headers["refresh-token"] as string;
+  else if (["browser", "browser-dev"].includes(platform))
+    refreshToken = getCookie(event, "refresh-token") as string;
+
+  // If no token, user is not authenticated
+  if (!refreshToken) {
+    console.log("Error: No refresh token provided");
     return createError({
-      statusCode: 401,
-      statusMessage: "Missing refresh token",
+      statusCode: 400,
+      statusMessage: "No refresh token provided",
     });
   }
 
   // Get Bearer token
-  const bearerToken = refreshTokenHeader.split(" ");
+  const bearerToken = refreshToken.split(" ");
 
   // Check for word "Bearer"
   if (bearerToken[0] !== "Bearer") {
@@ -456,10 +469,10 @@ async function verifyPassword(
  * @desc Verifies user after token is passed
  * @param token JSON web token
  */
-export function verifyAccessToken(token: string): H3Error | User {
+export function verifyAccessToken(token: string): H3Error | JwtPayload {
   let error = null;
   let tokenExpiredError = null;
-  let verifiedUser = null;
+  let jwtUser = null;
 
   jwt.verify(token, config.iamAccessTokenSecret, (err, user) => {
     if (err) {
@@ -478,7 +491,7 @@ export function verifyAccessToken(token: string): H3Error | User {
         statusMessage: "Unauthorized",
       });
     } else {
-      verifiedUser = user as User;
+      jwtUser = user as JwtPayload;
     }
   });
 
@@ -493,7 +506,7 @@ export function verifyAccessToken(token: string): H3Error | User {
     });
 
   // If token was valid and we got back a user, return the user
-  if (verifiedUser) return verifiedUser;
+  if (jwtUser) return jwtUser;
 
   // Otherwise return the error
   return createError({
