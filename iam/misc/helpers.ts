@@ -461,7 +461,7 @@ export function verifyAccessToken(token: string): H3Error | User {
   let tokenExpiredError = null;
   let verifiedUser = null;
 
-  jwt.verify(token, config.muloziAccessTokenSecret, (err, user) => {
+  jwt.verify(token, config.iamAccessTokenSecret, (err, user) => {
     if (err) {
       console.log(err);
 
@@ -522,12 +522,12 @@ export async function createNewTokensFromRefresh(
 
   if (user) {
     // Create access and refresh tokens
-    const accessToken = jwt.sign(publicUser, config.muloziAccessTokenSecret, {
+    const accessToken = jwt.sign(publicUser, config.iamAccessTokenSecret, {
       expiresIn: "15m",
     });
 
     const refreshTokenId = makeUuid();
-    const refreshToken = jwt.sign(publicUser, config.muloziRefreshTokenSecret, {
+    const refreshToken = jwt.sign(publicUser, config.iamRefreshTokenSecret, {
       expiresIn: "14d",
       issuer: "MuloziAuth",
       jwtid: refreshTokenId,
@@ -593,7 +593,7 @@ export async function verifyRefreshToken(
   let verifiedUser = null;
   let verifiedTokenPayload = null as JwtPayload | null;
 
-  jwt.verify(token, config.muloziRefreshTokenSecret, async (err, token) => {
+  jwt.verify(token, config.iamRefreshTokenSecret, async (err, token) => {
     if (err) {
       console.log(err);
       error = createError({
@@ -781,7 +781,7 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     };
 
     // Create access tokens
-    const accessToken = jwt.sign(publicUser, config.muloziAccessTokenSecret, {
+    const accessToken = jwt.sign(publicUser, config.iamAccessTokenSecret, {
       expiresIn: "15m",
       issuer: "MuloziAuth",
       jwtid: makeUuid(),
@@ -789,7 +789,7 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
 
     // Create new tokens
     const tokenId = makeUuid();
-    const refreshToken = jwt.sign(publicUser, config.muloziRefreshTokenSecret, {
+    const refreshToken = jwt.sign(publicUser, config.iamRefreshTokenSecret, {
       expiresIn: "14d",
       issuer: "MuloziAuth",
       jwtid: tokenId,

@@ -32,18 +32,18 @@
           token to request new access tokens and gain access to the user's data.
         </p>
         <div class="flex items-center justify-between">
-          <a
+          <NuxtLink
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            href="/signup"
+            to="/iam/authn/register"
           >
-            Sign Up
-          </a>
-          <a
+            Register
+          </NuxtLink>
+          <NuxtLink
             class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
-            href="/login"
+            to="/iam/authn/login"
           >
             Log In
-          </a>
+          </NuxtLink>
         </div>
       </div>
     </div>
