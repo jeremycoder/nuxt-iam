@@ -22,14 +22,14 @@ export default defineEventHandler(async (event) => {
     switch (method) {
       case "GET":
         // show all users
-        result = new route("/api/mulozi/users").match(url);
+        result = new route("/api/iam/users").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await index(event);
         }
 
         // show a particular user
-        result = new route("/api/mulozi/users(/:uuid)").match(url);
+        result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await show(event);
@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
 
       case "POST":
         // add new user to database
-        result = new route("/api/mulozi/users/create").match(url);
+        result = new route("/api/iam/users/create").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await create(event);
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
       case "PUT":
         // update particular user then redirect
-        result = new route("/api/mulozi/users(/:uuid)").match(url);
+        result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await update(event);
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
 
       case "DELETE":
         // delete particular user
-        result = new route("/api/mulozi/users(/:uuid)").match(url);
+        result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await destroy(event);

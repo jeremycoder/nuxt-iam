@@ -25,6 +25,19 @@
   </div>
 </template>
 
+<script setup>
+const { login, isAuthenticated } = useIam();
+
+const loginForm = {
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
+
+const loginResponse = await login("hello", "pastense");
+console.log("loginResponse: ", loginResponse);
+</script>
+
 <style scoped>
 .login-container {
   display: flex;
@@ -69,16 +82,3 @@ button {
   cursor: pointer;
 }
 </style>
-
-<script setup>
-const { login, isAuthenticated } = useIam();
-
-const isLoggedIn = await isAuthenticated();
-console.log("isLoggedIn: ", isLoggedIn);
-
-const loginForm = {
-  email: "",
-  password: "",
-  confirmPassword: "",
-};
-</script>
