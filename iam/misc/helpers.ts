@@ -759,6 +759,12 @@ async function _deactivateRefreshTokens(
 export async function login(event: H3Event): Promise<H3Error | Tokens> {
   const body = await readBody(event);
 
+  if (!body)
+    return createError({
+      statusCode: 401,
+      statusMessage: "No email or password provided",
+    });
+
   const user = await getUserByEmail(body.email);
 
   if (user === null) {
@@ -811,41 +817,48 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
  * @param event Event from Api
  */
 export async function logout(event: H3Event): Promise<H3Error | void> {
+  // Attempt to get refresh tokens from cookies
+  let refreshToken = null;
+  refreshToken = event;
+
+  // If unsuccessful, attempt to get refresh tokens from header
+
   // Delete access and refresh cookies
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
 
-  // The rest of the code is for deactivating user's refresh tokens
-
   const body = await readBody(event);
-  const user = await getUserByEmail(body.email);
 
-  // Check if email is provided
-  if ("email" in body === false) {
-    console.log("Email not found in body for logging out");
-    return createError({
-      statusCode: 400,
-      statusMessage: "User email required",
-    });
-  }
+  if (body) {
+    const user = await getUserByEmail(body.email);
 
-  // If email is provided but user not found
-  if (!user) {
-    console.log("User not found for logging out");
-    return createError({
-      statusCode: 500,
-      statusMessage: "Logout failed",
-    });
-  }
+    // Check if email is provided
+    if ("email" in body === false) {
+      console.log("Email not found in body for logging out");
+      return createError({
+        statusCode: 400,
+        statusMessage: "User email required",
+      });
+    }
 
-  // Deactivate all refresh tokens
-  const deactivateError = await _deactivateRefreshTokens(user.id);
-  if (deactivateError) {
-    console.log(`Failed to deactivate user:${user.email}'s refresh tokens`);
-    return createError({
-      statusCode: 500,
-      statusMessage: "Logout failed",
-    });
+    // If email is provided but user not found
+    if (!user) {
+      console.log("User not found for logging out");
+      return createError({
+        statusCode: 500,
+        statusMessage: "Logout failed. User not found.",
+      });
+    }
+
+    // Deactivate all refresh tokens
+    const deactivateError = await _deactivateRefreshTokens(user.id);
+    if (deactivateError) {
+      console.log(`Failed to deactivate user:${user.email}'s refresh tokens`);
+      return createError({
+        statusCode: 500,
+        statusMessage: "Logout failed.",
+      });
+    }
   }
 
   // Not sure how to log out in app

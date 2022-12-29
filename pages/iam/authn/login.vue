@@ -20,13 +20,13 @@
         required
       />
 
-      <button type="submit" @click.prevent="login">Login</button>
+      <button type="submit" @click.prevent="attemptLogin">Login</button>
     </form>
   </div>
 </template>
 
 <script setup>
-const { login, isAuthenticated } = useIam();
+const { login, logout, isAuthenticated } = useIam();
 
 const loginForm = {
   email: "",
@@ -34,8 +34,24 @@ const loginForm = {
   confirmPassword: "",
 };
 
-const loginResponse = await login("hello", "pastense");
+const loginResponse = await login(
+  loginForm.email,
+  loginForm.password,
+  "browser-dev"
+);
 console.log("loginResponse: ", loginResponse);
+
+async function attemptLogin() {
+  const loginResponse = await login(
+    loginForm.email,
+    loginForm.password,
+    "browser"
+  );
+  console.log("loginResponse: ", loginResponse);
+}
+
+const logoutResponse = await logout();
+console.log("logoutResponse: ", logoutResponse);
 </script>
 
 <style scoped>

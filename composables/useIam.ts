@@ -1,24 +1,7 @@
 import { JSONResponse } from "~~/iam/misc/types";
 
-// Composable to make authentication easier
+// Composable to make authentication tasks easier
 export default function useIam() {
-  // Attempt to log user in
-  async function login(email: string, password: string) {
-    return await attemptLogin(email, password);
-  }
-
-  // Attempt to log user out
-  function logout() {
-    console.log("Logout function");
-  }
-
-  // Check if user is authenticated
-  async function isAuthenticated(
-    clientPlatform?: "app" | "browser" | "browser-dev"
-  ) {
-    return await checkAuthentication(clientPlatform);
-  }
-
   return {
     login,
     logout,
@@ -33,7 +16,7 @@ export default function useIam() {
  * @param clientPlatform? What platform client is on, whether 'app', 'browser' (production), or 'browser-dev' (development)
  * @returns {Promise<boolean>}
  */
-async function attemptLogin(
+async function login(
   email: string,
   password: string,
   clientPlatform?: "app" | "browser" | "browser-dev"
@@ -58,11 +41,34 @@ async function attemptLogin(
 }
 
 /**
+ * @desc Attempt to log user out
+ * @param clientPlatform? What platform client is on, whether 'app', 'browser' (production), or 'browser-dev' (development)
+ * @returns {Promise<boolean>}
+ */
+async function logout(
+  clientPlatform?: "app" | "browser" | "browser-dev"
+): Promise<JSONResponse> {
+  // Client platform defaults to browser (production)
+  if (!clientPlatform) {
+    clientPlatform = "browser";
+  }
+  // Attempt logout
+  const response = await $fetch("/api/iam/authn/logout", {
+    method: "POST",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+  });
+
+  return response;
+}
+
+/**
  * @desc Returns true/false depending on whether the user is logged in or not
  * @param clientPlatform? What platform client is on, whether 'app', 'browser' (production), or 'browser-dev' (development)
  * @returns {Promise<boolean>}
  */
-async function checkAuthentication(
+async function isAuthenticated(
   clientPlatform?: "app" | "browser" | "browser-dev"
 ): Promise<boolean> {
   let isAuthenticated = false;
