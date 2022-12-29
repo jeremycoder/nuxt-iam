@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-const { login, logout, refresh } = useIam();
+const { login, logout, getProfile } = useIam();
 
 const loginForm = {
   email: "",
@@ -38,16 +38,15 @@ const loginResponse = await login(loginForm.email, loginForm.password);
 console.log("loginResponse: ", loginResponse);
 
 async function attemptLogin() {
-  const loginResponse = await login(
-    loginForm.email,
-    loginForm.password,
-    "browser"
-  );
+  const loginResponse = await login(loginForm.email, loginForm.password);
   console.log("loginResponse: ", loginResponse);
 }
 
 const logoutResponse = await logout();
 console.log("logoutResponse: ", logoutResponse);
+
+const profile = await getProfile();
+console.log("profile: ", profile);
 </script>
 
 <style scoped>
