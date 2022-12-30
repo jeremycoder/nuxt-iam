@@ -1,79 +1,151 @@
 <template>
-  <section class="vh-100" style="background-color: #508bfc">
-    <div class="container py-5 h-100">
-      <div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-          <div class="card shadow-2-strong" style="border-radius: 1rem">
-            <div class="card-body p-5 text-center">
-              <h3 class="mb-5">Sign in</h3>
-
-              <div class="form-outline mb-4">
-                <input
-                  type="email"
-                  id="typeEmailX-2"
-                  class="form-control form-control-lg"
-                />
-                <label class="form-label" for="typeEmailX-2">Email</label>
-              </div>
-
-              <div class="form-outline mb-4">
-                <input
-                  type="password"
-                  id="typePasswordX-2"
-                  class="form-control form-control-lg"
-                />
-                <label class="form-label" for="typePasswordX-2">Password</label>
-              </div>
-
-              <!-- Checkbox -->
-              <div class="form-check d-flex justify-content-start mb-4">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  value=""
-                  id="form1Example3"
-                />
-                <label class="form-check-label" for="form1Example3">
-                  Remember password
-                </label>
-              </div>
-
-              <button class="btn btn-primary btn-lg btn-block" type="submit">
-                Login
-              </button>
-
-              <hr class="my-4" />
-
-              <button
-                class="btn btn-lg btn-block btn-primary"
-                style="background-color: #dd4b39"
-                type="submit"
-              >
-                <i class="fab fa-google me-2"></i> Sign in with google
-              </button>
-              <button
-                class="btn btn-lg btn-block btn-primary mb-2"
-                style="background-color: #3b5998"
-                type="submit"
-              >
-                <i class="fab fa-facebook-f me-2"></i>Sign in with facebook
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="container">
+    <!-- If we receive an error -->
+    <div
+      v-if="registerError"
+      class="alert alert-danger alert-dismissable"
+      role="alert"
+    >
+      <button
+        @click="registerError = null"
+        type="button"
+        class="close"
+        aria-label="Close"
+      >
+        <span aria-hidden="true">&times;</span></button
+      >{{ registerError.message }}
     </div>
-  </section>
+    <div class="register-form">
+      <form>
+        <h2 class="text-center">Register</h2>
+        <div class="form-group">
+          <input
+            v-model="registerForm.firstName"
+            type="text"
+            class="form-control"
+            placeholder="First name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <input
+            v-model="registerForm.lastName"
+            type="email"
+            class="form-control"
+            placeholder="Last name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <input
+            v-model="registerForm.email"
+            type="email"
+            class="form-control"
+            placeholder="Email"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <input
+            v-model="registerForm.password"
+            type="password"
+            class="form-control"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            @click.prevent="tryRegister"
+          >
+            Register
+          </button>
+        </div>
+        <div class="clearfix">
+          <label class="pull-left checkbox-inline"
+            ><input type="checkbox" /> I accept the
+            <NuxtLink to="#">Terms and Conditions</NuxtLink>
+          </label>
+        </div>
+      </form>
+      <p class="text-center">
+        Already have an account?
+        <NuxtLink to="/iam/authn/login">Log in here</NuxtLink>
+      </p>
+    </div>
+  </div>
 </template>
 
 <script setup>
-// If you're using tailwind in your app, you can remove the script tag
+// Get necessary functions from useIam composable
+const { register } = useIam();
+
+// These variables come from response from calling Nuxt IAM api
+let registerStatus = ref(null);
+let registerError = ref(null);
+let registerData = ref(null);
+
+const registerForm = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+};
+
+// Try to log user in
+async function tryRegister() {
+  const registerResponse = await register(
+    registerForm.firstName,
+    registerForm.lastName,
+    registerForm.email,
+    registerForm.password
+  );
+  registerStatus.value = registerResponse.status;
+  registerError.value = registerResponse.error;
+  registerData.value = registerResponse.data;
+  console.log("registerResponse: ", registerResponse);
+}
+
+// If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({
-  title: "Register",
+  title: "Nuxt IAM Register Example",
   link: {
     rel: "stylesheet",
-    href: "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+    href: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",
     type: "text/css",
+  },
+  script: {
+    src: "https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js",
+  },
+  script: {
+    src: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js",
   },
 });
 </script>
+
+<style scoped>
+.register-form {
+  width: 340px;
+  margin: 50px auto;
+}
+.register-form form {
+  margin-bottom: 15px;
+  background: #f7f7f7;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  padding: 30px;
+}
+.register-form h2 {
+  margin: 0 0 15px;
+}
+.form-control,
+.btn {
+  min-height: 38px;
+  border-radius: 2px;
+}
+.btn {
+  font-size: 15px;
+  font-weight: bold;
+}
+</style>
