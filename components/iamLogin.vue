@@ -78,13 +78,16 @@ const loginForm = {
 
 // Try to log user in
 async function tryLogin() {
+  const router = useRouter();
+
   const loginResponse = await login(loginForm.email, loginForm.password);
   loginStatus.value = loginResponse.status;
   loginError.value = loginResponse.error;
   loginData.value = loginResponse.data;
   console.log("loginResponse: ", loginResponse);
 
-  // TODO: If login successful, route to profile page
+  // If login successful, route to profile page
+  if (loginStatus.value === "success") router.push("/profile");
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below

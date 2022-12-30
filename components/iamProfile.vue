@@ -1,159 +1,196 @@
 <template>
-  <div v-if="isLoaded && isLoggedIn">
-    <div class="container-xl px-4 mt-4">
-      <!-- Account page navigation-->
-      <h1>Profile</h1>
-      <h6 class="right">Log out</h6>
-      <hr class="mt-0 mb-4" />
-      <div class="row">
-        <div class="col-xl-8">
-          <!-- Account details card-->
-          <div class="card mb-4">
-            <div class="card-header">Account Details</div>
-            <div class="card-body">
-              <form>
-                <!-- Form Row-->
-                <div class="row gx-3 mb-3">
-                  <!-- Form Group (first name)-->
-                  <div class="col-md-6">
-                    <label class="medium mb-1" for="inputFirstName"
-                      >First name</label
+  <div v-if="isLoaded">
+    <div v-if="isLoggedIn">
+      <div class="container-xl px-4 mt-4">
+        <!-- Account page navigation-->
+        <div class="row">
+          <div class="col-xl-11">
+            <h1>Profile</h1>
+          </div>
+          <div class="col-xl-1">
+            <button
+              type="button"
+              class="btn btn-outline-secondary mb-3"
+              @click="logMeOut"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+        <hr class="mt-0 mb-4" />
+        <div class="row">
+          <div class="col-xl-8">
+            <!-- Account details card-->
+            <div class="card mb-4">
+              <div class="card-header">Account Details</div>
+              <div class="card-body">
+                <form>
+                  <!-- Form Row-->
+                  <div class="row gx-3 mb-3">
+                    <!-- Form Group (first name)-->
+                    <div class="col-md-6">
+                      <label class="medium mb-1" for="inputFirstName"
+                        >First name</label
+                      >
+                      <input
+                        class="form-control"
+                        id="inputFirstName"
+                        type="text"
+                        placeholder="Enter your first name"
+                        value="Valerie"
+                      />
+                    </div>
+                    <!-- Form Group (last name)-->
+                    <div class="col-md-6">
+                      <label class="medium mb-1" for="inputLastName"
+                        >Last name</label
+                      >
+                      <input
+                        class="form-control"
+                        id="inputLastName"
+                        type="text"
+                        placeholder="Enter your last name"
+                        value="Luna"
+                      />
+                    </div>
+                  </div>
+                  <!-- Form Group (email address)-->
+                  <div class="mb-3">
+                    <label class="medium mb-1" for="inputEmailAddress"
+                      >Email address</label
                     >
                     <input
-                      class="form-control"
-                      id="inputFirstName"
-                      type="text"
-                      placeholder="Enter your first name"
-                      value="Valerie"
+                      class="form-control bg-light"
+                      id="inputEmailAddress"
+                      type="email"
+                      placeholder="Enter your email address"
+                      value="name@example.com"
+                      aria-label="Disabled input example"
+                      disabled
+                      readonly
                     />
                   </div>
-                  <!-- Form Group (last name)-->
-                  <div class="col-md-6">
-                    <label class="medium mb-1" for="inputLastName"
-                      >Last name</label
-                    >
-                    <input
-                      class="form-control"
-                      id="inputLastName"
-                      type="text"
-                      placeholder="Enter your last name"
-                      value="Luna"
-                    />
-                  </div>
-                </div>
-                <!-- Form Group (email address)-->
-                <div class="mb-3">
-                  <label class="medium mb-1" for="inputEmailAddress"
-                    >Email address</label
-                  >
-                  <input
-                    class="form-control bg-light"
-                    id="inputEmailAddress"
-                    type="email"
-                    placeholder="Enter your email address"
-                    value="name@example.com"
-                    aria-label="Disabled input example"
-                    disabled
-                    readonly
-                  />
-                </div>
-                <!-- Save changes button-->
-                <button class="btn btn-primary" type="button">
-                  Save changes
-                </button>
-              </form>
+                  <!-- Save changes button-->
+                  <button class="btn btn-primary" type="button">
+                    Save changes
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <hr class="mt-0 mb-4" />
-      <div class="row">
-        <div class="col-lg-8">
-          <!-- Change password card-->
-          <div class="card mb-4">
-            <div class="card-header">Change Password</div>
-            <div class="card-body">
-              <form>
-                <!-- Form Group (current password)-->
-                <div class="mb-3">
-                  <label class="medium mb-1" for="currentPassword"
-                    >Current Password</label
-                  >
-                  <input
-                    class="form-control"
-                    id="currentPassword"
-                    type="password"
-                    placeholder="Enter current password"
-                  />
-                </div>
-                <!-- Form Group (new password)-->
-                <div class="mb-3">
-                  <label class="medium mb-1" for="newPassword"
-                    >New Password</label
-                  >
-                  <input
-                    class="form-control"
-                    id="newPassword"
-                    type="password"
-                    placeholder="Enter new password"
-                  />
-                </div>
-                <!-- Form Group (confirm password)-->
-                <div class="mb-3">
-                  <label class="medium mb-1" for="confirmPassword"
-                    >Confirm Password</label
-                  >
-                  <input
-                    class="form-control"
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm new password"
-                  />
-                </div>
-                <button class="btn btn-primary" type="button">Save</button>
-              </form>
+        <hr class="mt-0 mb-4" />
+        <div class="row">
+          <div class="col-lg-8">
+            <!-- Change password card-->
+            <div class="card mb-4">
+              <div class="card-header">Change Password</div>
+              <div class="card-body">
+                <form>
+                  <!-- Form Group (current password)-->
+                  <div class="mb-3">
+                    <label class="medium mb-1" for="currentPassword"
+                      >Current Password</label
+                    >
+                    <input
+                      class="form-control"
+                      id="currentPassword"
+                      type="password"
+                      placeholder="Enter current password"
+                    />
+                  </div>
+                  <!-- Form Group (new password)-->
+                  <div class="mb-3">
+                    <label class="medium mb-1" for="newPassword"
+                      >New Password</label
+                    >
+                    <input
+                      class="form-control"
+                      id="newPassword"
+                      type="password"
+                      placeholder="Enter new password"
+                    />
+                  </div>
+                  <!-- Form Group (confirm password)-->
+                  <div class="mb-3">
+                    <label class="medium mb-1" for="confirmPassword"
+                      >Confirm Password</label
+                    >
+                    <input
+                      class="form-control"
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm new password"
+                    />
+                  </div>
+                  <button class="btn btn-primary" type="button">Save</button>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="col-lg-4">
-          <!-- Delete account card-->
-          <div class="card mb-4">
-            <div class="card-header">Delete Account</div>
-            <div class="card-body">
-              <p>
-                Deleting your account is a permanent action and cannot be
-                undone. If you are sure you want to delete your account, select
-                the button below.
-              </p>
-              <button class="btn btn-danger" type="button">
-                I understand, delete my account
-              </button>
+          <div class="col-lg-4">
+            <!-- Delete account card-->
+            <div class="card mb-4">
+              <div class="card-header">Delete Account</div>
+              <div class="card-body">
+                <p>
+                  Deleting your account is a permanent action and cannot be
+                  undone. If you are sure you want to delete your account,
+                  select the button below.
+                </p>
+                <button class="btn btn-danger" type="button">
+                  I understand, delete my account
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <div v-else><h1>Log in required</h1></div>
   </div>
-  <div v-else><h1>Log in required</h1></div>
+  <div v-else class="container-xl px-4 mt-4">
+    <div class="spinner-border" role="status"></div>
+  </div>
 </template>
 
 <script setup>
 // Get necessary functions from useIam composable
-const { isAuthenticated } = useIam();
+const { isAuthenticated, getProfile, logout } = useIam();
+const router = useRouter();
 const isLoaded = ref(false);
 
+// First check if user is authenticated
 const isLoggedIn = ref(false);
 isLoggedIn.value = await isAuthenticated();
 console.log("isLoggedIn: ", isLoggedIn.value);
+
+// If user is not authenticated, push to login page
+if (!isLoggedIn.value) router.push("/login");
+
+const profile = {
+  firstName: "",
+  lastName: "",
+  password: "",
+};
 
 onMounted(() => {
   isLoaded.value = true;
 });
 
+// Log user out
+async function logMeOut() {
+  const { status, error, data } = await logout();
+  console.log("status: ", status);
+  if (status === "success") {
+    router.push("/login");
+  }
+}
+
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({
-  title: "Nuxt IAM Register Example",
+  title: "Nuxt IAM Profile Example",
   script: {
     src: "https://code.jquery.com/jquery-1.10.2.min.js",
   },
