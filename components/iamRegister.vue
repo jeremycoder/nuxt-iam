@@ -75,7 +75,7 @@
       </form>
       <p class="text-center">
         Already have an account?
-        <NuxtLink to="/iam/authn/login">Log in here</NuxtLink>
+        <NuxtLink to="/login">Log in here</NuxtLink>
       </p>
     </div>
   </div>
