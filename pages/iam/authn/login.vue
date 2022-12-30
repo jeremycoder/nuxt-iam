@@ -16,6 +16,9 @@
       >{{ loginError.message }}
     </div>
     <div class="login-form">
+      <div style="margin-left: 64px">
+        <img src="~~/iam/ui/img/nuxt-iam-logo.png/" />
+      </div>
       <form>
         <h2 class="text-center">Log in</h2>
         <div class="form-group">
@@ -102,7 +105,7 @@ useHead({
 <style scoped>
 .login-form {
   width: 340px;
-  margin: 50px auto;
+  margin: 0 auto;
 }
 .login-form form {
   margin-bottom: 15px;
