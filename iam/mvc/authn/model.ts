@@ -50,6 +50,10 @@ export async function login(event: H3Event): Promise<JSONResponse> {
 
   // If error, return error
   if (errorOrPlatform instanceof H3Error) {
+    // Delete access and refresh tokens
+    deleteCookie(event, "access-token");
+    deleteCookie(event, "refresh-token");
+
     response.status = "fail";
     response.error = errorOrPlatform;
     return response;
@@ -62,6 +66,10 @@ export async function login(event: H3Event): Promise<JSONResponse> {
 
   // If error, return error
   if (errorOrTokens instanceof H3Error) {
+    // Delete access and refresh tokens
+    deleteCookie(event, "access-token");
+    deleteCookie(event, "refresh-token");
+
     response.status = "fail";
     response.error = errorOrTokens;
     return response;
@@ -94,8 +102,13 @@ export async function login(event: H3Event): Promise<JSONResponse> {
 
   // Development cookies are not secure. Use only in development
   if (platform === "browser-dev") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken);
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
+    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+      // Access tokens themselves expire in 15 mins
+      expires: dayjs().add(1, "day").toDate(),
+    });
+    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+      expires: dayjs().add(1, "day").toDate(),
+    });
   }
 
   // Create api result
@@ -168,8 +181,13 @@ export async function refresh(event: H3Event): Promise<JSONResponse> {
 
   // Development cookies are not secure. Use only in development
   if (platform === "browser-dev") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken);
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
+    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+      // Access tokens themselves expire in 15 mins
+      expires: dayjs().add(1, "day").toDate(),
+    });
+    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+      expires: dayjs().add(1, "day").toDate(),
+    });
   }
 
   // If all is successful

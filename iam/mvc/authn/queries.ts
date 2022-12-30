@@ -130,8 +130,9 @@ export async function isAuthenticated(
   if (platform === "app")
     // If browser, get token from cookies
     accessToken = event.node.req.headers["access-token"] as string;
-  else if (["browser", "browser-dev"].includes(platform))
+  else if (["browser", "browser-dev"].includes(platform)) {
     accessToken = getCookie(event, "access-token") as string;
+  }
 
   // If no token, user is not authenticated
   if (!accessToken) {
@@ -195,8 +196,13 @@ export async function isAuthenticated(
 
     // Development cookies are not secure. Use only in development
     if (platform === "browser-dev") {
-      setCookie(event, "access-token", "Bearer " + tokens.accessToken);
-      setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
+      setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+        // Access tokens themselves expire in 15 mins
+        expires: dayjs().add(1, "day").toDate(),
+      });
+      setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+        expires: dayjs().add(1, "day").toDate(),
+      });
     }
 
     // Return authenticated
@@ -297,8 +303,13 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
 
     // Development cookies are not secure. Use only in development
     if (platform === "browser-dev") {
-      setCookie(event, "access-token", "Bearer " + tokens.accessToken);
-      setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken);
+      setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+        // Access tokens themselves expire in 15 mins
+        expires: dayjs().add(1, "day").toDate(),
+      });
+      setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+        expires: dayjs().add(1, "day").toDate(),
+      });
     }
   }
 
@@ -322,6 +333,7 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
 
     // Otherwise, hide password (password is one-way hashed and cannot be retrieved from hash anyway, it just looks nicer) return the user
     user.password = "[hidden]";
+    user.id = 0;
     return user;
   }
 }

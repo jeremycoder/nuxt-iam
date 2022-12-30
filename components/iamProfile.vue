@@ -16,6 +16,15 @@
               Logout
             </button>
           </div>
+          <div class="col-xl-1">
+            <button
+              type="button"
+              class="btn btn-outline-secondary mb-3"
+              @click="tryGetProfile"
+            >
+              Profile
+            </button>
+          </div>
         </div>
         <hr class="mt-0 mb-4" />
         <div class="row">
@@ -33,11 +42,11 @@
                         >First name</label
                       >
                       <input
+                        v-model="profile.firstName"
                         class="form-control"
                         id="inputFirstName"
                         type="text"
                         placeholder="Enter your first name"
-                        value="Valerie"
                       />
                     </div>
                     <!-- Form Group (last name)-->
@@ -46,11 +55,11 @@
                         >Last name</label
                       >
                       <input
+                        v-model="profile.lastName"
                         class="form-control"
                         id="inputLastName"
                         type="text"
                         placeholder="Enter your last name"
-                        value="Luna"
                       />
                     </div>
                   </div>
@@ -162,21 +171,27 @@ const router = useRouter();
 const isLoaded = ref(false);
 
 // First check if user is authenticated
-const isLoggedIn = ref(false);
-isLoggedIn.value = await isAuthenticated();
-console.log("isLoggedIn: ", isLoggedIn.value);
+
+// TODO: On refresh, is coming back as not authenticated, when valid access-token cookie in cookie, why?
+// TODO: Probably because we are sending an api request and not sending through browser
+// TODO: Probably same thing happening with logout
+
+const isLoggedIn = await isAuthenticated();
+console.log("isLoggedIn: ", isLoggedIn);
 
 // If user is not authenticated, push to login page
-if (!isLoggedIn.value) router.push("/login");
+if (!isLoggedIn) router.push("/login");
 
+// Get user profile
+// TODO: Fix, unable to see names after getting them from DB in getProfile()
 const profile = {
   firstName: "",
   lastName: "",
-  password: "",
 };
 
 onMounted(() => {
   isLoaded.value = true;
+  tryGetProfile();
 });
 
 // Log user out
@@ -185,6 +200,18 @@ async function logMeOut() {
   console.log("status: ", status);
   if (status === "success") {
     router.push("/login");
+  }
+}
+
+async function tryGetProfile() {
+  const tryGetProfile = await getProfile();
+  if (tryGetProfile.status === "success") {
+    const profileData = tryGetProfile.data;
+
+    profile.firstName = profileData.first_name;
+    profile.lastName = profileData.last_name;
+
+    console.log("profile: ", profileData);
   }
 }
 
