@@ -29,7 +29,7 @@ async function register(
 ): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
-  // Attempt login
+  // Attempt register
   const response = await $fetch("/api/iam/authn/register", {
     method: "POST",
     headers: {
@@ -77,6 +77,7 @@ async function login(email: string, password: string): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function updateProfile(
+  uuid: string,
   firstName: string,
   lastName: string,
   password?: string,
@@ -84,13 +85,13 @@ async function updateProfile(
 ): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
-  // Api response always has status, data, or error
   const response = await $fetch("/api/iam/authn/update", {
-    method: "POST",
+    method: "PUT",
     headers: {
       "client-platform": clientPlatform,
     },
     body: {
+      uuid: uuid,
       first_name: firstName,
       last_name: lastName,
       password: password,
@@ -108,7 +109,6 @@ async function updateProfile(
 async function getProfile(): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
-  // Api response always has status, data, or error
   const response = await $fetch("/api/iam/authn/profile", {
     headers: {
       "client-platform": clientPlatform,

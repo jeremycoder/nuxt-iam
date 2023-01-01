@@ -93,7 +93,11 @@
                     />
                   </div>
                   <!-- Save changes button-->
-                  <button class="btn btn-primary" type="button">
+                  <button
+                    class="btn btn-primary"
+                    type="button"
+                    @click="updateMyProfile(profile)"
+                  >
                     Save changes
                   </button>
                 </form>
@@ -146,7 +150,9 @@
                       placeholder="Confirm new password"
                     />
                   </div>
-                  <button class="btn btn-primary" type="button">Save</button>
+                  <button class="btn btn-primary" type="button">
+                    Update password
+                  </button>
                 </form>
               </div>
             </div>
@@ -179,15 +185,25 @@
 
 <script setup>
 // Get necessary functions from useIam composable
-const { isAuthenticated, getProfile, logout } = useIam();
+const { isAuthenticated, getProfile, updateProfile, logout } = useIam();
 const router = useRouter();
 const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
 let profileError = ref(null);
 
-// Get user profile
+// User profile
 const profile = {
+  uuid: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  currentPassword: "",
+  newPassword: "",
+};
+
+//User profile with password
+const profileWithPassword = {
   firstName: "",
   lastName: "",
   email: "",
@@ -232,11 +248,28 @@ async function getMyProfile() {
   if (status === "success") {
     console.log("status: ", status);
     console.log("data: ", data);
+    profile.uuid = data.uuid;
     profile.firstName = data.first_name;
     profile.lastName = data.last_name;
     profile.email = data.email;
 
     showProfile.value = true;
+  }
+}
+
+// Attempt to update user profile
+async function updateMyProfile(profile) {
+  console.log("profile: ", profile);
+  const { error } = await updateProfile(
+    profile.uuid,
+    profile.firstName,
+    profile.lastName
+  );
+
+  // If error, display error
+  if (error) {
+    console.log("error: ", error);
+    profileError.value = error;
   }
 }
 

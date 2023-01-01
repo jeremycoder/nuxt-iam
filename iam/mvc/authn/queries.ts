@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import {
   hashPassword,
   validateUserRegistration,
@@ -9,9 +9,9 @@ import {
   getRefreshTokens,
   logout,
   getUserByEmail,
+  updateUserProfile,
 } from "~~/iam/misc/helpers";
 import { verifyAccessToken } from "~~/iam/misc/helpers";
-import { updateUser } from "../users/queries";
 import { Tokens, User } from "~~/iam/misc/types";
 import { getClientPlatform } from "~~/iam/middleware";
 import { H3Event, H3Error } from "h3";
@@ -443,7 +443,7 @@ export async function updateProfile(event: H3Event): Promise<User | H3Error> {
   } else {
     // Otherwise, return the user
     // const jwtUser = errorOrJwtPayload as JwtPayload;
-    const errorOrUser = await updateUser(event);
+    const errorOrUser = await updateUserProfile(event);
     if (errorOrUser instanceof H3Error) return errorOrUser;
 
     const user = errorOrUser as User;

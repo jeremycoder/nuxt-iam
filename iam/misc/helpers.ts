@@ -64,8 +64,8 @@ export async function validateUserRegistration(
   if (!validatePassword(body.password)) {
     return createError({
       statusCode: 400,
-      statusMessage:
-        "Poor password strength. Password must contain at least 8 characters, an upper-case letter, and a lower-case letter, a number, and a non-alphanumeric character.",
+      statusMessage: `Poor password strength. Password must contain at least 8 characters, an upper-case letter, and a lower-case letter, 
+        a number, and a non-alphanumeric character.`,
     });
   }
 }
@@ -80,13 +80,6 @@ export async function validateUserUpdate(
 ): Promise<H3Error | void> {
   const { fromRoute } = event.context.params;
   const body = await readBody(event);
-
-  // If fromRoute object not found
-  if (!fromRoute)
-    return createError({
-      statusCode: 400,
-      statusMessage: "fromRoute expected",
-    });
 
   // If no uuid given
   if (!fromRoute.uuid)
@@ -121,6 +114,74 @@ export async function validateUserUpdate(
     return createError({
       statusCode: 400,
       statusMessage: "last_name must have data",
+    });
+}
+
+/**
+ * @desc Suite of checks to validate data before updating user profile
+ * @param event Event from Api
+ */
+export async function validateUserProfileUpdate(
+  event: H3Event
+): Promise<H3Error | void> {
+  const body = await readBody(event);
+
+  // If uuid not provided
+  if (!body.uuid)
+    return createError({
+      statusCode: 400,
+      statusMessage: "User uuid not provided",
+    });
+
+  const user = await getUserByUuid(body.uuid);
+  // This error really shouldn't happen
+  if (!user)
+    return createError({
+      statusCode: 400,
+      statusMessage: "User not found",
+    });
+
+  // If first name is supplied, but has no value
+  if ("first_name" in body === true && body.first_name.trim() === "")
+    return createError({
+      statusCode: 400,
+      statusMessage: "first_name must have a value",
+    });
+
+  // If last name is supplied, but has no value
+  if ("last_name" in body === true && body.last_name.trim() === "")
+    return createError({
+      statusCode: 400,
+      statusMessage: "last_name must have a value",
+    });
+
+  // If either current password or new password is supplied, but not the other one
+  if ("new_password" in body === true && "current_password" in body === false)
+    return createError({
+      statusCode: 400,
+      statusMessage: "Both current_password && new_password must be supplied",
+    });
+
+  if ("new_password" in body === false && "current_password" in body === true)
+    return createError({
+      statusCode: 400,
+      statusMessage: "Both current_password && new_password must be supplied",
+    });
+
+  // If supplied current password does not match password in database
+  if ("current_password" in body)
+    if (!(await verifyPassword(user.password, body.current_password)))
+      return createError({
+        statusCode: 400,
+        statusMessage: "Wrong current password",
+      });
+
+  // If new password is supplied, but fails password strength policy
+  if ("new_password" in body === true && !validatePassword(body.new_password))
+    return createError({
+      statusCode: 400,
+      statusMessage: `Poor new password strength. Password must contain at least 8 characters, an upper-case letter, and a lower-case letter, 
+      a number, and a non-alphanumeric character.`,
     });
 }
 
@@ -404,6 +465,30 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     .findFirst({
       where: {
         email: email,
+      },
+    })
+    .then(async (response) => {
+      user = response;
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+    });
+
+  return user;
+}
+
+/**
+ * @desc Returns user by user's uuid
+ * @param uuid User's uuid
+ */
+export async function getUserByUuid(uuid: string): Promise<User | null> {
+  let user = null;
+  await prisma.users
+    .findFirst({
+      where: {
+        uuid: uuid,
       },
     })
     .then(async (response) => {
@@ -876,4 +961,85 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
   }
 
   // Not sure how to log out in app
+}
+
+/**
+ * @desc Update user profile
+ * @param event H3Event
+ */
+export async function updateUserProfile(
+  event: H3Event
+): Promise<User | H3Error> {
+  const errorOrVoid = await validateUserProfileUpdate(event);
+  if (errorOrVoid instanceof H3Error) return errorOrVoid;
+
+  // After going through validateUserProfileUpdate, supplied values should be clean
+  const body = await readBody(event);
+
+  let user = {} as User;
+  let error = null;
+
+  // Get current user data
+  const userDataOrError = await getUserByUuid(body.uuid);
+  if (userDataOrError instanceof H3Error) return userDataOrError;
+  const userData = userDataOrError as User;
+
+  // Update user data if they are supplied
+  /**
+   * @desc Compares two string values and returns the updated valid value
+   * @param oldValue The old or current value
+   * @param newValue The new value
+   * @returns {string}
+   */
+  function updateOrKeep(oldValue: string, newValue: string): string {
+    // If new value is empty string, keep old value
+    if (newValue.trim().length === 0) return oldValue.trim();
+
+    // If new value is same as old value, keep old value
+    if (newValue.trim() === oldValue.trim()) return oldValue.trim();
+
+    // Otherwise return new value
+    return newValue.trim();
+  }
+
+  // Attempt to hash new password, if error, return error
+  let newHashedPassword = "";
+  if ("new_password" in body === true && "current_password" in body === true) {
+    const newHashedPasswordOrError = await hashPassword(body.new_password);
+    if (newHashedPasswordOrError instanceof H3Error)
+      return newHashedPasswordOrError;
+    newHashedPassword = newHashedPasswordOrError as string;
+  }
+
+  // Update values
+  const updatedFirstName = updateOrKeep(userData.first_name, body.first_name);
+  const updatedLastName = updateOrKeep(userData.last_name, body.last_name);
+
+  await prisma.users
+    .update({
+      where: {
+        uuid: body.uuid,
+      },
+      data: {
+        first_name: updatedFirstName,
+        last_name: updatedLastName,
+        // If we got a new password, update it, otherwise keep old password
+        password:
+          newHashedPassword.length > 0 ? newHashedPassword : user.password,
+      },
+    })
+    .then(async (response) => {
+      user = response;
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+      await prisma.$disconnect();
+    });
+
+  // If error, return error
+  if (error) return error;
+
+  return user;
 }

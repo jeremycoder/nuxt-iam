@@ -95,8 +95,6 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
   let user = {} as User;
   let error = null;
 
-  // TODO: First and last names cannot be empty
-
   // Update password
   // TODO: Check if current password AND new password exist in body
   // TODO: If one exists but not the other return error
