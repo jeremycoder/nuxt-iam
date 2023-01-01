@@ -2,6 +2,7 @@
   <div v-if="isLoaded">
     <div v-if="isLoggedIn">
       <div class="container-xl px-4 mt-4">
+        <!-- Profile errors notification -->
         <div
           v-if="profileError"
           class="alert alert-danger alert-dismissable"
@@ -15,6 +16,21 @@
           >
             <span aria-hidden="true">&times;</span></button
           >{{ profileError.message }}
+        </div>
+        <!-- Profile success notification -->
+        <div
+          v-if="updateSuccessful"
+          class="alert alert-success alert-dismissable"
+          role="alert"
+        >
+          <button
+            @click="updateSuccessful = false"
+            type="button"
+            class="close"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span></button
+          >Profile updated successfully
         </div>
         <!-- logout button -->
         <div class="row">
@@ -191,6 +207,7 @@ const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
 let profileError = ref(null);
+let updateSuccessful = ref(false);
 
 // User profile
 const profile = {
@@ -270,7 +287,10 @@ async function updateMyProfile(profile) {
   if (error) {
     console.log("error: ", error);
     profileError.value = error;
+    return;
   }
+
+  updateSuccessful.value = true;
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
