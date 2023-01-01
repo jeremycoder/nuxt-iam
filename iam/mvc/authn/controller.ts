@@ -10,6 +10,7 @@ import {
   register,
   login,
   profile,
+  update,
   refresh,
   logout,
   isauthenticated,
@@ -71,12 +72,20 @@ export default defineEventHandler(async (event) => {
           return await logout(event);
         }
         break;
+      case "PUT":
+        // update user profile
+        result = new route("/api/iam/authn/update").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await update(event);
+        }
+        break;
     }
 
   // Return method not allowed error
   const response = {} as JSONResponse;
   response.status = "fail";
-  response.data = createError({
+  response.error = createError({
     statusCode: 405,
     statusMessage: "Method not allowed",
   });

@@ -2,10 +2,33 @@
   <div v-if="isLoaded">
     <div v-if="isLoggedIn">
       <div class="container-xl px-4 mt-4">
-        <!-- Account page navigation-->
+        <div
+          v-if="profileError"
+          class="alert alert-danger alert-dismissable"
+          role="alert"
+        >
+          <button
+            @click="profileError = null"
+            type="button"
+            class="close"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span></button
+          >{{ profileError.message }}
+        </div>
+        <!-- logout button -->
         <div class="row">
-          <div class="col-xl-11">
+          <div class="col-xl-10">
             <h1>Profile</h1>
+          </div>
+          <div class="col-xl-1">
+            <button
+              type="button"
+              class="btn btn-outline-primary mb-3"
+              @click="getMyProfile"
+            >
+              Profile
+            </button>
           </div>
           <div class="col-xl-1">
             <button
@@ -16,15 +39,6 @@
               Logout
             </button>
           </div>
-          <div class="col-xl-1">
-            <button
-              type="button"
-              class="btn btn-outline-secondary mb-3"
-              @click="tryGetProfile"
-            >
-              Profile
-            </button>
-          </div>
         </div>
         <hr class="mt-0 mb-4" />
         <div class="row">
@@ -33,7 +47,7 @@
             <div class="card mb-4">
               <div class="card-header">Account Details</div>
               <div class="card-body">
-                <form>
+                <form v-if="showProfile">
                   <!-- Form Row-->
                   <div class="row gx-3 mb-3">
                     <!-- Form Group (first name)-->
@@ -72,8 +86,7 @@
                       class="form-control bg-light"
                       id="inputEmailAddress"
                       type="email"
-                      placeholder="Enter your email address"
-                      value="name@example.com"
+                      :value="profile.email"
                       aria-label="Disabled input example"
                       disabled
                       readonly
@@ -169,30 +182,32 @@
 const { isAuthenticated, getProfile, logout } = useIam();
 const router = useRouter();
 const isLoaded = ref(false);
-
-// First check if user is authenticated
-
-// TODO: On refresh, is coming back as not authenticated, when valid access-token cookie in cookie, why?
-// TODO: Probably because we are sending an api request and not sending through browser
-// TODO: Probably same thing happening with logout
-
-const isLoggedIn = await isAuthenticated();
-console.log("isLoggedIn: ", isLoggedIn);
-
-// If user is not authenticated, push to login page
-if (!isLoggedIn) router.push("/login");
+const iAmLoggedIn = ref(false);
+const showProfile = ref(false);
+let profileError = ref(null);
 
 // Get user profile
-// TODO: Fix, unable to see names after getting them from DB in getProfile()
 const profile = {
   firstName: "",
   lastName: "",
+  email: "",
+  currentPassword: "",
+  newPassword: "",
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await isLoggedIn();
+  await getMyProfile();
   isLoaded.value = true;
-  tryGetProfile();
 });
+
+async function isLoggedIn() {
+  iAmLoggedIn.value = await isAuthenticated();
+  console.log("isLoggedIn: ", iAmLoggedIn.value);
+
+  // If user is not authenticated, push to login page
+  if (!iAmLoggedIn.value) router.push("/login");
+}
 
 // Log user out
 async function logMeOut() {
@@ -203,15 +218,25 @@ async function logMeOut() {
   }
 }
 
-async function tryGetProfile() {
-  const tryGetProfile = await getProfile();
-  if (tryGetProfile.status === "success") {
-    const profileData = tryGetProfile.data;
+// Attempt to get user profile
+async function getMyProfile() {
+  const { status, error, data } = await getProfile();
 
-    profile.firstName = profileData.first_name;
-    profile.lastName = profileData.last_name;
+  // If error, show error
+  if (error) {
+    console.log("error: ", error);
+    profileError.value = error;
+  }
 
-    console.log("profile: ", profileData);
+  // If successful, data will contain profile
+  if (status === "success") {
+    console.log("status: ", status);
+    console.log("data: ", data);
+    profile.firstName = data.first_name;
+    profile.lastName = data.last_name;
+    profile.email = data.email;
+
+    showProfile.value = true;
   }
 }
 

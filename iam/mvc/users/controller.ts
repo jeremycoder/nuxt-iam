@@ -4,6 +4,7 @@
 
 import UrlPattern from "url-pattern";
 import { usersMiddleware } from "./middleware";
+import { JSONResponse } from "~~/iam/misc/types";
 import { H3Error } from "h3";
 import { index, create, show, update, destroy } from "./model";
 
@@ -64,8 +65,13 @@ export default defineEventHandler(async (event) => {
         break;
     }
 
-  throw createError({
+  // Return method not allowed error
+  const response = {} as JSONResponse;
+  response.status = "fail";
+  response.error = createError({
     statusCode: 405,
     statusMessage: "Method not allowed",
   });
+
+  return response;
 });

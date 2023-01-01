@@ -6,6 +6,7 @@ import {
   logoutUser,
   isAuthenticated,
   getProfile,
+  updateProfile,
 } from "./queries";
 import { getClientPlatform } from "~~/iam/middleware";
 import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
@@ -249,6 +250,29 @@ export async function isauthenticated(event: H3Event): Promise<JSONResponse> {
  */
 export async function profile(event: H3Event): Promise<JSONResponse> {
   const profileOrError = await getProfile(event);
+  const response = {} as JSONResponse;
+
+  if (profileOrError instanceof H3Error) {
+    response.status = "fail";
+    response.error = profileOrError;
+    return response;
+  }
+
+  const profile = profileOrError as User;
+
+  response.status = "success";
+  response.data = profile;
+
+  return response;
+}
+
+/**
+ * @desc Updates and returns updated profile of authenticated user
+ * @param event H3 Event passed from api
+ * @returns {Promise<JSONResponse>}
+ */
+export async function update(event: H3Event): Promise<JSONResponse> {
+  const profileOrError = await updateProfile(event);
   const response = {} as JSONResponse;
 
   if (profileOrError instanceof H3Error) {

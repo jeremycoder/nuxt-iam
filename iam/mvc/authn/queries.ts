@@ -11,6 +11,7 @@ import {
   getUserByEmail,
 } from "~~/iam/misc/helpers";
 import { verifyAccessToken } from "~~/iam/misc/helpers";
+import { updateUser } from "../users/queries";
 import { Tokens, User } from "~~/iam/misc/types";
 import { getClientPlatform } from "~~/iam/middleware";
 import { H3Event, H3Error } from "h3";
@@ -42,8 +43,8 @@ export async function registerUser(event: H3Event): Promise<User | H3Error> {
   await prisma.users
     .create({
       data: {
-        first_name: body.first_name,
-        last_name: body.last_name,
+        first_name: body.first_name.trim(),
+        last_name: body.last_name.trim(),
         uuid: makeUuid(),
         email: body.email,
         password: hashedPassword,
@@ -273,11 +274,12 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
     // Otherwise, get tokens
     const tokens = errorOrTokens as Tokens;
 
-    const errorOrPlatform = getClientPlatform(event);
-    if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
+    // TODO: Is this repetitious?
+    // const errorOrPlatform = getClientPlatform(event);
+    // if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
 
-    // Get access token from header or cookie
-    const platform = errorOrPlatform as string;
+    // // Get access token from header or cookie
+    // const platform = errorOrPlatform as string;
 
     // If platform is app dev/production, set tokens in header
     if (platform === "app") {
@@ -333,6 +335,120 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
 
     // Otherwise, hide password (password is one-way hashed and cannot be retrieved from hash anyway, it just looks nicer) return the user
     user.password = "[hidden]";
+    user.id = 0;
+    return user;
+  }
+}
+
+/**
+ * @desc Attempts to update and return authenticated user's profile
+ * @param event
+ * @returns {Promise<User | H3Error>} Returns user profile or returns error
+ */
+export async function updateProfile(event: H3Event): Promise<User | H3Error> {
+  // Check client platform
+  let accessToken = null;
+
+  // Get client platform
+  const errorOrPlatform = getClientPlatform(event);
+  if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
+
+  // If app, get token from header
+  const platform = errorOrPlatform as string;
+  if (platform === "app")
+    // If browser, get token from cookies
+    accessToken = event.node.req.headers["access-token"] as string;
+  else if (["browser", "browser-dev"].includes(platform))
+    accessToken = getCookie(event, "access-token") as string;
+
+  // If no token, user is not authenticated
+  if (!accessToken) {
+    console.log("Error: No access token provided");
+    return createError({
+      statusCode: 400,
+      statusMessage: "No access token provided",
+    });
+  }
+
+  // Parse Bearer token (Bearer xxxx)
+  const accessTokenArr = accessToken.split(" ");
+
+  // Verify access token
+  const errorOrJwtPayload = verifyAccessToken(accessTokenArr[1]);
+
+  // If error is an expired access token, attempt to reauthenticate
+  if (errorOrJwtPayload instanceof jwt.TokenExpiredError) {
+    console.log("Yes, attempt to reauthenticate");
+    const errorOrTokens = await getRefreshTokens(event);
+
+    // If get an error, reauthentication failed
+    if (errorOrTokens instanceof H3Error) {
+      console.log("Reauthentication failed");
+      return createError({
+        statusCode: 500,
+        statusMessage: "Reauthentication failed. Login required.",
+      });
+    }
+
+    // Otherwise, get tokens
+    const tokens = errorOrTokens as Tokens;
+
+    // TODO: Update client profile
+    // TODO: Read from body
+
+    // const errorOrPlatform = getClientPlatform(event);
+    // if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
+
+    // // Get access token from header or cookie
+    // const platform = errorOrPlatform as string;
+
+    // If platform is app dev/production, set tokens in header
+    if (platform === "app") {
+      setHeader(event, "access-token", "Bearer " + tokens.accessToken);
+      setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+    }
+
+    // If platform is browser production, set tokens in secure, httpOnly cookies
+    if (platform === "browser") {
+      setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+        httpOnly: true,
+        secure: true,
+      });
+
+      // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
+      // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
+      setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        expires: dayjs().add(14, "day").toDate(),
+      });
+    }
+
+    // Development cookies are not secure. Use only in development
+    if (platform === "browser-dev") {
+      setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+        // Access tokens themselves expire in 15 mins
+        expires: dayjs().add(1, "day").toDate(),
+      });
+      setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+        expires: dayjs().add(1, "day").toDate(),
+      });
+    }
+  }
+
+  // If other error, return error
+  if (errorOrJwtPayload instanceof H3Error) {
+    console.log("Error: ", errorOrJwtPayload);
+    return errorOrJwtPayload;
+  } else {
+    // Otherwise, return the user
+    // const jwtUser = errorOrJwtPayload as JwtPayload;
+    const errorOrUser = await updateUser(event);
+    if (errorOrUser instanceof H3Error) return errorOrUser;
+
+    const user = errorOrUser as User;
+    user.password = "[hidden]";
+    // True user id is not 0, user.id is used by database, uuid is exposed to be used by client
     user.id = 0;
     return user;
   }

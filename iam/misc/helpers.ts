@@ -42,7 +42,7 @@ export async function validateUserRegistration(
   const body = await readBody(event);
 
   // Check if body contains first_name, last_name, email, and password
-  const bodyError = validateRegisterBody(body);
+  const bodyError = await validateRegisterBody(event);
   if (bodyError) {
     return createError({ statusCode: 400, statusMessage: bodyError });
   }
@@ -267,12 +267,13 @@ export async function getRefreshTokens(
  * @desc Checks whether the body in register post request is in correct format
  * @param body Body object passed in register post request
  */
-export function validateRegisterBody(body: Object) {
-  if ("first_name" in body === false) {
+export async function validateRegisterBody(event: H3Event) {
+  const body = await readBody(event);
+  if ("first_name" in body === false || body.first_name.trim() == "") {
     return "'first_name' is required";
   }
 
-  if ("last_name" in body === false) {
+  if ("last_name" in body === false || body.last_name.trim() == "") {
     return "'last_name' is required";
   }
 

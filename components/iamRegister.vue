@@ -85,11 +85,10 @@
 // Get necessary functions from useIam composable
 const { register } = useIam();
 
-// These variables come from response from calling Nuxt IAM api
-let registerStatus = ref(null);
+// Captures any registration errors
 let registerError = ref(null);
-let registerData = ref(null);
 
+// Object to hold registration data
 const registerForm = {
   firstName: "",
   lastName: "",
@@ -97,18 +96,26 @@ const registerForm = {
   password: "",
 };
 
-// Try to log user in
+// Try to register user
 async function tryRegister() {
-  const registerResponse = await register(
+  const { status, error } = await register(
     registerForm.firstName,
     registerForm.lastName,
     registerForm.email,
     registerForm.password
   );
-  registerStatus.value = registerResponse.status;
-  registerError.value = registerResponse.error;
-  registerData.value = registerResponse.data;
-  console.log("registerResponse: ", registerResponse);
+
+  // If we get an error
+  if (error) {
+    console.log("error: ", error);
+    registerError.value = error;
+  }
+
+  // If successful, route to login page
+  if (status === "success") {
+    const router = useRouter();
+    router.push("/login");
+  }
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
