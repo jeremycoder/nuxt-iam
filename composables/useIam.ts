@@ -80,7 +80,7 @@ async function updateProfile(
   uuid: string,
   firstName: string,
   lastName: string,
-  password?: string,
+  currentPassword?: string,
   newPassword?: string
 ): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
@@ -94,7 +94,7 @@ async function updateProfile(
       uuid: uuid,
       first_name: firstName,
       last_name: lastName,
-      password: password,
+      current_password: currentPassword,
       new_password: newPassword,
     },
   });

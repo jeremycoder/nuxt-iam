@@ -136,6 +136,7 @@
                       >Current Password</label
                     >
                     <input
+                      v-model="profile.currentPassword"
                       class="form-control"
                       id="currentPassword"
                       type="password"
@@ -148,6 +149,7 @@
                       >New Password</label
                     >
                     <input
+                      v-model="profile.newPassword"
                       class="form-control"
                       id="newPassword"
                       type="password"
@@ -160,13 +162,18 @@
                       >Confirm Password</label
                     >
                     <input
+                      v-model="profile.confirmNewPassword"
                       class="form-control"
                       id="confirmPassword"
                       type="password"
                       placeholder="Confirm new password"
                     />
                   </div>
-                  <button class="btn btn-primary" type="button">
+                  <button
+                    class="btn btn-primary"
+                    type="button"
+                    @click="updateMyProfileWithPassword(profile)"
+                  >
                     Update password
                   </button>
                 </form>
@@ -217,15 +224,7 @@ const profile = {
   email: "",
   currentPassword: "",
   newPassword: "",
-};
-
-//User profile with password
-const profileWithPassword = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  currentPassword: "",
-  newPassword: "",
+  confirmNewPassword: "",
 };
 
 onMounted(async () => {
@@ -290,6 +289,57 @@ async function updateMyProfile(profile) {
     return;
   }
 
+  updateSuccessful.value = true;
+}
+
+// Attempt to update user profile with password
+async function updateMyProfileWithPassword(profile) {
+  // Front end password validation
+  if (
+    !profile.currentPassword ||
+    !profile.newPassword ||
+    !profile.confirmNewPassword
+  ) {
+    console.log("current: ", profile.currentPassword);
+    console.log("new: ", profile.newPassword);
+    console.log("confirm: ", profile.confirmNewPassword);
+
+    const allPasswordsError = {
+      message: "All passwords must be supplied",
+    };
+    console.log("error: ", allPasswordsError);
+    profileError.value = allPasswordsError;
+    return;
+  }
+
+  // Confirm password front end validation
+  if (profile.newPassword !== profile.confirmNewPassword) {
+    const confirmPasswordError = {
+      message: "New password does not match confirm password",
+    };
+    console.log("error: ", confirmPasswordError);
+    profileError.value = confirmPasswordError;
+    return;
+  }
+
+  const { status, data, error } = await updateProfile(
+    profile.uuid,
+    profile.firstName,
+    profile.lastName,
+    profile.currentPassword,
+    profile.newPassword,
+    profile.confirmNewPassword
+  );
+
+  // If error, display error
+  if (error) {
+    console.log("error: ", error);
+    profileError.value = error;
+    return;
+  }
+
+  console.log("status: ", status);
+  console.log("data: ", data);
   updateSuccessful.value = true;
 }
 

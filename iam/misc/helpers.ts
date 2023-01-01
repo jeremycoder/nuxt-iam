@@ -159,13 +159,13 @@ export async function validateUserProfileUpdate(
   if ("new_password" in body === true && "current_password" in body === false)
     return createError({
       statusCode: 400,
-      statusMessage: "Both current_password && new_password must be supplied",
+      statusMessage: "Both current_password and new_password must be supplied",
     });
 
   if ("new_password" in body === false && "current_password" in body === true)
     return createError({
       statusCode: 400,
-      statusMessage: "Both current_password && new_password must be supplied",
+      statusMessage: "Both current_password and new_password must be supplied",
     });
 
   // If supplied current password does not match password in database

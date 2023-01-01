@@ -20,7 +20,6 @@ export function getClientPlatform(event: H3Event): H3Error | string {
     });
 
   // Check if 'client-platform' header is either 'app' or 'browser'
-  console.log("clientPlatform: ", clientPlatform);
   if (clientPlatform && !clientPlatforms.includes(clientPlatform))
     return createError({
       statusCode: 400,
