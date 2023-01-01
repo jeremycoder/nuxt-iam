@@ -10,6 +10,7 @@ export default function useIam() {
     refresh,
     getProfile,
     updateProfile,
+    deleteAccount,
   };
 }
 
@@ -176,6 +177,26 @@ async function refresh(): Promise<JSONResponse> {
     method: "POST",
     headers: {
       "client-platform": clientPlatform,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Delete user account
+ * @returns {Promise<JSONResponse>}
+ */
+async function deleteAccount(uuid: string): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch("/api/iam/authn/delete", {
+    method: "DELETE",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+    body: {
+      uuid: uuid,
     },
   });
 

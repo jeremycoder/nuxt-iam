@@ -14,6 +14,7 @@ import {
   refresh,
   logout,
   isauthenticated,
+  destroy,
 } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -78,6 +79,14 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await update(event);
+        }
+        break;
+      case "DELETE":
+        // delete user account
+        result = new route("/api/iam/authn/delete").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await destroy(event);
         }
         break;
     }

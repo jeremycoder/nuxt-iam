@@ -7,6 +7,7 @@ import {
   isAuthenticated,
   getProfile,
   updateProfile,
+  deleteAccount,
 } from "./queries";
 import { getClientPlatform } from "~~/iam/middleware";
 import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
@@ -285,6 +286,40 @@ export async function update(event: H3Event): Promise<JSONResponse> {
 
   response.status = "success";
   response.data = profile;
+
+  return response;
+}
+
+/**
+ * @desc Deletes user's account
+ * @param event H3 Event passed from api
+ * @returns {Promise<JSONResponse>}
+ */
+export async function destroy(event: H3Event): Promise<JSONResponse> {
+  const deleteOrError = await deleteAccount(event);
+  const response = {} as JSONResponse;
+
+  // If error in deleting user account, return error
+  if (deleteOrError instanceof H3Error) {
+    response.status = "fail";
+    response.error = deleteOrError;
+    return response;
+  }
+
+  const userDeleted = deleteOrError as boolean;
+
+  // If false result, which shouldn't happen, return error
+  if (userDeleted === false) {
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Error deleting user account",
+    });
+    return response;
+  }
+
+  // Otherwise delete was successful
+  response.status = "success";
 
   return response;
 }

@@ -190,7 +190,11 @@
                   undone. If you are sure you want to delete your account,
                   select the button below.
                 </p>
-                <button class="btn btn-danger" type="button">
+                <button
+                  class="btn btn-danger"
+                  type="button"
+                  @click="deleteMyAccount(profile)"
+                >
                   I understand, delete my account
                 </button>
               </div>
@@ -208,7 +212,8 @@
 
 <script setup>
 // Get necessary functions from useIam composable
-const { isAuthenticated, getProfile, updateProfile, logout } = useIam();
+const { isAuthenticated, getProfile, updateProfile, logout, deleteAccount } =
+  useIam();
 const router = useRouter();
 const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
@@ -243,7 +248,7 @@ async function isLoggedIn() {
 
 // Log user out
 async function logMeOut() {
-  const { status, error, data } = await logout();
+  const { status } = await logout();
   console.log("status: ", status);
   if (status === "success") {
     router.push("/login");
@@ -300,10 +305,6 @@ async function updateMyProfileWithPassword(profile) {
     !profile.newPassword ||
     !profile.confirmNewPassword
   ) {
-    console.log("current: ", profile.currentPassword);
-    console.log("new: ", profile.newPassword);
-    console.log("confirm: ", profile.confirmNewPassword);
-
     const allPasswordsError = {
       message: "All passwords must be supplied",
     };
@@ -341,6 +342,21 @@ async function updateMyProfileWithPassword(profile) {
   console.log("status: ", status);
   console.log("data: ", data);
   updateSuccessful.value = true;
+}
+
+// Attempt to delete user account
+async function deleteMyAccount(profile) {
+  const { status, error } = await deleteAccount(profile.uuid);
+
+  // If error, show error
+  if (error) {
+    profileError.value = error;
+    return;
+  }
+
+  // Otherwise, delete was successful, navigate to register
+  const router = useRouter();
+  router.push("/register");
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below

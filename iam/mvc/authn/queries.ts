@@ -9,6 +9,7 @@ import {
   getRefreshTokens,
   logout,
   getUserByEmail,
+  getUserByUuid,
   updateUserProfile,
 } from "~~/iam/misc/helpers";
 import { verifyAccessToken } from "~~/iam/misc/helpers";
@@ -451,5 +452,97 @@ export async function updateProfile(event: H3Event): Promise<User | H3Error> {
     // True user id is not 0, user.id is used by database, uuid is exposed to be used by client
     user.id = 0;
     return user;
+  }
+}
+
+/**
+ * @desc Removes user from database
+ * @param event H3Event
+ */
+export async function deleteAccount(
+  event: H3Event
+): Promise<boolean | H3Error> {
+  const body = await readBody(event);
+  const uuid = body.uuid;
+
+  // If uuid not provided
+  if (!uuid)
+    return createError({
+      statusCode: 400,
+      statusMessage: "User uuid not provided",
+    });
+
+  // Get current user
+  const nullOrUser = await getUserByUuid(uuid);
+  if (!nullOrUser) {
+    console.log(
+      "User to delete from useIam not found. This should not happen."
+    );
+    return createError({
+      statusCode: 500,
+      statusMessage: "User not found",
+    });
+  }
+
+  const user = nullOrUser as User;
+  let deletedUser = null;
+  let error = null;
+
+  // First remove all user's refresh tokens
+  await prisma.refresh_tokens
+    .deleteMany({
+      where: {
+        user_id: user.id,
+      },
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+      await prisma.$disconnect();
+    });
+
+  // If error deleting refresh tokens, return error
+  if (error)
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error. Failed to delete account.",
+    });
+
+  // Then remove user
+  await prisma.users
+    .delete({
+      where: {
+        uuid: uuid,
+      },
+    })
+    .then(async (result) => {
+      deletedUser = result;
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+      await prisma.$disconnect();
+    });
+
+  // If we encounter an error, return error
+  if (error)
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error with deleting account",
+    });
+
+  // Delete access and refresh cookies
+  deleteCookie(event, "access-token");
+  deleteCookie(event, "refresh-token");
+
+  // If we have a user, return the boolean
+  if (deletedUser) return true;
+  // otherwise return false (which shouldn't happen)
+  else {
+    console.log(
+      "This shouldn't happen: Returning false in deleting user from profile"
+    );
+    return false;
   }
 }

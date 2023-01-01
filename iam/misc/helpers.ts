@@ -920,8 +920,6 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
   let refreshToken = null;
   refreshToken = event;
 
-  // If unsuccessful, attempt to get refresh tokens from header
-
   // Delete access and refresh cookies
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
