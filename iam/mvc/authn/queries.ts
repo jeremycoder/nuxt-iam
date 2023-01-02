@@ -58,12 +58,10 @@ export async function registerUser(event: H3Event): Promise<User | H3Error> {
     })
     .then(async (response) => {
       user = response;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
       registrationError = e;
-      await prisma.$disconnect();
     });
 
   if (registrationError)
@@ -503,7 +501,6 @@ export async function deleteAccount(
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   // If error deleting refresh tokens, return error
@@ -522,12 +519,10 @@ export async function deleteAccount(
     })
     .then(async (result) => {
       deletedUser = result;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   // If we encounter an error, return error

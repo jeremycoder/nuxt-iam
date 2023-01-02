@@ -1058,6 +1058,10 @@ export async function sendResetEmail(user: User, token: string) {
       user: "nuxt.tips@outlook.com",
       pass: "yahshuaIsNumber1*",
     },
+    tls: {
+      // do not fail on invalid certs
+      rejectUnauthorized: false,
+    },
   });
 
   const emailOptions = {
@@ -1073,6 +1077,7 @@ export async function sendResetEmail(user: User, token: string) {
     // If error, log error and return
     if (err) {
       console.log(err);
+      console.log("Send mail error");
       return;
     }
 
