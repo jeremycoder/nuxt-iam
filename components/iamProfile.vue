@@ -251,7 +251,7 @@ async function logMeOut() {
   const { status } = await logout();
   console.log("status: ", status);
   if (status === "success") {
-    router.push("/login");
+    router.push("/iam/login");
   }
 }
 

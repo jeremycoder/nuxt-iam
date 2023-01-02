@@ -378,6 +378,8 @@ export function validateEmail(email: string): boolean {
  * @desc Checks whether email already exists in database
  * @param email The email string
  */
+// TODO: This needs to return errors or boolean
+// TODO: Database errors are being masked and it's hard to debug
 export async function emailExists(email: string): Promise<boolean> {
   if (!email) return false;
 
