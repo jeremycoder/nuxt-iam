@@ -8,6 +8,7 @@ import {
   getProfile,
   updateProfile,
   deleteAccount,
+  resetPassword,
 } from "./queries";
 import { getClientPlatform } from "~~/iam/middleware";
 import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
@@ -319,6 +320,40 @@ export async function destroy(event: H3Event): Promise<JSONResponse> {
   }
 
   // Otherwise delete was successful
+  response.status = "success";
+
+  return response;
+}
+
+/**
+ * @desc Reset user's password
+ * @param event H3 Event passed from api
+ * @returns {Promise<JSONResponse>} Object mentioning success or failure of authenticating user or error
+ */
+export async function reset(event: H3Event): Promise<JSONResponse> {
+  const response = {} as JSONResponse;
+
+  // Delete access and refresh tokens
+  deleteCookie(event, "access-token");
+  deleteCookie(event, "refresh-token");
+
+  await resetPassword(event);
+
+  // Create reset token
+
+  // Send reset token to email
+
+  // Email link should send to url/reset/reset-token good for 20 mins
+
+  // Create end point to receive token
+
+  // Check if token is valid
+
+  // If valid, route to page where user can enter new password
+
+  // Update password and direct user to log in
+
+  // Response is always successful
   response.status = "success";
 
   return response;

@@ -15,6 +15,7 @@ import {
   logout,
   isauthenticated,
   destroy,
+  reset,
 } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -64,6 +65,13 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await refresh(event);
+        }
+
+        // reset user password
+        result = new route("/api/iam/authn/reset").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await reset(event);
         }
 
         // log user out

@@ -17,6 +17,7 @@
     "argon2": "^0.30.2",
     "dayjs": "^1.11.7",
     "jsonwebtoken": "^8.5.1",
+    "nodemailer": "^6.8.0",
     "prisma": "^4.7.1",
     "save-dev": "^0.0.1-security",
     "url-pattern": "^1.0.3",

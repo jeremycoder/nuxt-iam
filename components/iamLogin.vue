@@ -21,6 +21,18 @@
       </div>
       <form>
         <h2 class="text-center">Log in</h2>
+        <div class="text-center social-btn">
+          <a href="#" class="btn btn-primary btn-block"
+            ><i class="fa fa-facebook"></i> Sign in with <b>Facebook</b></a
+          >
+          <a href="#" class="btn btn-info btn-block"
+            ><i class="fa fa-twitter"></i> Sign in with <b>Twitter</b></a
+          >
+          <a href="#" class="btn btn-danger btn-block"
+            ><i class="fa fa-google"></i> Sign in with <b>Google</b></a
+          >
+        </div>
+        <div class="or-seperator"><i>or</i></div>
         <div class="form-group">
           <input
             v-model="loginForm.email"
@@ -52,11 +64,13 @@
           <label class="pull-left checkbox-inline"
             ><input type="checkbox" /> Remember me</label
           >
-          <a href="#" class="pull-right">Forgot Password?</a>
+          <NuxtLink to="/iam/reset" class="pull-right"
+            >Forgot Password?</NuxtLink
+          >
         </div>
       </form>
       <p class="text-center">
-        <NuxtLink to="/register">Create an Account</NuxtLink>
+        <NuxtLink to="/iam/register">Create an Account</NuxtLink>
       </p>
     </div>
   </div>
@@ -87,12 +101,16 @@ async function tryLogin() {
   console.log("loginResponse: ", loginResponse);
 
   // If login successful, route to profile page
-  if (loginStatus.value === "success") router.push("/profile");
+  if (loginStatus.value === "success") router.push("/iam/profile");
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({
   title: "Nuxt IAM Login Example",
+  link: {
+    rel: "stylesheet",
+    href: "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",
+  },
   link: {
     rel: "stylesheet",
     href: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",
@@ -120,6 +138,32 @@ useHead({
 }
 .login-form h2 {
   margin: 0 0 15px;
+}
+.or-seperator {
+  margin: 20px 0 10px;
+  text-align: center;
+  border-top: 1px solid #ccc;
+}
+.or-seperator i {
+  padding: 0 10px;
+  background: #f7f7f7;
+  position: relative;
+  top: -11px;
+  z-index: 1;
+}
+.social-btn .btn {
+  margin: 10px 0;
+  font-size: 15px;
+  text-align: left;
+  line-height: 24px;
+}
+.social-btn .btn i {
+  float: left;
+  margin: 4px 15px 0 5px;
+  min-width: 15px;
+}
+.input-group-addon .fa {
+  font-size: 18px;
 }
 .form-control,
 .btn {

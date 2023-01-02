@@ -633,7 +633,7 @@ export async function createNewTokensFromRefresh(
     });
 
     // Deactivate current token
-    const deactivateTokenError = await _deactivateRefreshTokens(user.id);
+    const deactivateTokenError = await deactivateRefreshTokens(user.id);
     if (deactivateTokenError) return deactivateTokenError;
 
     // Store tokens
@@ -751,7 +751,7 @@ export async function verifyRefreshToken(
       console.log(
         `Attempt to deactivate all user:${user.email}'s refresh tokens`
       );
-      const deactivateError = await _deactivateRefreshTokens(user.id);
+      const deactivateError = await deactivateRefreshTokens(user.id);
 
       if (deactivateError) {
         console.log(
@@ -825,7 +825,7 @@ async function _storeRefreshToken(
  * @desc Deactivates a user's refresh tokens in database
  * @param userId User's id
  */
-async function _deactivateRefreshTokens(
+export async function deactivateRefreshTokens(
   userId: number
 ): Promise<H3Error | void> {
   let error = null;
@@ -895,7 +895,7 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     });
 
     // Deactivate any other tokens
-    const deactivateTokenError = await _deactivateRefreshTokens(user.id);
+    const deactivateTokenError = await deactivateRefreshTokens(user.id);
     if (deactivateTokenError) return deactivateTokenError;
 
     // Store tokens
@@ -948,7 +948,7 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
     }
 
     // Deactivate all refresh tokens
-    const deactivateError = await _deactivateRefreshTokens(user.id);
+    const deactivateError = await deactivateRefreshTokens(user.id);
     if (deactivateError) {
       console.log(`Failed to deactivate user:${user.email}'s refresh tokens`);
       return createError({

@@ -75,7 +75,7 @@
       </form>
       <p class="text-center">
         Already have an account?
-        <NuxtLink to="/login">Log in here</NuxtLink>
+        <NuxtLink to="/iam/login">Log in here</NuxtLink>
       </p>
     </div>
   </div>
@@ -114,7 +114,7 @@ async function tryRegister() {
   // If successful, route to login page
   if (status === "success") {
     const router = useRouter();
-    router.push("/login");
+    router.push("/iam/login");
   }
 }
 

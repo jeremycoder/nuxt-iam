@@ -356,7 +356,7 @@ async function deleteMyAccount(profile) {
 
   // Otherwise, delete was successful, navigate to register
   const router = useRouter();
-  router.push("/register");
+  router.push("/iam/register");
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below

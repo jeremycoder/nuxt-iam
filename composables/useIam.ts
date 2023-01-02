@@ -11,6 +11,7 @@ export default function useIam() {
     getProfile,
     updateProfile,
     deleteAccount,
+    resetPassword,
   };
 }
 
@@ -197,6 +198,26 @@ async function deleteAccount(uuid: string): Promise<JSONResponse> {
     },
     body: {
       uuid: uuid,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Reset user's password
+ * @returns {Promise<JSONResponse>}
+ */
+async function resetPassword(email: string): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch("/api/iam/authn/reset", {
+    method: "POST",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+    body: {
+      email: email,
     },
   });
 

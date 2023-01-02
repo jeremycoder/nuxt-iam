@@ -11,12 +11,16 @@ import {
   getUserByEmail,
   getUserByUuid,
   updateUserProfile,
+  deactivateRefreshTokens,
+  validateEmail,
 } from "~~/iam/misc/helpers";
 import { verifyAccessToken } from "~~/iam/misc/helpers";
 import { Tokens, User } from "~~/iam/misc/types";
 import { getClientPlatform } from "~~/iam/middleware";
 import { H3Event, H3Error } from "h3";
 import dayjs from "dayjs";
+
+const config = useRuntimeConfig();
 
 const prisma = new PrismaClient();
 
@@ -545,4 +549,49 @@ export async function deleteAccount(
     );
     return false;
   }
+}
+
+/**
+ * @desc Reset user's password
+ * @param event H3Event
+ * @info For security purposes, returns nothing. All errors log to console.
+ */
+export async function resetPassword(event: H3Event): Promise<void> {
+  const body = await readBody(event);
+
+  // If no email in body, log error
+  if ("email" in body === false) {
+    console.log("Email missing from body for password reset");
+    return;
+  }
+
+  // If email is in bad form, log error
+  if (!validateEmail(body.email)) {
+    console.log("Bad email format for password reset");
+    return;
+  }
+
+  // Get user from email
+  const nullOrUser = await getUserByEmail(body.email);
+  if (!nullOrUser) {
+    console.log("Could not get user from email for password reset");
+    return;
+  }
+
+  // Deactivate user's refresh tokens
+  const user = nullOrUser as User;
+  const voidOrError = await deactivateRefreshTokens(user.id);
+
+  if (voidOrError instanceof H3Error) {
+    console.log(voidOrError.message);
+    return;
+  }
+
+  // Create reset jwt token
+  const resetToken = jwt.sign(body.email, config.iamResetTokenSecret, {
+    expiresIn: "15m",
+    issuer: "MuloziAuth",
+  });
+
+  // Send email to user
 }
