@@ -53,13 +53,17 @@ export async function validateUserRegistration(
     return createError({ statusCode: 400, statusMessage: "Bad email format" });
   }
 
-  // Check if email exists
-  if (await emailExists(body.email)) {
+  // Check if email exists. If error, return error
+  const errorOrEmailAvailable = await emailExists(body.email);
+  if (errorOrEmailAvailable instanceof H3Error) return errorOrEmailAvailable;
+
+  // If user does not exist, return error
+  const emailAvailable = errorOrEmailAvailable as boolean;
+  if (!emailAvailable)
     return createError({
       statusCode: 403,
       statusMessage: "Email already exists",
     });
-  }
 
   // Check password meets minimum strength requirements
   if (!validatePassword(body.password)) {
@@ -380,8 +384,9 @@ export function validateEmail(email: string): boolean {
  */
 // TODO: This needs to return errors or boolean
 // TODO: Database errors are being masked and it's hard to debug
-export async function emailExists(email: string): Promise<boolean> {
+export async function emailExists(email: string): Promise<boolean | H3Error> {
   if (!email) return false;
+  let error = null;
 
   let user = undefined;
   await prisma.users
@@ -392,15 +397,25 @@ export async function emailExists(email: string): Promise<boolean> {
     })
     .then(async (result) => {
       user = result;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
-      await prisma.$disconnect();
+      error = e;
     });
 
+  // If error, return error
+  if (error) {
+    console.log("Email error when checking if email exists");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // if user does not exist, return false
   if (user === null) return false;
 
+  // Otherwise user exists, return true
   return true;
 }
 
@@ -422,11 +437,9 @@ export async function userExists(uuid: string): Promise<boolean> {
     })
     .then(async (result) => {
       user = result;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
-      await prisma.$disconnect();
     });
 
   if (user === null) return false;
@@ -472,11 +485,9 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     })
     .then(async (response) => {
       user = response;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
-      await prisma.$disconnect();
     });
 
   return user;
@@ -496,11 +507,9 @@ export async function getUserByUuid(uuid: string): Promise<User | null> {
     })
     .then(async (response) => {
       user = response;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
-      await prisma.$disconnect();
     });
 
   return user;
@@ -523,11 +532,9 @@ async function updateLastLogin(email: string): Promise<null | User> {
     })
     .then(async (response) => {
       result = response;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
-      await prisma.$disconnect();
     });
 
   return result;
@@ -571,6 +578,55 @@ export function verifyAccessToken(token: string): H3Error | JwtPayload {
       if (err instanceof jwt.TokenExpiredError) {
         console.log("Expired access token");
         console.log("Attempt reauthentication");
+        tokenExpiredError = err;
+      }
+
+      // If not, just return the error
+      error = createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized",
+      });
+    } else {
+      jwtUser = user as JwtPayload;
+    }
+  });
+
+  // Check token expiration error first
+  if (tokenExpiredError) return tokenExpiredError;
+
+  // If other error, return error
+  if (error)
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+
+  // If token was valid and we got back a user, return the user
+  if (jwtUser) return jwtUser;
+
+  // Otherwise return the error
+  return createError({
+    statusCode: 401,
+    statusMessage: "Unauthorized",
+  });
+}
+
+/**
+ * @desc Verifies reset password token
+ * @param token JSON web token
+ */
+export function verifyResetToken(token: string): H3Error | JwtPayload {
+  let error = null;
+  let tokenExpiredError = null;
+  let jwtUser = null;
+
+  jwt.verify(token, config.iamResetTokenSecret, (err, user) => {
+    if (err) {
+      console.log(err);
+
+      // If reset token expired, return error
+      if (err instanceof jwt.TokenExpiredError) {
+        console.log("Expired password reset token");
         tokenExpiredError = err;
       }
 
@@ -670,13 +726,10 @@ async function _refreshTokenActive(tokenId: string): Promise<H3Error | void> {
         is_active: true,
       },
     })
-    .then(async () => {
-      await prisma.$disconnect();
-    })
+    .then(async () => {})
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   if (error)
@@ -811,13 +864,10 @@ async function _storeRefreshToken(
         is_active: true,
       },
     })
-    .then(async () => {
-      await prisma.$disconnect();
-    })
+    .then(async () => {})
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   if (error)
@@ -841,13 +891,10 @@ export async function deactivateRefreshTokens(
         is_active: false,
       },
     })
-    .then(async () => {
-      await prisma.$disconnect();
-    })
+    .then(async () => {})
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   if (error)
@@ -1031,12 +1078,10 @@ export async function updateUserProfile(
     })
     .then(async (response) => {
       user = response;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   // If error, return error
@@ -1046,17 +1091,36 @@ export async function updateUserProfile(
 }
 
 /**
- * @desc Send reset email
+ * @desc Send email to reset user password
  * @param user User's account
  * @param token Reset token
  */
 export async function sendResetEmail(user: User, token: string) {
-  console.log("in send reset email");
+  // Get config options
+  /**
+   * 1. Sign up for a free email account like yourname@outlook.com
+   * 2. Make sure you verify your account
+   * 3. Send a test email from your account before using this
+   * 4. Then use the example in the comments below
+   *
+   * Please see https://nodemailer.com/smtp/, and https://nodemailer.com/smtp/well-known/
+   */
+
+  const url = config.iamResetEmailUrl;
+  const service = config.iamResetEmailService;
+  const emailUser = config.iamResetEmailUser;
+  const password = config.iamResetEmailPassword;
+  const from = config.iamResetEmailFrom;
+  const subject = config.iamResetEmailSubject;
+  const text = config.iamResetEmailText;
+
+  // Validation
+
   const transporter = nodemailer.createTransport({
-    service: "hotmail",
+    service: service,
     auth: {
-      user: "nuxt.tips@outlook.com",
-      pass: "yahshuaIsNumber1*",
+      user: emailUser,
+      pass: password,
     },
     tls: {
       // do not fail on invalid certs
@@ -1065,19 +1129,20 @@ export async function sendResetEmail(user: User, token: string) {
   });
 
   const emailOptions = {
-    from: "nuxt.tips@outlook.com",
+    from: from,
     to: user.email,
-    subject: `${user.first_name}, Nuxt IAM password reset link`,
-    text: `You requested to reset your password. Please use the following link to reset your password:
-    http://localhost:3000/updatepassword/${token}. If you did not request this, please contact administrator.
-    Your last login time was: ${user.last_login}`,
+    subject: `${user.first_name}, ${subject}`,
+    text: `${text}. Your last login time was: ${user.last_login}
+    
+    Password reset link: ${url}/api/iam/authn/verifyreset/${token}
+    `,
   };
 
   transporter.sendMail(emailOptions, (err, result) => {
     // If error, log error and return
     if (err) {
       console.log(err);
-      console.log("Send mail error");
+      console.log("Send reset password email error");
       return;
     }
 

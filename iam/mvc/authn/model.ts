@@ -13,6 +13,7 @@ import {
 import { getClientPlatform } from "~~/iam/middleware";
 import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
 import dayjs from "dayjs";
+import { verifyResetToken } from "~~/iam/misc/helpers";
 
 /**
  * @desc Registers (creates) a new user in database
@@ -339,19 +340,49 @@ export async function reset(event: H3Event): Promise<JSONResponse> {
 
   await resetPassword(event);
 
-  // Create reset token
+  // For security purposes, response is always successful
+  response.status = "success";
 
-  // Send reset token to email
+  return response;
+}
 
-  // Email link should send to url/reset/reset-token good for 20 mins
+/**
+ * @desc Verifies token sent from user's reset email password
+ * @param event H3 Event passed from api
+ * @returns {Promise<JSONResponse>} Object mentioning success or failure of authenticating user or error
+ */
+export async function resetVerify(event: H3Event): Promise<JSONResponse> {
+  const response = {} as JSONResponse;
 
-  // Create end point to receive token
+  // Delete access and refresh tokens
+  deleteCookie(event, "access-token");
+  deleteCookie(event, "refresh-token");
 
-  // Check if token is valid
+  // Get token from route. Token comes split
+  const { fromRoute } = event.context.params;
 
-  // If valid, route to page where user can enter new password
+  // Get split parts of token
+  const tokenHeader = fromRoute.jwtheader;
+  const tokenPayload = fromRoute.jwtpayload;
+  const tokenSignature = fromRoute.jwtsignature;
 
-  // Update password and direct user to log in
+  // Put token together
+  const resetToken = `${tokenHeader}.${tokenPayload}.${tokenSignature}`;
+  console.log("reset token from email: ", resetToken);
+
+  // TODO: Verify token
+  const userOrError = verifyResetToken(resetToken);
+  console.log("userOrError: ", userOrError);
+
+  // If link expired, say link is expired
+
+  // If other error, say unauthorized
+
+  // If verification successful, navigate to /updatepassword route
+
+  // Update password should have a check to make sure it's coming only from this route
+
+  // Will reject any requests from anywhere else
 
   // Response is always successful
   response.status = "success";

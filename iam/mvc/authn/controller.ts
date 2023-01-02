@@ -16,6 +16,7 @@ import {
   isauthenticated,
   destroy,
   reset,
+  resetVerify,
 } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -25,6 +26,7 @@ export default defineEventHandler(async (event) => {
   let result = null;
 
   // Middleware for all authn routes
+  // TODO: This traps reset emai link, reset email link should not require header
   const errorOrPlatform = authnMiddleware(event);
   if (errorOrPlatform instanceof H3Error) throw errorOrPlatform;
 
@@ -43,6 +45,15 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await isauthenticated(event);
+        }
+
+        // verifies token sent from reset email
+        result = new route(
+          "/api/iam/authn/verifyreset(/:jwtheader)(.:jwtpayload)(.:jwtsignature)"
+        ).match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await resetVerify(event);
         }
         break;
       case "POST":
@@ -100,6 +111,9 @@ export default defineEventHandler(async (event) => {
     }
 
   // Return method not allowed error
+  console.log("event req method: ", event.node.req.method);
+  console.log("event req url: ", event.node.req.url);
+
   const response = {} as JSONResponse;
   response.status = "fail";
   response.error = createError({

@@ -22,13 +22,10 @@ export async function getAllUsers(
     })
     .then(async (result) => {
       users = result;
-
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   // Return error or users
@@ -53,12 +50,10 @@ export async function showUser(event: H3Event): Promise<User | H3Error> {
     })
     .then(async (result) => {
       user = result;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   // If error, return error
@@ -122,12 +117,10 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
     })
     .then(async (response) => {
       user = response;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   // If error, return error
@@ -158,12 +151,10 @@ export async function destroyUser(event: H3Event): Promise<boolean | H3Error> {
     })
     .then(async (result) => {
       user = result;
-      await prisma.$disconnect();
     })
     .catch(async (e) => {
       console.error(e);
       error = e;
-      await prisma.$disconnect();
     });
 
   // If we encounter an error, return error
