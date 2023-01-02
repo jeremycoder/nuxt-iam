@@ -1,5 +1,6 @@
 // Helper functions for
 import argon2 from "argon2";
+import nodemailer from "nodemailer";
 import { PrismaClient } from "@prisma/client";
 import { User, Tokens } from "~~/iam/misc/types";
 import { v4 as uuidv4 } from "uuid";
@@ -1040,4 +1041,38 @@ export async function updateUserProfile(
   if (error) return error;
 
   return user;
+}
+
+/**
+ * @desc Send reset email
+ * @param user User's account
+ * @param token Reset token
+ */
+export async function sendResetEmail(user: User, token: string) {
+  const transporter = nodemailer.createTransport({
+    service: "hotmail",
+    auth: {
+      user: "nuxt.tips@outlook.com",
+      pass: "yahshuaIsNumber1*",
+    },
+  });
+
+  const emailOptions = {
+    from: "nuxt.tips@outlook.com",
+    to: user.email,
+    subject: `${user.first_name}, Nuxt IAM password reset link`,
+    text: `You requested to reset your password. Please use the following link to reset your password:
+    http://localhost:3000/updatepassword/${token}. If you did not request this, please contact administrator.
+    Your last login time was: ${user.last_login}`,
+  };
+
+  transporter.sendMail(emailOptions, (err, result) => {
+    // If error, log error and return
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    console.log("Email successfully sent: ", result.response);
+  });
 }

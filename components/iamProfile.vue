@@ -243,7 +243,7 @@ async function isLoggedIn() {
   console.log("isLoggedIn: ", iAmLoggedIn.value);
 
   // If user is not authenticated, push to login page
-  if (!iAmLoggedIn.value) router.push("/login");
+  if (!iAmLoggedIn.value) router.push("/iam/login");
 }
 
 // Log user out

@@ -13,6 +13,7 @@
   "dependencies": {
     "@prisma/client": "^4.7.1",
     "@types/jsonwebtoken": "^8.5.9",
+    "@types/nodemailer": "^6.4.7",
     "@types/uuid": "^9.0.0",
     "argon2": "^0.30.2",
     "dayjs": "^1.11.7",

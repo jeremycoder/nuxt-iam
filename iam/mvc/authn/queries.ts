@@ -13,6 +13,7 @@ import {
   updateUserProfile,
   deactivateRefreshTokens,
   validateEmail,
+  sendResetEmail,
 } from "~~/iam/misc/helpers";
 import { verifyAccessToken } from "~~/iam/misc/helpers";
 import { Tokens, User } from "~~/iam/misc/types";
@@ -587,11 +588,20 @@ export async function resetPassword(event: H3Event): Promise<void> {
     return;
   }
 
+  // Create an object for user reset
+  const resetUser = {
+    email: user.email,
+    role: user.role,
+  };
+
   // Create reset jwt token
-  const resetToken = jwt.sign(body.email, config.iamResetTokenSecret, {
+  const resetToken = jwt.sign(resetUser, config.iamResetTokenSecret, {
     expiresIn: "15m",
     issuer: "MuloziAuth",
   });
 
+  console.log("resetToken: ", resetToken);
+
   // Send email to user
+  await sendResetEmail(user, resetToken);
 }
