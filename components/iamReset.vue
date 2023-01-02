@@ -32,7 +32,7 @@
           </div>
           <div class="clearfix">
             <NuxtLink to="/iam/register" class="pull-">Register</NuxtLink>
-            <NuxtLink to="/iam/register" class="pull-right">Register</NuxtLink>
+            <NuxtLink to="/iam/login" class="pull-right">Login</NuxtLink>
           </div>
         </form>
       </div>

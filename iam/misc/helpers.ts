@@ -1049,6 +1049,7 @@ export async function updateUserProfile(
  * @param token Reset token
  */
 export async function sendResetEmail(user: User, token: string) {
+  console.log("in send reset email");
   const transporter = nodemailer.createTransport({
     service: "hotmail",
     auth: {

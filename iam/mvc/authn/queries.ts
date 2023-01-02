@@ -600,8 +600,6 @@ export async function resetPassword(event: H3Event): Promise<void> {
     issuer: "MuloziAuth",
   });
 
-  console.log("resetToken: ", resetToken);
-
   // Send email to user
   await sendResetEmail(user, resetToken);
 }
