@@ -14,7 +14,7 @@ import { getClientPlatform } from "~~/iam/middleware";
 import jwt from "jsonwebtoken";
 import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
 import dayjs from "dayjs";
-import { verifyResetToken } from "~~/iam/misc/helpers";
+import { verifyResetToken, generateNewPassword } from "~~/iam/misc/helpers";
 
 /**
  * @desc Registers (creates) a new user in database
@@ -399,18 +399,31 @@ export async function verifyReset(
     return response;
   }
 
-  // Otherwise, return user uuid
+  // TODO: Can make link one-time use by creating a table of used tokens
+  // TODO: Give token a uuid, and save in table with token expiration date
+  // TODO: id, token, expirate_date
+  // TODO: When used, check if exists in table already
+  // TODO: If exists, reject error as link expired
+  // TODO: Will need to
+
+  // Otherwise generate new password for user
   const user = userOrError as User;
+  const errorOrPassword = await generateNewPassword(user.uuid);
+
+  // If error, return error
+  if (errorOrPassword instanceof H3Error) {
+    response.status = "fail";
+    response.error = errorOrPassword;
+    return response;
+  }
+
+  // Otherwise, get newly generated password
+  const password = errorOrPassword as string;
+
   response.status = "success";
   response.data = {
-    uuid: user.uuid,
+    pass: password,
   };
-
-  // TODO: Send update-password token here in response
-  // TODO: Send in secure cookies only. So it may not work in local development?
-  // TODO: Figure out how to reset password in api
-  // TODO: API password reset may have to use form. Has to since requires email link
-  // TODO: So api, will need to use browser too
 
   return response;
 }

@@ -3,6 +3,7 @@
 </template>
 
 <script setup>
+const newPassword = ref(null);
 // Get token from route
 const route = useRoute();
 const router = useRouter();
@@ -20,7 +21,6 @@ const { status, data, error } = await verifyReset(token);
 // If verification fails, navigate to a verify failed page
 if (error) router.push(`/iam/verifyfailed`);
 
-// If successful, route to a page to input new password and pass user uuid
-// Could have used 'success' here, but kept saying deprecated
-if (data) router.push(`/iam/password?uuid=${data.uuid}`);
+// If navigate to verify successful page
+if (data) router.push(`/iam/verifysuccessful?pass=${data.pass}`);
 </script>

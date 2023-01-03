@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
 import { getClientPlatform } from "../middleware";
+import passwordGenerator from "generate-password";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -54,16 +55,22 @@ export async function validateUserRegistration(
   }
 
   // Check if email exists. If error, return error
+  // TODO: Please fix logic, maybe rewrite or rename emailExists
+  // TODO: If email exists return true, response 'Email already exists'
+  // TODO: If email does not exist return false, response 'None'
+  // TODO: If error, return error, response 'Server error'
   const errorOrEmailAvailable = await emailExists(body.email);
   if (errorOrEmailAvailable instanceof H3Error) return errorOrEmailAvailable;
 
   // If user does not exist, return error
   const emailAvailable = errorOrEmailAvailable as boolean;
-  if (!emailAvailable)
+  if (!emailAvailable) {
+    console.log("Email available error: ");
     return createError({
       statusCode: 403,
       statusMessage: "Email already exists",
     });
+  }
 
   // Check password meets minimum strength requirements
   if (!validatePassword(body.password)) {
@@ -413,7 +420,10 @@ export async function emailExists(email: string): Promise<boolean | H3Error> {
   }
 
   // if user does not exist, return false
-  if (user === null) return false;
+  if (user === null) {
+    console.log("User not found");
+    return false;
+  }
 
   // Otherwise user exists, return true
   return true;
@@ -1115,6 +1125,15 @@ export async function sendResetEmail(user: User, token: string) {
   const text = config.iamResetEmailText;
 
   // TODO: Add validation checking if all these are good, or perhaps move them to the UI
+  console.log("======== Reset Email Values ==========");
+  console.log("url: ", url);
+  console.log("service: ", service);
+  console.log("emailUser: ", emailUser);
+  console.log("password: ", password);
+  console.log("from: ", from);
+  console.log("subject: ", subject);
+  console.log("text: ", text);
+  console.log("======== Reset Email Values end ==========");
 
   const transporter = nodemailer.createTransport({
     service: service,
@@ -1138,6 +1157,10 @@ export async function sendResetEmail(user: User, token: string) {
     `,
   };
 
+  console.log(
+    `Attempting to send email to reset password for use: ${user.email}`
+  );
+
   transporter.sendMail(emailOptions, (err, result) => {
     // If error, log error and return
     if (err) {
@@ -1149,4 +1172,72 @@ export async function sendResetEmail(user: User, token: string) {
     console.log(`Reset email successfully sent to: ${user.email}`);
     console.log("Reset email sending info: ", result.response);
   });
+}
+
+/**
+ * @Desc Generates a new password for user given user's uuid
+ * @param uuid User's uuid
+ * @returns {Promise<H3Error|string>} Returns generated password or error
+ */
+export async function generateNewPassword(
+  uuid: string
+): Promise<H3Error | string> {
+  let error = null;
+
+  // Generate secure password consistent with password policy
+  const password = passwordGenerator.generate({
+    length: 20,
+    numbers: true,
+    symbols: true,
+    strict: true,
+  });
+
+  // Check if password passes password policy
+  const isValidPassword = validatePassword(password);
+  if (!isValidPassword) {
+    console.log("Failed to generate valid password");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // Hash password
+  const errorOrHashedPassword = await hashPassword(password);
+  if (errorOrHashedPassword instanceof H3Error) {
+    console.log("Error hashing password");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  const hashedPassword = errorOrHashedPassword as string;
+
+  // Update database
+  await prisma.users
+    .update({
+      where: {
+        uuid: uuid,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // Check for database errors
+  if (error) {
+    console.log("Error updating user password");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  console.log("Updated user password");
+  return password;
 }
