@@ -11,6 +11,7 @@ import {
   resetPassword,
 } from "./queries";
 import { getClientPlatform } from "~~/iam/middleware";
+import jwt from "jsonwebtoken";
 import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
 import dayjs from "dayjs";
 import { verifyResetToken } from "~~/iam/misc/helpers";
@@ -349,43 +350,67 @@ export async function reset(event: H3Event): Promise<JSONResponse> {
 /**
  * @desc Verifies token sent from user's reset email password
  * @param event H3 Event passed from api
- * @returns {Promise<JSONResponse>} Object mentioning success or failure of authenticating user or error
+ * @returns {Promise<JSONResponse>} Success of failure
  */
-export async function resetVerify(event: H3Event): Promise<JSONResponse> {
+export async function verifyReset(
+  event: H3Event
+): Promise<JSONResponse | void> {
   const response = {} as JSONResponse;
 
   // Delete access and refresh tokens
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
 
-  // Get token from route. Token comes split
-  const { fromRoute } = event.context.params;
+  // Get token from body
+  const body = await readBody(event);
+  const token = body.token;
 
-  // Get split parts of token
-  const tokenHeader = fromRoute.jwtheader;
-  const tokenPayload = fromRoute.jwtpayload;
-  const tokenSignature = fromRoute.jwtsignature;
+  if (!token) {
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+    return response;
+  }
 
-  // Put token together
-  const resetToken = `${tokenHeader}.${tokenPayload}.${tokenSignature}`;
-  console.log("reset token from email: ", resetToken);
+  // Verify token
+  const userOrError = verifyResetToken(token);
 
-  // TODO: Verify token
-  const userOrError = verifyResetToken(resetToken);
-  console.log("userOrError: ", userOrError);
+  // If password reset token is expired, return error
+  if (userOrError instanceof jwt.TokenExpiredError) {
+    console.log("Expired password reset token");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 401,
+      statusMessage: "Link has expired",
+    });
+    return response;
+  }
 
-  // If link expired, say link is expired
+  // If other error coccured, return error
+  if (userOrError instanceof H3Error) {
+    console.log("Other error with password reset token");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
 
-  // If other error, say unauthorized
-
-  // If verification successful, navigate to /updatepassword route
-
-  // Update password should have a check to make sure it's coming only from this route
-
-  // Will reject any requests from anywhere else
-
-  // Response is always successful
+  // Otherwise, return user uuid
+  const user = userOrError as User;
   response.status = "success";
+  response.data = {
+    uuid: user.uuid,
+  };
+
+  // TODO: Send update-password token here in response
+  // TODO: Send in secure cookies only. So it may not work in local development?
+  // TODO: Figure out how to reset password in api
+  // TODO: API password reset may have to use form. Has to since requires email link
+  // TODO: So api, will need to use browser too
 
   return response;
 }

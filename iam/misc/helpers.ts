@@ -1114,7 +1114,7 @@ export async function sendResetEmail(user: User, token: string) {
   const subject = config.iamResetEmailSubject;
   const text = config.iamResetEmailText;
 
-  // Validation
+  // TODO: Add validation checking if all these are good, or perhaps move them to the UI
 
   const transporter = nodemailer.createTransport({
     service: service,
@@ -1134,7 +1134,7 @@ export async function sendResetEmail(user: User, token: string) {
     subject: `${user.first_name}, ${subject}`,
     text: `${text}. Your last login time was: ${user.last_login}
     
-    Password reset link: ${url}/api/iam/authn/verifyreset/${token}
+    Password reset link: ${url}/iam/verify?token=${token}
     `,
   };
 
@@ -1146,6 +1146,7 @@ export async function sendResetEmail(user: User, token: string) {
       return;
     }
 
-    console.log("Email successfully sent: ", result.response);
+    console.log(`Reset email successfully sent to: ${user.email}`);
+    console.log("Reset email sending info: ", result.response);
   });
 }

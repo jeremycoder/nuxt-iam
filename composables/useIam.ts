@@ -12,6 +12,7 @@ export default function useIam() {
     updateProfile,
     deleteAccount,
     resetPassword,
+    verifyReset,
   };
 }
 
@@ -218,6 +219,26 @@ async function resetPassword(email: string): Promise<JSONResponse> {
     },
     body: {
       email: email,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Verify reset token sent by user
+ * @returns {Promise<JSONResponse>}
+ */
+async function verifyReset(token: string): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch("/api/iam/authn/verifyreset", {
+    method: "POST",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+    body: {
+      token: token,
     },
   });
 

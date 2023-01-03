@@ -585,13 +585,12 @@ export async function resetPassword(event: H3Event): Promise<void> {
 
   // Create an object for user reset
   const resetUser = {
-    email: user.email,
-    role: user.role,
+    uuid: user.uuid,
   };
 
   // Create reset jwt token
   const resetToken = jwt.sign(resetUser, config.iamResetTokenSecret, {
-    expiresIn: "15m",
+    expiresIn: "1h",
     issuer: "MuloziAuth",
   });
 

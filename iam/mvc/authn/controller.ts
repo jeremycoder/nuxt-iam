@@ -16,7 +16,7 @@ import {
   isauthenticated,
   destroy,
   reset,
-  resetVerify,
+  verifyReset,
 } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -45,15 +45,6 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await isauthenticated(event);
-        }
-
-        // verifies token sent from reset email
-        result = new route(
-          "/api/iam/authn/verifyreset(/:jwtheader)(.:jwtpayload)(.:jwtsignature)"
-        ).match(url);
-        if (result) {
-          event.context.params.fromRoute = result;
-          return await resetVerify(event);
         }
         break;
       case "POST":
@@ -85,6 +76,13 @@ export default defineEventHandler(async (event) => {
           return await reset(event);
         }
 
+        // verifies token sent from reset email
+        result = new route("/api/iam/authn/verifyreset(/:token)").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await verifyReset(event);
+        }
+
         // log user out
         result = new route("/api/iam/authn/logout").match(url);
         if (result) {
@@ -109,10 +107,6 @@ export default defineEventHandler(async (event) => {
         }
         break;
     }
-
-  // Return method not allowed error
-  console.log("event req method: ", event.node.req.method);
-  console.log("event req url: ", event.node.req.url);
 
   const response = {} as JSONResponse;
   response.status = "fail";
