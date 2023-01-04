@@ -8,6 +8,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
 import { getClientPlatform } from "../middleware";
 import passwordGenerator from "generate-password";
+import sgMail from "@sendgrid/mail";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -1152,16 +1153,18 @@ export async function sendResetEmail(user: User, token: string) {
   console.log("text: ", text);
   console.log("======== Reset Email Values end ==========");
 
+  const updatedText = `${text}. Your last login time was: ${user.last_login}
+    
+  This is a one-time password link that will reveal a temporary password.
+
+  Password reset link: ${url}/iam/verify?token=${token}
+  `;
+
   const emailOptions = {
     from: from,
     to: user.email,
     subject: `${user.first_name}, ${subject}`,
-    text: `${text}. Your last login time was: ${user.last_login}
-    
-    This is a one-time password link that will reveal a temporary password.
-
-    Password reset link: ${url}/iam/verify?token=${token}
-    `,
+    text: updatedText,
   };
 
   // admin@nizamedia.com password: ]th{CRSglaV~
@@ -1252,6 +1255,33 @@ export async function sendResetEmail(user: User, token: string) {
         rejectUnauthorized: false,
       },
     });
+  } else if (emailer === "sendgrid") {
+    const apiKey = config.iamSendGridApiKey;
+
+    // If Sendgrid api key not found
+    if (!apiKey) {
+      console.log("Sendgrid Api key not found. Cannot send email. Aborting.");
+      return;
+    }
+
+    // Attempting to send mail with Sendgrid
+
+    sgMail.setApiKey(apiKey);
+    const msg = {
+      to: user, // Change to your recipient
+      from: "team@studentrepo.com", // Change to your verified sender
+      subject: subject,
+      text: updatedText,
+      // html: updatedText,
+    };
+    sgMail
+      .send(msg)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
   // Prepare to send email

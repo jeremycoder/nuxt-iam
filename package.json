@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "^4.7.1",
+    "@sendgrid/mail": "^7.7.0",
     "@types/jsonwebtoken": "^8.5.9",
     "@types/nodemailer": "^6.4.7",
     "@types/uuid": "^9.0.0",

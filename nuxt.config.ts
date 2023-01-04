@@ -18,6 +18,9 @@ export default defineNuxtConfig({
     iamEmailSubject: process.env.IAM_EMAIL_SUBJECT,
     iamEmailText: process.env.IAM_EMAIL_TEXT,
 
+    // IAM SendGrid
+    iamSendGridApiKey: process.env.SENDGRID_API_KEY,
+
     // Do not put secret information here
     public: {
       iamClientPlatform: process.env.IAM_CLIENT_PLATFORM,
