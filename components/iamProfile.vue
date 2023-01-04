@@ -1,7 +1,23 @@
 <template>
   <div v-if="isLoaded">
     <div v-if="isLoggedIn">
-      <div class="container-xl px-4 mt-4">
+      <div
+        v-if="verifyRegistrations && !emailIsVerified"
+        class="container-xl px-4 mt-4"
+      >
+        <div>
+          <h2>Email verification is required</h2>
+          <p>Please click the button below to verify your email</p>
+          <button
+            class="btn btn-success"
+            type="button"
+            @click="verifyMyEmail(profile.email)"
+          >
+            I understand, delete my account
+          </button>
+        </div>
+      </div>
+      <div v-else class="container-xl px-4 mt-4">
         <!-- Profile errors notification -->
         <div
           v-if="profileError"
@@ -32,7 +48,7 @@
             <span aria-hidden="true">&times;</span></button
           >Profile updated successfully
         </div>
-        <!-- logout button -->
+        <!-- profile button -->
         <div class="row">
           <div class="col-xl-10">
             <h1>Profile</h1>
@@ -57,13 +73,13 @@
           </div>
         </div>
         <hr class="mt-0 mb-4" />
-        <div class="row">
+        <div v-if="showProfile" class="row">
           <div class="col-xl-8">
             <!-- Account details card-->
             <div class="card mb-4">
               <div class="card-header">Account Details</div>
               <div class="card-body">
-                <form v-if="showProfile">
+                <form>
                   <!-- Form Row-->
                   <div class="row gx-3 mb-3">
                     <!-- Form Group (first name)-->
@@ -121,9 +137,8 @@
             </div>
           </div>
         </div>
-
         <hr class="mt-0 mb-4" />
-        <div class="row">
+        <div v-if="showProfile" class="row">
           <div class="col-lg-8">
             <!-- Change password card-->
             <div class="card mb-4">
@@ -214,12 +229,18 @@
 // Get necessary functions from useIam composable
 const { isAuthenticated, getProfile, updateProfile, logout, deleteAccount } =
   useIam();
+
 const router = useRouter();
 const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
 let profileError = ref(null);
 let updateSuccessful = ref(false);
+
+// Check email verification
+const verifyRegistrations =
+  useRuntimeConfig().public.iamVerifyRegistrations === "true";
+const emailIsVerified = ref(false);
 
 // User profile
 const profile = {
@@ -274,6 +295,8 @@ async function getMyProfile() {
     profile.lastName = data.last_name;
     profile.email = data.email;
 
+    // Check email verification status
+    emailIsVerified.value = data.email_verified;
     showProfile.value = true;
   }
 }
@@ -357,6 +380,15 @@ async function deleteMyAccount(profile) {
   // Otherwise, delete was successful, navigate to register
   const router = useRouter();
   router.push("/iam/register");
+}
+
+// Verify my email
+async function verifyMyEmail(email) {
+  console.log("Verifying my email");
+  // TODO: Create composable and route to verify email
+  // TODO: Should send an email with token, good for one day
+  // TODO: After email is verified, update user profile, route user to registration
+  // TODO: Perhaps follow procedure as password reset flow
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below

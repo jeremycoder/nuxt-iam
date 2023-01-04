@@ -6,7 +6,7 @@ export type User = {
   email: string;
   password: string;
   role: "ADMIN" | "GENERAL";
-  password_verified: boolean;
+  email_verified: boolean;
   last_login: Date | null;
 };
 
