@@ -22,3 +22,11 @@ export type Tokens = {
 };
 
 export type ClientPlatforms = "app" | "browser" | "browser-dev";
+
+export type EmailOptions = {
+  to: string;
+  from: string;
+  subject: string;
+  text?: string;
+  html?: string;
+};

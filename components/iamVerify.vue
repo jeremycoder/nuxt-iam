@@ -16,6 +16,8 @@ if (!token) router.push(`/iam/verifyfailed`);
 
 // Verify token
 const { verifyReset } = useIam();
+// TODO: This is being called twice or something. Please fix. User cannot get to updated password
+// TODO: Maybe send response directly to api
 const { status, data, error } = await verifyReset(token);
 
 // If verification fails, navigate to a verify failed page

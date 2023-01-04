@@ -8,7 +8,6 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
 import { getClientPlatform } from "../middleware";
 import passwordGenerator from "generate-password";
-import sgMail from "@sendgrid/mail";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
