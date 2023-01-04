@@ -1274,7 +1274,7 @@ export async function sendResetEmail(user: User, token: string) {
       text: updatedText,
       // html: updatedText,
     };
-    sgMail
+    await sgMail
       .send(msg)
       .then(() => {
         console.log("Email sent");
