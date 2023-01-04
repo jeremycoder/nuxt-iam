@@ -7,14 +7,22 @@
       >
         <div>
           <h2>Email verification is required</h2>
-          <p>Please click the button below to verify your email</p>
-          <button
-            class="btn btn-success"
-            type="button"
-            @click="verifyMyEmail(profile.email)"
-          >
-            I understand, delete my account
-          </button>
+          <h4 v-if="!verificationEmailSent">
+            <p>Please click the button below to verify your email</p>
+            <button
+              class="btn btn-primary"
+              type="button"
+              @click="verifyMyEmail(profile.email)"
+            >
+              Send email verification
+            </button>
+          </h4>
+          <h4 v-else>
+            <p>
+              Please check your email. Check your spam folder too. You should
+              receive it within 15 minutes.
+            </p>
+          </h4>
         </div>
       </div>
       <div v-else class="container-xl px-4 mt-4">
@@ -236,6 +244,7 @@ const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
 let profileError = ref(null);
 let updateSuccessful = ref(false);
+let verificationEmailSent = ref(false);
 
 // Check email verification
 const verifyRegistrations =
@@ -389,6 +398,7 @@ async function verifyMyEmail(email) {
   // TODO: Should send an email with token, good for one day
   // TODO: After email is verified, update user profile, route user to registration
   // TODO: Perhaps follow procedure as password reset flow
+  verificationEmailSent.value = true;
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
