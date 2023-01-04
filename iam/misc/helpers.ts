@@ -1106,6 +1106,7 @@ export async function updateUserProfile(
  * @param token Reset token
  */
 export async function sendResetEmail(user: User, token: string) {
+  console.log("Preparing to send reset email");
   // Get config options
   /**
    * 1. Sign up for a free email account like yourname@outlook.com
@@ -1116,17 +1117,33 @@ export async function sendResetEmail(user: User, token: string) {
    * Please see https://nodemailer.com/smtp/, and https://nodemailer.com/smtp/well-known/
    */
 
-  const url = config.iamResetEmailUrl;
-  const service = config.iamResetEmailService;
-  const emailUser = config.iamResetEmailUser;
-  const password = config.iamResetEmailPassword;
-  const from = config.iamResetEmailFrom;
-  const subject = config.iamResetEmailSubject;
-  const text = config.iamResetEmailText;
+  // Email options
+  const emailer = config.iamEmailer;
+  const url = config.iamEmailUrl;
+  const host = config.iamEmailHost;
+  const port = config.iamEmailPort;
+  const service = config.iamEmailService;
+  const emailUser = config.iamEmailUser;
+  const password = config.iamEmailPassword;
+  const from = config.iamEmailFrom;
+  const subject = config.iamEmailSubject;
+  const text = config.iamEmailText;
+
+  // Error flag
+  let errorFound = false;
+
+  // If emailer not specified, abort trying to send email
+  if (!emailer) {
+    console.log("Emailer not found. Cannot send email. Aborting");
+    return;
+  }
 
   // TODO: Add validation checking if all these are good, or perhaps move them to the UI
   console.log("======== Reset Email Values ==========");
+  console.log("emailer: ", emailer);
   console.log("url: ", url);
+  console.log("host: ", host);
+  console.log("port: ", port);
   console.log("service: ", service);
   console.log("emailUser: ", emailUser);
   console.log("password: ", password);
@@ -1134,18 +1151,6 @@ export async function sendResetEmail(user: User, token: string) {
   console.log("subject: ", subject);
   console.log("text: ", text);
   console.log("======== Reset Email Values end ==========");
-
-  const transporter = nodemailer.createTransport({
-    service: service,
-    auth: {
-      user: emailUser,
-      pass: password,
-    },
-    tls: {
-      // do not fail on invalid certs
-      rejectUnauthorized: false,
-    },
-  });
 
   const emailOptions = {
     from: from,
@@ -1159,21 +1164,130 @@ export async function sendResetEmail(user: User, token: string) {
     `,
   };
 
-  console.log(
-    `Attempting to send email to reset password for use: ${user.email}`
-  );
+  // admin@nizamedia.com password: ]th{CRSglaV~
 
-  transporter.sendMail(emailOptions, (err, result) => {
-    // If error, log error and return
-    if (err) {
-      console.log(err);
-      console.log("Send reset password email error");
+  let transporter = null;
+
+  // Sending email using nodemailer-service
+  if (emailer === "nodemailer-service") {
+    console.log(`Attempting to send mail using ${emailer}`);
+
+    // Check for service
+    if (!service) {
+      console.log("Error: Email service not found. Aborting email send.");
+      errorFound = true;
       return;
     }
 
-    console.log(`Reset email successfully sent to: ${user.email}`);
-    console.log("Reset email sending info: ", result.response);
-  });
+    // Check for email user
+    if (!emailUser) {
+      console.log("Error: Email user not specified. Aborting email send.");
+      errorFound = true;
+      return;
+    }
+
+    // Check for password
+    if (!password) {
+      console.log("Error: Email password not specified. Aborting email send.");
+      errorFound = true;
+      return;
+    }
+
+    transporter = nodemailer.createTransport({
+      service: service,
+      auth: {
+        user: emailUser,
+        pass: password,
+      },
+      tls: {
+        // do not fail on invalid certs
+        rejectUnauthorized: false,
+      },
+    });
+  }
+  // Sending email using nodemailer-smtp
+  else if (emailer === "nodemailer-smtp") {
+    console.log(`Attempting to send mail using ${emailer}`);
+
+    // Check for host
+    if (!host) {
+      console.log("Error: Email host not found. Aborting email send.");
+      errorFound = true;
+      return;
+    }
+
+    // Check for port
+    if (!port) {
+      console.log("Error: Email port not specified. Aborting email send.");
+      errorFound = true;
+      return;
+    }
+
+    // Check for email user
+    if (!emailUser) {
+      console.log("Error: Email user not specified. Aborting email send.");
+      errorFound = true;
+      return;
+    }
+
+    // Check for password
+    if (!password) {
+      console.log("Error: Email password not specified. Aborting email send.");
+      errorFound = true;
+      return;
+    }
+
+    // Create transporter
+    transporter = nodemailer.createTransport({
+      pool: true,
+      host: host,
+      port: port,
+      secure: true, // use TLS
+      auth: {
+        user: emailUser,
+        pass: password,
+      },
+      tls: {
+        // do not fail on invalid certs
+        rejectUnauthorized: false,
+      },
+    });
+  }
+
+  // Prepare to send email
+  if (transporter && !errorFound) {
+    // Check if email server is ready to take our messages
+    transporter.verify(function (error, success) {
+      if (error) {
+        console.log(error);
+        console.log("Email server problem");
+      } else {
+        console.log("Server is ready to take our messages");
+        console.log("Success: ", success);
+      }
+    });
+
+    // Attempt to send email
+    transporter.sendMail(emailOptions, (err, result) => {
+      console.log(
+        `Attempting to send email to reset password for user: ${user.email}`
+      );
+
+      // If error, log error and return
+      if (err) {
+        console.log(err);
+        console.log("Send reset password email error");
+        return;
+      }
+
+      console.log(`Reset email successfully sent to: ${user.email}`);
+      console.log("Reset email sending info: ", result.response);
+    });
+  } else {
+    console.log(
+      "Email transporter not found or errors found. Cannot send reset email."
+    );
+  }
 }
 
 /**

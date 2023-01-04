@@ -6,14 +6,17 @@ export default defineNuxtConfig({
     iamRefreshTokenSecret: process.env.IAM_REFRESH_TOKEN_SECRET,
     iamResetTokenSecret: process.env.IAM_RESET_TOKEN_SECRET,
 
-    // IAM Reset Email Options
-    iamResetEmailUrl: process.env.IAM_RESET_EMAIL_URL,
-    iamResetEmailService: process.env.IAM_RESET_EMAIL_SERVICE,
-    iamResetEmailUser: process.env.IAM_RESET_EMAIL_USER,
-    iamResetEmailPassword: process.env.IAM_RESET_EMAIL_PASSWORD,
-    iamResetEmailFrom: process.env.IAM_RESET_EMAIL_FROM,
-    iamResetEmailSubject: process.env.IAM_RESET_EMAIL_SUBJECT,
-    iamResetEmailText: process.env.IAM_RESET_EMAIL_TEXT,
+    // IAM Email Options
+    iamEmailer: process.env.IAM_EMAILER,
+    iamEmailUrl: process.env.IAM_EMAIL_URL,
+    iamEmailHost: process.env.IAM_EMAIL_HOST,
+    iamEmailPort: process.env.IAM_EMAIL_PORT,
+    iamEmailService: process.env.IAM_EMAIL_SERVICE,
+    iamEmailUser: process.env.IAM_EMAIL_USER,
+    iamEmailPassword: process.env.IAM_EMAIL_PASSWORD,
+    iamEmailFrom: process.env.IAM_EMAIL_FROM,
+    iamEmailSubject: process.env.IAM_EMAIL_SUBJECT,
+    iamEmailText: process.env.IAM_EMAIL_TEXT,
 
     // Do not put secret information here
     public: {
