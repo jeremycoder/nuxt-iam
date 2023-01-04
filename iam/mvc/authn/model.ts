@@ -11,10 +11,15 @@ import {
   resetPassword,
 } from "./queries";
 import { getClientPlatform } from "~~/iam/middleware";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
 import dayjs from "dayjs";
-import { verifyResetToken, generateNewPassword } from "~~/iam/misc/helpers";
+import {
+  verifyResetToken,
+  generateNewPassword,
+  addOneTimeToken,
+  getTokenPayload,
+} from "~~/iam/misc/helpers";
 
 /**
  * @desc Registers (creates) a new user in database
@@ -399,12 +404,44 @@ export async function verifyReset(
     return response;
   }
 
-  // TODO: Can make link one-time use by creating a table of used tokens
-  // TODO: Give token a uuid, and save in table with token expiration date
-  // TODO: id, token, expirate_date
-  // TODO: When used, check if exists in table already
-  // TODO: If exists, reject error as link expired
-  // TODO: Will need to
+  // Get token payload. Check if error
+  const errorOrTokenPayload = getTokenPayload(token, "reset");
+  if (errorOrTokenPayload instanceof H3Error) {
+    console.log("Get token payload error");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
+
+  // If no error, get token payload
+  const tokenPayload = errorOrTokenPayload as JwtPayload;
+
+  // If token has no id, return error
+  if (!tokenPayload.jti) {
+    console.log("Token payload has no id (jwt.jti)");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
+
+  // Attempt to add token, if token already exists, it's used
+  if (
+    tokenPayload.jti !== (await addOneTimeToken(tokenPayload.jti, new Date()))
+  ) {
+    console.log("Adding one time token failed. Token is probably already used");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
 
   // Otherwise generate new password for user
   const user = userOrError as User;
@@ -420,6 +457,7 @@ export async function verifyReset(
   // Otherwise, get newly generated password
   const password = errorOrPassword as string;
 
+  // Return password
   response.status = "success";
   response.data = {
     pass: password,

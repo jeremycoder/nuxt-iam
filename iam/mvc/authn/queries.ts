@@ -592,6 +592,7 @@ export async function resetPassword(event: H3Event): Promise<void> {
   const resetToken = jwt.sign(resetUser, config.iamResetTokenSecret, {
     expiresIn: "1h",
     issuer: "MuloziAuth",
+    jwtid: makeUuid(),
   });
 
   // Send email to user

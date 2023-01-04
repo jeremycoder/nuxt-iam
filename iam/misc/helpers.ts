@@ -1153,6 +1153,8 @@ export async function sendResetEmail(user: User, token: string) {
     subject: `${user.first_name}, ${subject}`,
     text: `${text}. Your last login time was: ${user.last_login}
     
+    This is a one-time password link that will reveal a temporary password.
+
     Password reset link: ${url}/iam/verify?token=${token}
     `,
   };
@@ -1240,4 +1242,112 @@ export async function generateNewPassword(
 
   console.log("Updated user password");
   return password;
+}
+
+/**
+ * @Desc Attempts to add one time token to table, if successful returns the same token id
+ * @param tokenId Token's uuid
+ * @param expiresAt Date and time when token expires
+ * @returns {Promise<H3Error|string>} Returns error or the given uuid
+ */
+export async function addOneTimeToken(
+  tokenId: string,
+  expiresAt: Date
+): Promise<H3Error | string> {
+  let error = null;
+
+  // Update database
+  await prisma.one_time_tokens
+    .create({
+      data: {
+        token_id: tokenId,
+        expires_at: expiresAt,
+      },
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // Check for database errors
+  if (error) {
+    console.log("Error adding one time token");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  console.log("One time token added successfully");
+  return tokenId;
+}
+
+/**
+ * @desc Returns JWT payload if token is valid, otherwise returns an error
+ * @param token JSON web token
+ * @param type Assigned token types
+ */
+export function getTokenPayload(
+  token: string,
+  type: "access" | "refresh" | "reset"
+): H3Error | JwtPayload {
+  let error = null;
+  const tokenTypes = ["access", "refresh", "reset"];
+  let tokenSecret = "";
+  let tempPayload = null;
+  let payload = null;
+
+  // If incorrect token type, return error
+  if (!tokenTypes.includes(type)) {
+    console.log("Invalid token type");
+    return (error = createError({
+      statusCode: 500,
+      statusMessage: "Serve error",
+    }));
+  }
+
+  // Check token type
+  switch (type) {
+    case "access":
+      tokenSecret = config.iamAccessTokenSecret;
+      break;
+    case "refresh":
+      tokenSecret = config.iamRefreshTokenSecret;
+      break;
+    case "reset":
+      tokenSecret = config.iamResetTokenSecret;
+      break;
+  }
+
+  // Get token payload
+  jwt.verify(token, tokenSecret, (err, jwtPayload) => {
+    if (err) {
+      console.log(err);
+
+      // If not, just return the error
+      error = createError({
+        statusCode: 500,
+        statusMessage: "Server error",
+      });
+    } else {
+      tempPayload = jwtPayload;
+    }
+  });
+
+  // Check for errors
+  if (error) return error;
+
+  // Otherwise return Jwt payload
+  if (tempPayload) {
+    console.log("Jwt payload obtained successfully");
+    payload = tempPayload as JwtPayload;
+    return payload;
+  }
+
+  // Return error (to satisfy Typescript demannds)
+  console.log("We should never reach here");
+  return createError({
+    statusCode: 500,
+    statusMessage: "Server error",
+  });
 }
