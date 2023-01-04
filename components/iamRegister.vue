@@ -19,6 +19,9 @@
       <div style="margin-left: 64px">
         <img src="~~/iam/ui/img/nuxt-iam-logo.png/" />
       </div>
+      <div v-if="verifyRegistrations" class="alert alert-warning" role="alert">
+        <strong>Email verification is required.</strong>
+      </div>
       <form>
         <h2 class="text-center">Register</h2>
         <div class="form-group">
@@ -84,6 +87,8 @@
 <script setup>
 // Get necessary functions from useIam composable
 const { register } = useIam();
+const verifyRegistrations =
+  useRuntimeConfig().public.iamVerifyRegistrations === "true";
 
 // Captures any registration errors
 let registerError = ref(null);
