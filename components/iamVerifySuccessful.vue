@@ -4,7 +4,7 @@
       <img src="~~/iam/ui/img/nuxt-iam-logo.png/" />
     </div>
     <h3>Your temporary password is {{ tempPassword }}</h3>
-    <h3>Make sure you change it soon</h3>
+    <h3>Copy it, log in, and change it.</h3>
   </div>
 </template>
 
