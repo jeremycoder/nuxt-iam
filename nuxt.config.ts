@@ -8,18 +8,17 @@ export default defineNuxtConfig({
 
     // IAM Email Options
     iamEmailer: process.env.IAM_EMAILER,
-    iamEmailUrl: process.env.IAM_EMAIL_URL,
-    iamEmailHost: process.env.IAM_EMAIL_HOST,
-    iamEmailPort: process.env.IAM_EMAIL_PORT,
-    iamEmailService: process.env.IAM_EMAIL_SERVICE,
-    iamEmailUser: process.env.IAM_EMAIL_USER,
-    iamEmailPassword: process.env.IAM_EMAIL_PASSWORD,
-    iamEmailFrom: process.env.IAM_EMAIL_FROM,
-    iamEmailSubject: process.env.IAM_EMAIL_SUBJECT,
-    iamEmailText: process.env.IAM_EMAIL_TEXT,
+    iamPublicUrl: process.env.IAM_NODEMAILER_URL,
 
-    // IAM SendGrid
-    iamSendGridApiKey: process.env.SENDGRID_API_KEY,
+    // IAM Nodemailer email
+    iamNodemailerHost: process.env.IAM_NODEMAILER_HOST,
+    iamNodemailerPort: process.env.IAM_NODEMAILER_PORT,
+    iamNodemailerService: process.env.IAM_NODEMAILER_SERVICE,
+    iamNodemailerSender: process.env.IAM_NODEMAILER_SENDER,
+    iamNodemailerPassword: process.env.IAM_NODEMAILER_PASSWORD,
+
+    // IAM SendGrid API KEY
+    iamSendGridApiKey: process.env.IAM_SENDGRID_API_KEY,
 
     // Do not put secret information here
     public: {

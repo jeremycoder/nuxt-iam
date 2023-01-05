@@ -90,7 +90,7 @@ export async function emailWithNodemailerService(
 
   // Check for email user
   if (!senderEmail) {
-    console.log("Error: Email user not specified. Aborting email send.");
+    console.log("Error: Sender email not specified. Aborting email send.");
     return createError({ statusCode: 500, statusMessage: "Server error" });
   }
 
@@ -183,20 +183,20 @@ export async function emailWithNodemailerSmtp(
   // Sending email using nodemailer-service
   console.log("Attempting to send mail using nodemailer-service");
 
-  if (!service) {
-    console.log("Error: Service not specified. Aborting email send.");
+  if (!host) {
+    console.log("Error: Email host not specified. Aborting email send.");
     return createError({ statusCode: 500, statusMessage: "Server error" });
   }
 
   // Check for email user
   if (!senderEmail) {
-    console.log("Error: Email user not specified. Aborting email send.");
+    console.log("Error: Sender email not specified. Aborting email send.");
     return createError({ statusCode: 500, statusMessage: "Server error" });
   }
 
   // Check for password
   if (!senderPassword) {
-    console.log("Error: Email password not specified. Aborting email send.");
+    console.log("Error: Sender password not specified. Aborting email send.");
     return createError({ statusCode: 500, statusMessage: "Server error" });
   }
 

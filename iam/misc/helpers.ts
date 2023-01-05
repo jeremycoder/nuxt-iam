@@ -1,6 +1,5 @@
 // Helper functions for
 import argon2 from "argon2";
-import nodemailer from "nodemailer";
 import { PrismaClient } from "@prisma/client";
 import { User, Tokens } from "~~/iam/misc/types";
 import { v4 as uuidv4 } from "uuid";
@@ -8,6 +7,11 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
 import { getClientPlatform } from "../middleware";
 import passwordGenerator from "generate-password";
+import {
+  emailWithNodemailerService,
+  emailWithNodemailerSmtp,
+  emailWithSendgrid,
+} from "./email";
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -1107,50 +1111,18 @@ export async function updateUserProfile(
  */
 export async function sendResetEmail(user: User, token: string) {
   console.log("Preparing to send reset email");
-  // Get config options
-  /**
-   * 1. Sign up for a free email account like yourname@outlook.com
-   * 2. Make sure you verify your account
-   * 3. Send a test email from your account before using this
-   * 4. Then use the example in the comments below
-   *
-   * Please see https://nodemailer.com/smtp/, and https://nodemailer.com/smtp/well-known/
-   */
 
-  // Email options
+  // Get all email options
   const emailer = config.iamEmailer;
-  const url = config.iamEmailUrl;
+  const url = config.iamPublicUrl;
   const host = config.iamEmailHost;
   const port = config.iamEmailPort;
   const service = config.iamEmailService;
-  const emailUser = config.iamEmailUser;
+  const senderEmail = config.iamEmailSender;
   const password = config.iamEmailPassword;
   const from = config.iamEmailFrom;
   const subject = config.iamEmailSubject;
   const text = config.iamEmailText;
-
-  // Error flag
-  let errorFound = false;
-
-  // If emailer not specified, abort trying to send email
-  if (!emailer) {
-    console.log("Emailer not found. Cannot send email. Aborting");
-    return;
-  }
-
-  // TODO: Add validation checking if all these are good, or perhaps move them to the UI
-  console.log("======== Reset Email Values ==========");
-  console.log("emailer: ", emailer);
-  console.log("url: ", url);
-  console.log("host: ", host);
-  console.log("port: ", port);
-  console.log("service: ", service);
-  console.log("emailUser: ", emailUser);
-  console.log("password: ", password);
-  console.log("from: ", from);
-  console.log("subject: ", subject);
-  console.log("text: ", text);
-  console.log("======== Reset Email Values end ==========");
 
   const updatedText = `${text}. Your last login time was: ${user.last_login}
     
@@ -1159,102 +1131,26 @@ export async function sendResetEmail(user: User, token: string) {
   Password reset link: ${url}/iam/verify?token=${token}
   `;
 
-  const emailOptions = {
-    from: from,
-    to: user.email,
-    subject: `${user.first_name}, ${subject}`,
-    text: updatedText,
-  };
-
-  // admin@nizamedia.com password: ]th{CRSglaV~
-
-  let transporter = null;
-
-  // Sending email using nodemailer-service
-  if (emailer === "nodemailer-service") {
-    console.log(`Attempting to send mail using ${emailer}`);
-
-    // Check for service
-    if (!service) {
-      console.log("Error: Email service not found. Aborting email send.");
-      errorFound = true;
-      return;
-    }
-
-    // Check for email user
-    if (!emailUser) {
-      console.log("Error: Email user not specified. Aborting email send.");
-      errorFound = true;
-      return;
-    }
-
-    // Check for password
-    if (!password) {
-      console.log("Error: Email password not specified. Aborting email send.");
-      errorFound = true;
-      return;
-    }
-
-    transporter = nodemailer.createTransport({
-      service: service,
-      auth: {
-        user: emailUser,
-        pass: password,
-      },
-      tls: {
-        // do not fail on invalid certs
-        rejectUnauthorized: false,
-      },
-    });
+  // Check if emailer is valid
+  const emailers = ["nodemailer-service", "nodemailer-smtp", "sendgrid"];
+  if (!emailers.includes(emailer)) {
+    console.log(
+      `Error: Emailer: ${emailer} is an unknown emailer. Aborting send.`
+    );
+    return;
   }
-  // Sending email using nodemailer-smtp
+
+  // Sending with nodemailer-service
+  if (emailer === "nodemailer-service") {
+    const error = await emailWithNodemailerService();
+  }
+
+  // Sending with nodemailer-smtp
   else if (emailer === "nodemailer-smtp") {
-    console.log(`Attempting to send mail using ${emailer}`);
+  }
 
-    // Check for host
-    if (!host) {
-      console.log("Error: Email host not found. Aborting email send.");
-      errorFound = true;
-      return;
-    }
-
-    // Check for port
-    if (!port) {
-      console.log("Error: Email port not specified. Aborting email send.");
-      errorFound = true;
-      return;
-    }
-
-    // Check for email user
-    if (!emailUser) {
-      console.log("Error: Email user not specified. Aborting email send.");
-      errorFound = true;
-      return;
-    }
-
-    // Check for password
-    if (!password) {
-      console.log("Error: Email password not specified. Aborting email send.");
-      errorFound = true;
-      return;
-    }
-
-    // Create transporter
-    transporter = nodemailer.createTransport({
-      pool: true,
-      host: host,
-      port: port,
-      secure: true, // use TLS
-      auth: {
-        user: emailUser,
-        pass: password,
-      },
-      tls: {
-        // do not fail on invalid certs
-        rejectUnauthorized: false,
-      },
-    });
-  } else if (emailer === "sendgrid") {
+  // Sending with Sendgrid
+  else if (emailer === "sendgrid") {
     const apiKey = config.iamSendGridApiKey;
 
     // If Sendgrid api key not found
@@ -1281,41 +1177,6 @@ export async function sendResetEmail(user: User, token: string) {
       .catch((error) => {
         console.error(error);
       });
-  }
-
-  // Prepare to send email
-  if (transporter && !errorFound) {
-    // Check if email server is ready to take our messages
-    transporter.verify(function (error, success) {
-      if (error) {
-        console.log(error);
-        console.log("Email server problem");
-      } else {
-        console.log("Server is ready to take our messages");
-        console.log("Success: ", success);
-      }
-    });
-
-    // Attempt to send email
-    transporter.sendMail(emailOptions, (err, result) => {
-      console.log(
-        `Attempting to send email to reset password for user: ${user.email}`
-      );
-
-      // If error, log error and return
-      if (err) {
-        console.log(err);
-        console.log("Send reset password email error");
-        return;
-      }
-
-      console.log(`Reset email successfully sent to: ${user.email}`);
-      console.log("Reset email sending info: ", result.response);
-    });
-  } else {
-    console.log(
-      "Email transporter not found or errors found. Cannot send reset email."
-    );
   }
 }
 
