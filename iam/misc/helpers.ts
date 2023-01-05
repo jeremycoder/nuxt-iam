@@ -1,7 +1,7 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { User, Tokens } from "~~/iam/misc/types";
+import { User, Tokens, EmailOptions } from "~~/iam/misc/types";
 import { v4 as uuidv4 } from "uuid";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
@@ -1109,75 +1109,99 @@ export async function updateUserProfile(
  * @param user User's account
  * @param token Reset token
  */
-export async function sendResetEmail(user: User, token: string) {
+export async function sendResetEmail(
+  user: User,
+  token: string
+): Promise<H3Error | true> {
+  const emailers = ["nodemailer-service", "nodemailer-smtp", "sendgrid"];
   console.log("Preparing to send reset email");
 
   // Get all email options
   const emailer = config.iamEmailer;
   const url = config.iamPublicUrl;
-  const host = config.iamEmailHost;
-  const port = config.iamEmailPort;
-  const service = config.iamEmailService;
-  const senderEmail = config.iamEmailSender;
+  const host = config.iamNodemailerHost;
+  const port = config.iamNodemailerPort;
+  const service = config.iamNodemailerService;
+  const sender = config.iamNodemailerSender;
   const password = config.iamEmailPassword;
-  const from = config.iamEmailFrom;
-  const subject = config.iamEmailSubject;
-  const text = config.iamEmailText;
-
-  const updatedText = `${text}. Your last login time was: ${user.last_login}
-    
-  This is a one-time password link that will reveal a temporary password.
-
-  Password reset link: ${url}/iam/verify?token=${token}
-  `;
 
   // Check if emailer is valid
-  const emailers = ["nodemailer-service", "nodemailer-smtp", "sendgrid"];
   if (!emailers.includes(emailer)) {
     console.log(
       `Error: Emailer: ${emailer} is an unknown emailer. Aborting send.`
     );
-    return;
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
   }
+
+  // Create email options
+  const options = {
+    from: sender,
+    to: user.email,
+    subject: "Nuxt IAM reset password link",
+    text: `
+    Hello ${user.first_name},
+    You requested to reset your password. Please follow the link below. If you did not request to reset your password, 
+    disregard this email. Your last login time was: ${user.last_login}.
+      
+    This is a one-time password link that will reveal a temporary password.
+  
+    Password reset link: ${url}/iam/verify?token=${token}
+    `,
+  } as EmailOptions;
 
   // Sending with nodemailer-service
   if (emailer === "nodemailer-service") {
-    const error = await emailWithNodemailerService();
+    const errorOrSent = await emailWithNodemailerService(
+      sender,
+      password,
+      service,
+      options
+    );
+
+    // If error, return error
+    if (errorOrSent instanceof H3Error) return errorOrSent;
+
+    // Otherwise its true
+    return true;
   }
 
   // Sending with nodemailer-smtp
-  else if (emailer === "nodemailer-smtp") {
+  if (emailer === "nodemailer-smtp") {
+    const errorOrSent = await emailWithNodemailerSmtp(
+      sender,
+      password,
+      host,
+      port,
+      options
+    );
+
+    // If error, return error
+    if (errorOrSent instanceof H3Error) return errorOrSent;
+
+    // Otherwise its true
+    return true;
   }
 
   // Sending with Sendgrid
-  else if (emailer === "sendgrid") {
-    const apiKey = config.iamSendGridApiKey;
+  if (emailer === "sendgrid") {
+    const errorOrSent = await emailWithSendgrid(options);
 
-    // If Sendgrid api key not found
-    if (!apiKey) {
-      console.log("Sendgrid Api key not found. Cannot send email. Aborting.");
-      return;
-    }
+    // If error, return error
+    if (errorOrSent instanceof H3Error) return errorOrSent;
 
-    // Attempting to send mail with Sendgrid
-
-    sgMail.setApiKey(apiKey);
-    const msg = {
-      to: user, // Change to your recipient
-      from: "team@studentrepo.com", // Change to your verified sender
-      subject: subject,
-      text: updatedText,
-      // html: updatedText,
-    };
-    await sgMail
-      .send(msg)
-      .then(() => {
-        console.log("Email sent");
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    // Otherwise its true
+    return true;
   }
+
+  // Otherwise return error
+  console.log("We should not get here");
+  return createError({
+    statusCode: 500,
+    statusMessage: "Server error",
+  });
 }
 
 /**
