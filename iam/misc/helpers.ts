@@ -1116,14 +1116,20 @@ export async function sendResetEmail(
   const emailers = ["nodemailer-service", "nodemailer-smtp", "sendgrid"];
   console.log("Preparing to send reset email");
 
-  // Get all email options
+  // Get emailer and url
   const emailer = config.iamEmailer;
   const url = config.iamPublicUrl;
-  const host = config.iamNodemailerHost;
-  const port = config.iamNodemailerPort;
+
+  // nodemailer-service
   const service = config.iamNodemailerService;
-  const sender = config.iamNodemailerSender;
-  const password = config.iamEmailPassword;
+  const serviceSender = config.iamNodemailerServiceSender;
+  const servicePassword = config.iamNodemailerServicePassword;
+
+  // nodemailer-smtp
+  const smtpHost = config.iamNodemailerSmtpHost;
+  const smtpPort = config.iamNodemailerSmtpPort;
+  const smtpSender = config.iamNodemailerSmtpSender;
+  const smtpPassword = config.iamNodemailerSmtpPassword;
 
   // Check if emailer is valid
   if (!emailers.includes(emailer)) {
@@ -1136,9 +1142,8 @@ export async function sendResetEmail(
     });
   }
 
-  // Create email options
+  // Common email options
   const options = {
-    from: sender,
     to: user.email,
     subject: "Nuxt IAM reset password link",
     text: `
@@ -1150,15 +1155,26 @@ export async function sendResetEmail(
   
     Password reset link: ${url}/iam/verify?token=${token}
     `,
+    html: `
+    <p>Hello ${user.first_name}</p>,
+    <p>You requested to reset your password. Please follow the link below. If you did not request to reset your password, 
+    disregard this email. Your last login time was: ${user.last_login}.</p>
+    <p>This is a one-time password link that will reveal a temporary password.</p>
+    <p>Password reset link: ${url}/iam/verify?token=${token}</p>`,
   } as EmailOptions;
 
   // Sending with nodemailer-service
   if (emailer === "nodemailer-service") {
+    //Options to do with nodemailer-service
+    const serviceOptions = options;
+    serviceOptions.from = serviceSender;
+
+    // Attempt to send
     const errorOrSent = await emailWithNodemailerService(
-      sender,
-      password,
+      serviceSender,
+      servicePassword,
       service,
-      options
+      serviceOptions
     );
 
     // If error, return error
@@ -1170,12 +1186,17 @@ export async function sendResetEmail(
 
   // Sending with nodemailer-smtp
   if (emailer === "nodemailer-smtp") {
+    //Options to do with nodemailer-smtp
+    const smtpOptions = options;
+    smtpOptions.from = smtpSender;
+
+    // Attempt to send email
     const errorOrSent = await emailWithNodemailerSmtp(
-      sender,
-      password,
-      host,
-      port,
-      options
+      smtpSender,
+      smtpPassword,
+      smtpHost,
+      smtpPort,
+      smtpOptions
     );
 
     // If error, return error

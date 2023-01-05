@@ -39,8 +39,6 @@ export async function emailWithSendgrid(
   console.log("from: ", msg.from);
   console.log("to: ", msg.to);
   console.log("subject: ", msg.subject);
-  console.log("text: ", msg.text);
-  console.log("html: ", msg.html);
   console.log("=======SENDGRID EMAIL OPTIONS END=========================");
 
   // Send email
@@ -70,15 +68,15 @@ export async function emailWithSendgrid(
 
 /**
  *@desc Sends email using Nodemailer service (e.g. hotmail)
- * @param senderEmail Sender's email address
- * @param senderPassword Sender's password
+ * @param sender Sender's email address
+ * @param password Sender's password
  * @param service Sender's service such as hotmail
  * @param options Options for email such as to, from, subject etc.
  * @returns
  */
 export async function emailWithNodemailerService(
-  senderEmail: string,
-  senderPassword: string,
+  sender: string,
+  password: string,
   service: string,
   options: EmailOptions
 ): Promise<H3Error | true> {
@@ -90,6 +88,7 @@ export async function emailWithNodemailerService(
     to: options.to,
     subject: options.subject,
     text: options.text,
+    html: options.html,
   };
 
   // Sending email using nodemailer-service
@@ -101,23 +100,29 @@ export async function emailWithNodemailerService(
   }
 
   // Check for email user
-  if (!senderEmail) {
+  if (!sender) {
     console.log("Error: Sender email not specified. Aborting email send.");
     return createError({ statusCode: 500, statusMessage: "Server error" });
   }
 
   // Check for password
-  if (!senderPassword) {
+  if (!password) {
     console.log("Error: Email password not specified. Aborting email send.");
     return createError({ statusCode: 500, statusMessage: "Server error" });
   }
+
+  console.log("=======NODEMAILER-SERVICE EMAIL OPTIONS=============");
+  console.log("service: ", service);
+  console.log("from: ", emailOptions.from);
+  console.log("to: ", emailOptions.to);
+  console.log("=========NODEMAILER-SERVICE EMAIL OPTIONS END=================");
 
   // Create transporter
   const transporter = nodemailer.createTransport({
     service: service,
     auth: {
-      user: senderEmail,
-      pass: senderPassword,
+      user: sender,
+      pass: password,
     },
     tls: {
       // do not fail on invalid certs
@@ -168,16 +173,16 @@ export async function emailWithNodemailerService(
 
 /**
  * @desc Sends email using Nodemailer SMTP
- * @param senderEmail Sender's email address
- * @param senderPassword Sender's password
+ * @param sender Sender's email address
+ * @param password Sender's password
  * @param host Email server host
  * @param port Email server port
  * @param options Options for email such as to, from, subject etc.
  * @returns
  */
 export async function emailWithNodemailerSmtp(
-  senderEmail: string,
-  senderPassword: string,
+  sender: string,
+  password: string,
   host: string,
   port: string,
   options: EmailOptions
@@ -201,26 +206,32 @@ export async function emailWithNodemailerSmtp(
   }
 
   // Check for email user
-  if (!senderEmail) {
+  if (!sender) {
     console.log("Error: Sender email not specified. Aborting email send.");
     return createError({ statusCode: 500, statusMessage: "Server error" });
   }
 
   // Check for password
-  if (!senderPassword) {
+  if (!sender) {
     console.log("Error: Sender password not specified. Aborting email send.");
     return createError({ statusCode: 500, statusMessage: "Server error" });
   }
 
+  console.log("=======NODEMAILER-SMTP EMAIL OPTIONS=============");
+  console.log("host: ", host);
+  console.log("port: ", port);
+  console.log("user: ", sender);
+  console.log("=========NODEMAILER-SMTP EMAIL OPTIONS END=================");
+
   // Create transporter
   const transporter = nodemailer.createTransport({
-    pool: true,
     host: host,
     port: port,
+    pool: true,
     secure: true, // use TLS
     auth: {
-      user: senderEmail,
-      pass: senderPassword,
+      user: sender,
+      pass: password,
     },
     tls: {
       // do not fail on invalid certs

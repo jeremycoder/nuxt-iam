@@ -12,12 +12,16 @@ export default defineNuxtConfig({
     // IAM Emailer
     iamEmailer: process.env.IAM_EMAILER,
 
-    // IAM Nodemailer email
-    iamNodemailerHost: process.env.IAM_NODEMAILER_HOST,
-    iamNodemailerPort: process.env.IAM_NODEMAILER_PORT,
+    // nodemailer-service
     iamNodemailerService: process.env.IAM_NODEMAILER_SERVICE,
-    iamNodemailerSender: process.env.IAM_NODEMAILER_SENDER,
-    iamNodemailerPassword: process.env.IAM_NODEMAILER_PASSWORD,
+    iamNodemailerServiceSender: process.env.IAM_NODEMAILER_SERVICE_SENDER,
+    iamNodemailerServicePassword: process.env.IAM_NODEMAILER_SERVICE_PASSWORD,
+
+    // nodemailer-smtp
+    iamNodemailerSmtpHost: process.env.IAM_NODEMAILER_SMTP_HOST,
+    iamNodemailerSmtpPort: process.env.IAM_NODEMAILER_SMTP_PORT,
+    iamNodemailerSmtpSender: process.env.IAM_NODEMAILER_SMTP_SENDER,
+    iamNodemailerSmtpPassword: process.env.IAM_NODEMAILER_SMTP_PASSWORD,
 
     // IAM SendGrid
     iamSendGridApiKey: process.env.IAM_SENDGRID_API_KEY,
