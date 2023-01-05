@@ -1,5 +1,7 @@
 <template>
-  <div>
-    <IamVerify />
-  </div>
+  <ClientOnly>
+    <div>
+      <IamVerify />
+    </div>
+  </ClientOnly>
 </template>

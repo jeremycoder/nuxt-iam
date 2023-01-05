@@ -335,6 +335,7 @@ export async function destroy(event: H3Event): Promise<JSONResponse> {
 /**
  * @desc Reset user's password
  * @param event H3 Event passed from api
+ * @info For security purposes always returns success
  * @returns {Promise<JSONResponse>} Object mentioning success or failure of authenticating user or error
  */
 export async function reset(event: H3Event): Promise<JSONResponse> {
@@ -344,7 +345,13 @@ export async function reset(event: H3Event): Promise<JSONResponse> {
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
 
-  await resetPassword(event);
+  // Send user an email to reset their password
+  const errorOrReset = await resetPassword(event);
+
+  // For security purposes, do not throw errors
+  if (errorOrReset instanceof H3Error) {
+    console.log("Error: Failed to reset user password");
+  }
 
   // For security purposes, response is always successful
   response.status = "success";

@@ -550,38 +550,43 @@ export async function deleteAccount(
 /**
  * @desc Reset user's password
  * @param event H3Event
- * @info For security purposes, returns nothing. All errors log to console.
  */
-export async function resetPassword(event: H3Event): Promise<void> {
+export async function resetPassword(event: H3Event): Promise<H3Error | true> {
   const body = await readBody(event);
 
   // If no email in body, log error
   if ("email" in body === false) {
     console.log("Email missing from body for password reset");
-    return;
+    return createError({
+      statusCode: 400,
+      statusMessage: "Email missing from body for password reset",
+    });
   }
 
   // If email is in bad form, log error
   if (!validateEmail(body.email)) {
     console.log("Bad email format for password reset");
-    return;
+    return createError({
+      statusCode: 400,
+      statusMessage: "Bad email format for password reset",
+    });
   }
 
   // Get user from email
   const nullOrUser = await getUserByEmail(body.email);
   if (!nullOrUser) {
     console.log("Could not get user from email for password reset");
-    return;
+    return createError({
+      statusCode: 400,
+      statusMessage: "Could not get user from email for password reset",
+    });
   }
 
   // Deactivate user's refresh tokens
   const user = nullOrUser as User;
   const voidOrError = await deactivateRefreshTokens(user.id);
 
-  if (voidOrError instanceof H3Error) {
-    console.log(voidOrError.message);
-    return;
-  }
+  if (voidOrError instanceof H3Error) return voidOrError;
 
   // Create an object for user reset
   const resetUser = {
@@ -596,5 +601,9 @@ export async function resetPassword(event: H3Event): Promise<void> {
   });
 
   // Send email to user
-  await sendResetEmail(user, resetToken);
+  const errorOrSent = await sendResetEmail(user, resetToken);
+
+  if (errorOrSent instanceof H3Error) return errorOrSent;
+
+  return true;
 }
