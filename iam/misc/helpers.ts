@@ -1187,6 +1187,8 @@ export async function sendResetEmail(
 
   // Sending with Sendgrid
   if (emailer === "sendgrid") {
+    const sendgridOptions = options;
+    sendgridOptions.from = config.iamSendgridSender;
     const errorOrSent = await emailWithSendgrid(options);
 
     // If error, return error

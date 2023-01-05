@@ -373,6 +373,8 @@ export async function verifyReset(
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
 
+  console.log("In Reset user password");
+
   // Get token from body
   const body = await readBody(event);
   const token = body.token;

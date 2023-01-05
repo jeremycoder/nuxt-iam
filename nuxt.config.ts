@@ -6,9 +6,11 @@ export default defineNuxtConfig({
     iamRefreshTokenSecret: process.env.IAM_REFRESH_TOKEN_SECRET,
     iamResetTokenSecret: process.env.IAM_RESET_TOKEN_SECRET,
 
-    // IAM Email Options
+    // Public Url
+    iamPublicUrl: process.env.IAM_PUBLIC_URL,
+
+    // IAM Emailer
     iamEmailer: process.env.IAM_EMAILER,
-    iamPublicUrl: process.env.IAM_NODEMAILER_URL,
 
     // IAM Nodemailer email
     iamNodemailerHost: process.env.IAM_NODEMAILER_HOST,
@@ -17,8 +19,9 @@ export default defineNuxtConfig({
     iamNodemailerSender: process.env.IAM_NODEMAILER_SENDER,
     iamNodemailerPassword: process.env.IAM_NODEMAILER_PASSWORD,
 
-    // IAM SendGrid API KEY
+    // IAM SendGrid
     iamSendGridApiKey: process.env.IAM_SENDGRID_API_KEY,
+    iamSendgridSender: process.env.IAM_SENDGRID_SENDER,
 
     // Do not put secret information here
     public: {

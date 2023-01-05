@@ -32,10 +32,22 @@ export async function emailWithSendgrid(
     from: options.from, // Change to your verified sender
     subject: options.subject,
     text: options.text ? options.text : "",
-    html: options.html ? options.html : "",
+    html: options.html ? options.html : options.text,
   };
 
+  console.log("=======SENDGRID EMAIL OPTIONS =========================");
+  console.log("from: ", msg.from);
+  console.log("to: ", msg.to);
+  console.log("subject: ", msg.subject);
+  console.log("text: ", msg.text);
+  console.log("html: ", msg.html);
+  console.log("=======SENDGRID EMAIL OPTIONS END=========================");
+
   // Send email
+  console.log("Attempting to send email with Sendgrid");
+  console.log(
+    "Sendgrid requires verified senders. Make sure your sender is verified by Sendgrid."
+  );
   await sgMail
     .send(msg)
     .then(() => {
@@ -167,7 +179,7 @@ export async function emailWithNodemailerSmtp(
   senderEmail: string,
   senderPassword: string,
   host: string,
-  port: number,
+  port: string,
   options: EmailOptions
 ): Promise<H3Error | true> {
   // Error flag
