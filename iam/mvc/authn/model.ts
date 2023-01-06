@@ -9,6 +9,7 @@ import {
   updateProfile,
   deleteAccount,
   resetPassword,
+  verifyUserEmail,
 } from "./queries";
 import { getClientPlatform } from "~~/iam/middleware";
 import jwt, { JwtPayload } from "jsonwebtoken";
@@ -483,7 +484,7 @@ export async function verifyEmail(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
 
   // Send user an email to verify their email
-  const errorOrReset = await resetPassword(event);
+  const errorOrReset = await verifyUserEmail(event);
 
   // Always returns success because user must click link in email to verify it
   if (errorOrReset instanceof H3Error) {
@@ -520,10 +521,10 @@ export async function verifyEmailToken(
   }
 
   // Verify token
-  const userOrError = verifyEmailVerificationToken(token);
+  const jwtPayloadOrError = verifyEmailVerificationToken(token);
 
   // If email verification token is expired, return error
-  if (userOrError instanceof jwt.TokenExpiredError) {
+  if (jwtPayloadOrError instanceof jwt.TokenExpiredError) {
     console.log("Expired email verification reset token");
     response.status = "fail";
     response.error = createError({
@@ -534,7 +535,7 @@ export async function verifyEmailToken(
   }
 
   // If other error coccured, return error
-  if (userOrError instanceof H3Error) {
+  if (jwtPayloadOrError instanceof H3Error) {
     console.log("Other error with email reset token");
     response.status = "fail";
     response.error = createError({
@@ -544,48 +545,9 @@ export async function verifyEmailToken(
     return response;
   }
 
-  // Get token payload. Check if error
-  const errorOrTokenPayload = getTokenPayload(token, "reset");
-  if (errorOrTokenPayload instanceof H3Error) {
-    console.log("Get token payload error");
-    response.status = "fail";
-    response.error = createError({
-      statusCode: 500,
-      statusMessage: "Server error",
-    });
-    return response;
-  }
-
-  // If no error, get token payload
-  const tokenPayload = errorOrTokenPayload as JwtPayload;
-
-  // If token has no id, return error
-  if (!tokenPayload.jti) {
-    console.log("Token payload has no id (jwt.jti)");
-    response.status = "fail";
-    response.error = createError({
-      statusCode: 500,
-      statusMessage: "Server error",
-    });
-    return response;
-  }
-
-  // Attempt to add token, if token already exists, it's used
-  if (
-    tokenPayload.jti !== (await addOneTimeToken(tokenPayload.jti, new Date()))
-  ) {
-    console.log("Adding one time token failed. Token is probably already used");
-    response.status = "fail";
-    response.error = createError({
-      statusCode: 500,
-      statusMessage: "Server error",
-    });
-    return response;
-  }
-
   // Otherwise update user email to verified
-  const user = userOrError as User;
-  const updateError = await updateEmailVerifiedTrue(user.email);
+  const jwtPayload = jwtPayloadOrError as jwt.JwtPayload;
+  const updateError = await updateEmailVerifiedTrue(jwtPayload.email);
 
   if (updateError) {
     console.log("Error updating verified email to true");
@@ -600,7 +562,7 @@ export async function verifyEmailToken(
   // Return password
   response.status = "success";
   response.data = {
-    email: user.email,
+    email: jwtPayload.email,
   };
 
   return response;

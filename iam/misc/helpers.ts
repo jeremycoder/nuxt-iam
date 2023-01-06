@@ -553,6 +553,11 @@ export async function updateEmailVerifiedTrue(
 ): Promise<H3Error | void> {
   let error = null;
 
+  if (!email) {
+    console.log("Error no email provided to update email verified to true");
+    return createError({ statusCode: 400, statusMessage: "No email provided" });
+  }
+
   await prisma.users
     .update({
       where: {

@@ -148,15 +148,13 @@ export async function emailWithNodemailerService(
 
   // Attempt to send email
   transporter.sendMail(emailOptions, (err, result) => {
-    console.log(
-      `Attempting to send email to reset password for user: ${options.to}`
-    );
+    console.log(`Attempting to send email to user: ${options.to}`);
 
     // If error, log error and return
     if (err) {
       console.log(err);
       errorFound = err;
-      console.log("Send reset password email error");
+      console.log("Send email error");
     } else {
       console.log("Email successfully sent");
       console.log("Email result: ", result);
@@ -257,15 +255,13 @@ export async function emailWithNodemailerSmtp(
 
   // Attempt to send email
   transporter.sendMail(emailOptions, (err, result) => {
-    console.log(
-      `Attempting to send email to reset password for user: ${options.to}`
-    );
+    console.log(`Attempting to send email to user: ${options.to}`);
 
     // If error, log error and return
     if (err) {
       console.log(err);
       errorFound = err;
-      console.log("Send reset password email error");
+      console.log("Send email error");
     } else {
       console.log("Email successfully sent");
       console.log("Email result: ", result);

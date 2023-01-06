@@ -235,8 +235,14 @@
 
 <script setup>
 // Get necessary functions from useIam composable
-const { isAuthenticated, getProfile, updateProfile, logout, deleteAccount } =
-  useIam();
+const {
+  isAuthenticated,
+  verifyEmail,
+  getProfile,
+  updateProfile,
+  logout,
+  deleteAccount,
+} = useIam();
 
 const router = useRouter();
 const isLoaded = ref(false);
@@ -393,11 +399,8 @@ async function deleteMyAccount(profile) {
 
 // Verify my email
 async function verifyMyEmail(email) {
-  console.log("Verifying my email");
-  // TODO: Create composable and route to verify email
-  // TODO: Should send an email with token, good for one day
-  // TODO: After email is verified, update user profile, route user to registration
-  // TODO: Perhaps follow procedure as password reset flow
+  console.log("Verifying my email: ", email);
+  verifyEmail(email);
   verificationEmailSent.value = true;
 }
 

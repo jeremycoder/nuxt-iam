@@ -14,6 +14,7 @@ import {
   deactivateRefreshTokens,
   validateEmail,
   sendResetEmail,
+  sendVerifyEmail,
 } from "~~/iam/misc/helpers";
 import { verifyAccessToken } from "~~/iam/misc/helpers";
 import { Tokens, User } from "~~/iam/misc/types";
@@ -612,7 +613,7 @@ export async function resetPassword(event: H3Event): Promise<H3Error | true> {
  * @desc Send email to verify user's email address
  * @param event H3Event
  */
-export async function verifyEmail(event: H3Event): Promise<H3Error | true> {
+export async function verifyUserEmail(event: H3Event): Promise<H3Error | true> {
   const body = await readBody(event);
 
   // If no email in body, log error
@@ -646,7 +647,7 @@ export async function verifyEmail(event: H3Event): Promise<H3Error | true> {
   // Create an object for email verification token
   const user = nullOrUser as User;
   const verifyUser = {
-    uuid: user.uuid,
+    email: user.email,
   };
 
   // Create email verification jwt good for one day
@@ -657,7 +658,7 @@ export async function verifyEmail(event: H3Event): Promise<H3Error | true> {
   });
 
   // Send email to user
-  const errorOrSent = await sendResetEmail(user, emailVerifyToken);
+  const errorOrSent = await sendVerifyEmail(user, emailVerifyToken);
 
   if (errorOrSent instanceof H3Error) return errorOrSent;
 
