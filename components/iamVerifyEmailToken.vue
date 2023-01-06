@@ -3,7 +3,6 @@
 </template>
 
 <script setup>
-const newPassword = ref(null);
 // Get token from route
 const route = useRoute();
 const router = useRouter();
@@ -15,14 +14,12 @@ const token = route.query.token;
 if (!token) router.push(`/iam/verifyfailed`);
 
 // Verify token
-const { verifyReset } = useIam();
-// TODO: This is being called twice or something. Please fix. User cannot get to updated password
-// TODO: Maybe send response directly to api
-const { status, data, error } = await verifyReset(token);
+const { verifyEmailToken } = useIam();
+const { status, data, error } = await verifyEmailToken(token);
 
 // If verification fails, navigate to a verify failed page
 if (error) router.push(`/iam/verifyfailed`);
 
-// If navigate to verify successful page
-if (data) router.push(`/iam/verifysuccessful?pass=${data.pass}`);
+// If successful, navigate to login page
+if (data) router.push(`/iam/login?email_verify=true`);
 </script>

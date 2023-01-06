@@ -15,10 +15,12 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
 import dayjs from "dayjs";
 import {
-  verifyResetToken,
+  verifyPasswordResetToken,
+  verifyEmailVerificationToken,
   generateNewPassword,
   addOneTimeToken,
   getTokenPayload,
+  updateEmailVerifiedTrue,
 } from "~~/iam/misc/helpers";
 
 /**
@@ -336,7 +338,7 @@ export async function destroy(event: H3Event): Promise<JSONResponse> {
  * @desc Reset user's password
  * @param event H3 Event passed from api
  * @info For security purposes always returns success
- * @returns {Promise<JSONResponse>} Object mentioning success or failure of request
+ * @returns {Promise<JSONResponse>} Success of failure
  */
 export async function reset(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
@@ -364,16 +366,12 @@ export async function reset(event: H3Event): Promise<JSONResponse> {
  * @param event H3 Event passed from api
  * @returns {Promise<JSONResponse>} Success of failure
  */
-export async function verifyReset(
-  event: H3Event
-): Promise<JSONResponse | void> {
+export async function verifyReset(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
 
   // Delete access and refresh tokens
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
-
-  console.log("In Reset user password");
 
   // Get token from body
   const body = await readBody(event);
@@ -389,7 +387,7 @@ export async function verifyReset(
   }
 
   // Verify token
-  const userOrError = verifyResetToken(token);
+  const userOrError = verifyPasswordResetToken(token);
 
   // If password reset token is expired, return error
   if (userOrError instanceof jwt.TokenExpiredError) {
@@ -479,7 +477,7 @@ export async function verifyReset(
  * @desc Verifies user's email
  * @param event H3 Event passed from api
  * @info Always returns success
- * @returns {Promise<JSONResponse>} Object mentioning success or failure of request
+ * @returns {Promise<JSONResponse>} Success of failure
  */
 export async function verifyEmail(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
@@ -494,6 +492,116 @@ export async function verifyEmail(event: H3Event): Promise<JSONResponse> {
 
   // For security purposes, response is always successful
   response.status = "success";
+
+  return response;
+}
+
+/**
+ * @desc Verifies token sent from user's email to verify their email
+ * @param event H3 Event passed from api
+ * @returns {Promise<JSONResponse>} Success of failure
+ */
+export async function verifyEmailToken(
+  event: H3Event
+): Promise<JSONResponse | void> {
+  const response = {} as JSONResponse;
+
+  // Get token from body
+  const body = await readBody(event);
+  const token = body.token;
+
+  if (!token) {
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+    return response;
+  }
+
+  // Verify token
+  const userOrError = verifyEmailVerificationToken(token);
+
+  // If email verification token is expired, return error
+  if (userOrError instanceof jwt.TokenExpiredError) {
+    console.log("Expired email verification reset token");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 401,
+      statusMessage: "Link has expired",
+    });
+    return response;
+  }
+
+  // If other error coccured, return error
+  if (userOrError instanceof H3Error) {
+    console.log("Other error with email reset token");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
+
+  // Get token payload. Check if error
+  const errorOrTokenPayload = getTokenPayload(token, "reset");
+  if (errorOrTokenPayload instanceof H3Error) {
+    console.log("Get token payload error");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
+
+  // If no error, get token payload
+  const tokenPayload = errorOrTokenPayload as JwtPayload;
+
+  // If token has no id, return error
+  if (!tokenPayload.jti) {
+    console.log("Token payload has no id (jwt.jti)");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
+
+  // Attempt to add token, if token already exists, it's used
+  if (
+    tokenPayload.jti !== (await addOneTimeToken(tokenPayload.jti, new Date()))
+  ) {
+    console.log("Adding one time token failed. Token is probably already used");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
+
+  // Otherwise update user email to verified
+  const user = userOrError as User;
+  const updateError = await updateEmailVerifiedTrue(user.email);
+
+  if (updateError) {
+    console.log("Error updating verified email to true");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+    return response;
+  }
+
+  // Return password
+  response.status = "success";
+  response.data = {
+    email: user.email,
+  };
 
   return response;
 }

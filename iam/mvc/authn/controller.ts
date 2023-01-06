@@ -18,6 +18,7 @@ import {
   reset,
   verifyReset,
   verifyEmail,
+  verifyEmailToken,
 } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -27,7 +28,6 @@ export default defineEventHandler(async (event) => {
   let result = null;
 
   // Middleware for all authn routes
-  // TODO: This traps reset emai link, reset email link should not require header
   const errorOrPlatform = authnMiddleware(event);
   if (errorOrPlatform instanceof H3Error) throw errorOrPlatform;
 
@@ -89,6 +89,13 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await verifyEmail(event);
+        }
+
+        // verify token sent from user's email verification link
+        result = new route("/api/iam/authn/verifyemailtoken").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await verifyEmailToken(event);
         }
 
         // log user out

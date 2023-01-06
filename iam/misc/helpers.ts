@@ -545,6 +545,36 @@ async function updateLastLogin(email: string): Promise<null | User> {
 }
 
 /**
+ * @desc Updates user's email verified to true
+ * @param email User's email
+ */
+export async function updateEmailVerifiedTrue(
+  email: string
+): Promise<H3Error | void> {
+  let error = null;
+
+  await prisma.users
+    .update({
+      where: {
+        email: email,
+      },
+      data: {
+        email_verified: true,
+      },
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // If error, return error
+  if (error) {
+    console.log("Error updating email verified to true");
+    return createError({ statusCode: 500, statusMessage: "Password error" });
+  }
+}
+
+/**
  * @desc Verifies password against a hash
  * @param hash Hashed password
  * @param password Unhashed password
@@ -616,10 +646,10 @@ export function verifyAccessToken(token: string): H3Error | JwtPayload {
 }
 
 /**
- * @desc Verifies reset password token
+ * @desc Verifies password reset token
  * @param token JSON web token
  */
-export function verifyResetToken(token: string): H3Error | JwtPayload {
+export function verifyPasswordResetToken(token: string): H3Error | JwtPayload {
   let error = null;
   let tokenExpiredError = null;
   let jwtUser = null;
@@ -631,6 +661,57 @@ export function verifyResetToken(token: string): H3Error | JwtPayload {
       // If reset token expired, return error
       if (err instanceof jwt.TokenExpiredError) {
         console.log("Expired password reset token");
+        tokenExpiredError = err;
+      }
+
+      // If not, just return the error
+      error = createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized",
+      });
+    } else {
+      jwtUser = user as JwtPayload;
+    }
+  });
+
+  // Check token expiration error first
+  if (tokenExpiredError) return tokenExpiredError;
+
+  // If other error, return error
+  if (error)
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+
+  // If token was valid and we got back a user, return the user
+  if (jwtUser) return jwtUser;
+
+  // Otherwise return the error
+  return createError({
+    statusCode: 401,
+    statusMessage: "Unauthorized",
+  });
+}
+
+/**
+ * @desc Verifies email verification token
+ * @param token JSON web token
+ */
+export function verifyEmailVerificationToken(
+  token: string
+): H3Error | JwtPayload {
+  let error = null;
+  let tokenExpiredError = null;
+  let jwtUser = null;
+
+  jwt.verify(token, config.iamVerifyTokenSecret, (err, user) => {
+    if (err) {
+      console.log(err);
+
+      // If email verification token expired, return error
+      if (err instanceof jwt.TokenExpiredError) {
+        console.log("Expired email verification token");
         tokenExpiredError = err;
       }
 

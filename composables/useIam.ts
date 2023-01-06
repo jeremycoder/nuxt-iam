@@ -14,6 +14,7 @@ export default function useIam() {
     resetPassword,
     verifyReset,
     verifyEmail,
+    verifyEmailToken,
   };
 }
 
@@ -260,6 +261,26 @@ async function verifyEmail(email: string): Promise<JSONResponse> {
     },
     body: {
       email: email,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Verify email verification token sent by user
+ * @returns {Promise<JSONResponse>}
+ */
+async function verifyEmailToken(token: string): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch("/api/iam/authn/verifyemailtoken", {
+    method: "POST",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+    body: {
+      token: token,
     },
   });
 

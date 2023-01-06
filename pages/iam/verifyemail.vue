@@ -1,7 +1,7 @@
 <template>
   <ClientOnly>
     <div>
-      <IamVerifyPasswordReset />
+      <IamVerifyEmailToken />
     </div>
   </ClientOnly>
 </template>
