@@ -17,6 +17,7 @@ import {
   destroy,
   reset,
   verifyReset,
+  verifyEmail,
 } from "./model";
 
 export default defineEventHandler(async (event) => {
@@ -81,6 +82,13 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await verifyReset(event);
+        }
+
+        // send email to verify user email
+        result = new route("/api/iam/authn/verifyemail").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await verifyEmail(event);
         }
 
         // log user out

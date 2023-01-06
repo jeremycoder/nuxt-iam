@@ -5,6 +5,7 @@ export default defineNuxtConfig({
     iamAccessTokenSecret: process.env.IAM_ACCESS_TOKEN_SECRET,
     iamRefreshTokenSecret: process.env.IAM_REFRESH_TOKEN_SECRET,
     iamResetTokenSecret: process.env.IAM_RESET_TOKEN_SECRET,
+    iamVerifyTokenSecret: process.env.IAM_VERIFY_TOKEN_SECRET,
 
     // Public Url
     iamPublicUrl: process.env.IAM_PUBLIC_URL,

@@ -596,12 +596,68 @@ export async function resetPassword(event: H3Event): Promise<H3Error | true> {
   // Create reset jwt token
   const resetToken = jwt.sign(resetUser, config.iamResetTokenSecret, {
     expiresIn: "1h",
-    issuer: "MuloziAuth",
+    issuer: "NuxtIam",
     jwtid: makeUuid(),
   });
 
   // Send email to user
   const errorOrSent = await sendResetEmail(user, resetToken);
+
+  if (errorOrSent instanceof H3Error) return errorOrSent;
+
+  return true;
+}
+
+/**
+ * @desc Send email to verify user's email address
+ * @param event H3Event
+ */
+export async function verifyEmail(event: H3Event): Promise<H3Error | true> {
+  const body = await readBody(event);
+
+  // If no email in body, log error
+  if ("email" in body === false) {
+    console.log("Email missing from body for email verification");
+    return createError({
+      statusCode: 400,
+      statusMessage: "Email missing from body for email verification",
+    });
+  }
+
+  // If email is in bad form, log error
+  if (!validateEmail(body.email)) {
+    console.log("Bad email format for email verification");
+    return createError({
+      statusCode: 400,
+      statusMessage: "Bad email format for email verification",
+    });
+  }
+
+  // Get user from email
+  const nullOrUser = await getUserByEmail(body.email);
+  if (!nullOrUser) {
+    console.log("Could not get user from email for email verification");
+    return createError({
+      statusCode: 400,
+      statusMessage: "Could not get user from email for email verification",
+    });
+  }
+
+  // Create an object for email verification token
+  const user = nullOrUser as User;
+  const verifyUser = {
+    uuid: user.uuid,
+  };
+
+  // Create email verification jwt good for one day
+  const emailVerifyToken = jwt.sign(verifyUser, config.iamVerifyTokenSecret, {
+    expiresIn: "24h",
+    issuer: "NuxtIam",
+    jwtid: makeUuid(),
+  });
+
+  // Send email to user
+  const errorOrSent = await sendResetEmail(user, emailVerifyToken);
 
   if (errorOrSent instanceof H3Error) return errorOrSent;
 

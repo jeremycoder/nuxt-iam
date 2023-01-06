@@ -8,6 +8,7 @@ export type User = {
   role: "ADMIN" | "GENERAL";
   email_verified: boolean;
   last_login: Date | null;
+  created_at: Date;
 };
 
 export type JSONResponse = {

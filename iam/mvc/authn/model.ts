@@ -336,7 +336,7 @@ export async function destroy(event: H3Event): Promise<JSONResponse> {
  * @desc Reset user's password
  * @param event H3 Event passed from api
  * @info For security purposes always returns success
- * @returns {Promise<JSONResponse>} Object mentioning success or failure of authenticating user or error
+ * @returns {Promise<JSONResponse>} Object mentioning success or failure of request
  */
 export async function reset(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
@@ -471,6 +471,29 @@ export async function verifyReset(
   response.data = {
     pass: password,
   };
+
+  return response;
+}
+
+/**
+ * @desc Verifies user's email
+ * @param event H3 Event passed from api
+ * @info Always returns success
+ * @returns {Promise<JSONResponse>} Object mentioning success or failure of request
+ */
+export async function verifyEmail(event: H3Event): Promise<JSONResponse> {
+  const response = {} as JSONResponse;
+
+  // Send user an email to verify their email
+  const errorOrReset = await resetPassword(event);
+
+  // Always returns success because user must click link in email to verify it
+  if (errorOrReset instanceof H3Error) {
+    console.log("Error: Failed to send email to verify user email");
+  }
+
+  // For security purposes, response is always successful
+  response.status = "success";
 
   return response;
 }
