@@ -31,3 +31,14 @@ export type EmailOptions = {
   text?: string;
   html?: string;
 };
+
+export type RolePermission = {
+  id: number;
+  user_uuid: string;
+  is_super_admin: boolean;
+  is_admin: boolean;
+  is_general: boolean;
+  date_created: Date;
+};
+
+export type RolePermissions = Array<RolePermission>;

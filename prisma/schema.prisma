@@ -8,23 +8,27 @@ datasource db {
 }
 
 model users {
-  id             Int              @id @default(autoincrement())
-  uuid           String           @unique(map: "uuid") @db.VarChar(60)
-  email          String           @unique(map: "email") @db.VarChar(255)
-  password       String           @db.VarChar(255)
-  first_name     String           @db.VarChar(255)
-  last_name      String           @db.VarChar(255)
-  role           role             @default(GENERAL)
-  email_verified Boolean          @default(false)
-  last_login     DateTime?        @db.DateTime(0)
-  created_at     DateTime         @default(now()) @db.DateTime(0)
-  deleted_at     DateTime?        @db.DateTime(0)
-  refresh_tokens refresh_tokens[]
+  id                Int                 @id @default(autoincrement())
+  uuid              String              @unique(map: "uuid") @db.VarChar(60)
+  email             String              @unique(map: "email") @db.VarChar(255)
+  password          String              @db.VarChar(255)
+  first_name        String              @db.VarChar(255)
+  last_name         String              @db.VarChar(255)
+  role              role                @default(GENERAL)
+  email_verified    Boolean             @default(false)
+  last_login        DateTime?           @db.DateTime(0)
+  created_at        DateTime            @default(now()) @db.DateTime(0)
+  deleted_at        DateTime?           @db.DateTime(0)
+  refresh_tokens    refresh_tokens[]
+  profile_perms     profile_perms[]
+  users_table_perms users_table_perms[]
+  role_perms        role_perms[]
 }
 
 enum role {
-  GENERAL
+  SUPER_ADMIN
   ADMIN
+  GENERAL
 }
 
 model refresh_tokens {
@@ -46,4 +50,40 @@ model one_time_tokens {
 
 enum tokenType {
   RESET
+}
+
+model role_perms {
+  id             Int      @id @default(autoincrement())
+  users          users    @relation(fields: [user_uuid], references: [uuid])
+  user_uuid      String   @unique(map: "user_uuid") @db.VarChar(60)
+  is_super_admin Boolean  @default(false)
+  is_admin       Boolean  @default(false)
+  is_general     Boolean  @default(false)
+  updated_at     DateTime @db.DateTime(0)
+  created_at     DateTime @default(now()) @db.DateTime(0)
+}
+
+model profile_perms {
+  id                 Int      @id @default(autoincrement())
+  users              users    @relation(fields: [user_uuid], references: [uuid])
+  user_uuid          String   @unique(map: "user_uuid") @db.VarChar(60)
+  can_view_profile   Boolean  @default(true)
+  can_update_profile Boolean  @default(true)
+  can_delete_profile Boolean  @default(true)
+  updated_at         DateTime @db.DateTime(0)
+  created_at         DateTime @default(now()) @db.DateTime(0)
+}
+
+// * means all users, anything else will check for uuids
+model users_table_perms {
+  id               Int      @id @default(autoincrement())
+  users            users    @relation(fields: [user_uuid], references: [uuid])
+  user_uuid        String   @unique(map: "user_uuid") @db.VarChar(60)
+  can_create_users String
+  can_view_users   String
+  can_update_users String
+  can_delete_users String
+  expires_at       DateTime @db.DateTime(0)
+  updated_at       DateTime @db.DateTime(0)
+  created_at       DateTime @default(now()) @db.DateTime(0)
 }
