@@ -5,7 +5,7 @@ export type User = {
   uuid: string;
   email: string;
   password: string;
-  role: "ADMIN" | "GENERAL";
+  role: "SUPER_ADMIN" | "ADMIN" | "GENERAL";
   email_verified: boolean;
   last_login: Date | null;
   created_at: Date;
@@ -32,13 +32,16 @@ export type EmailOptions = {
   html?: string;
 };
 
-export type RolePermission = {
+export type UsersTablePermission = {
   id: number;
-  user_uuid: string;
-  is_super_admin: boolean;
-  is_admin: boolean;
-  is_general: boolean;
-  date_created: Date;
+  user_id?: number;
+  can_create?: string;
+  can_read?: string;
+  can_edit?: string;
+  can_delete?: string;
+  expires_at?: Date;
+  updated_at?: Date;
+  created_at?: Date;
 };
 
-export type RolePermissions = Array<RolePermission>;
+export type UsersTablePermissions = Array<UsersTablePermission>;

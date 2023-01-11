@@ -158,7 +158,13 @@ export async function destroyUser(event: H3Event): Promise<boolean | H3Error> {
     });
 
   // If we encounter an error, return error
-  if (error) return error;
+  if (error) {
+    console.log("Error deleting user");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
 
   // If we have a user, return the boolean
   if (user) return true;

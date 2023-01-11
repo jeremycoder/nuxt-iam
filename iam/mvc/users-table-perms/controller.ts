@@ -1,5 +1,5 @@
-/* Users controller
- * Routes all role requests
+/* Users Table Permissions controller
+ * Routes all permission requests
  */
 
 import UrlPattern from "url-pattern";
@@ -16,15 +16,15 @@ export default defineEventHandler(async (event) => {
   if (method && url)
     switch (method) {
       case "GET":
-        // show all roles
-        result = new route("/api/iam/role-perms").match(url);
+        // show all permissions
+        result = new route("/api/iam/users-table-perms").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await index(event);
         }
 
-        // show a particular role
-        result = new route("/api/iam/role-perms(/:id)").match(url);
+        // show a particular permission
+        result = new route("/api/iam/users-table-perms(/:id)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await show(event);
@@ -32,8 +32,8 @@ export default defineEventHandler(async (event) => {
         break;
 
       case "POST":
-        // add new role to database
-        result = new route("/api/iam/role-perms/create").match(url);
+        // add new permission to database
+        result = new route("/api/iam/users-table-perms").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await create(event);
@@ -41,8 +41,8 @@ export default defineEventHandler(async (event) => {
         break;
 
       case "PUT":
-        // update particular role then redirect
-        result = new route("/api/iam/role-perms(/:id)").match(url);
+        // update particular permission then redirect
+        result = new route("/api/iam/users-table-perms(/:id)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await update(event);
@@ -50,8 +50,8 @@ export default defineEventHandler(async (event) => {
         break;
 
       case "DELETE":
-        // delete particular role
-        result = new route("/api/iam/role-perms(/:id)").match(url);
+        // delete particular permission
+        result = new route("/api/iam/users-table-perms(/:id)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
           return await destroy(event);

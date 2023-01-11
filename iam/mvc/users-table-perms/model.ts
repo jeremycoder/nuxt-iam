@@ -1,38 +1,37 @@
 import { H3Event, H3Error } from "h3";
 import {
   getRolePermissions,
-  createRolePermission,
+  createUsersTablePermission,
   showRolePermission,
   updateRolePermission,
-  destroyRolePermission,
+  destroyUsersTablePermission,
 } from "./queries";
 import {
   JSONResponse,
-  RolePermissions,
-  RolePermission,
-  User,
+  UsersTablePermissions,
+  UsersTablePermission,
 } from "~~/iam/misc/types";
 
 /**
- * @desc Shows all role permissions
+ * @desc Shows all permissions
  * @param event H3 Event passed from api
  * @returns {Promise<JSONResponse>} Returns success or fail api response
  */
 export async function index(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
-  const errorOrRolePerms = await getRolePermissions(event);
+  const errorOrUsersTablePerms = await getUsersTablePermissions(event);
 
   // If error, return error
-  if (errorOrRolePerms instanceof H3Error) {
+  if (errorOrUsersTablePerms instanceof H3Error) {
     response.status = "fail";
-    response.error = errorOrRolePerms;
+    response.error = errorOrUsersTablePerms;
     return response;
   }
 
   // Otherwise, return role permissions
-  const rolePerms = errorOrRolePerms as RolePermissions;
+  const usersTablePerms = errorOrUsersTablePerms as UsersTablePermissions;
   response.status = "success";
-  response.data = rolePerms;
+  response.data = usersTablePerms;
 
   return response;
 }
@@ -44,19 +43,19 @@ export async function index(event: H3Event): Promise<JSONResponse> {
  */
 export async function create(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
-  const errorOrRolePerm = await createRolePermission(event);
+  const errorOrPerm = await createUsersTablePermission(event);
 
   // If error, return error
-  if (errorOrRolePerm instanceof H3Error) {
+  if (errorOrPerm instanceof H3Error) {
     response.status = "fail";
-    response.error = errorOrRolePerm;
+    response.error = errorOrPerm;
     return response;
   }
 
   // Otherwise, return role permissions
-  const rolePerm = errorOrRolePerm as RolePermission;
+  const perm = errorOrPerm as UsersTablePermission;
   response.status = "success";
-  response.data = rolePerm;
+  response.data = perm;
 
   return response;
 }
@@ -116,7 +115,7 @@ export async function update(event: H3Event): Promise<JSONResponse> {
  */
 export async function destroy(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
-  const errorOrRolePerm = await destroyRolePermission(event);
+  const errorOrRolePerm = await destroyUsersTablePermission(event);
 
   // If error, return error
   if (errorOrRolePerm instanceof H3Error) {
