@@ -62,8 +62,8 @@ model users_table_perms {
   id         Int       @id @default(autoincrement())
   users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id    Int?      @unique
-  can_create String?
-  can_read   String?
+  can_create Boolean?
+  can_read   String? // * | [uuid], [uuid], [uuid]
   can_update String?
   can_delete String?
   expires_at DateTime? @db.DateTime(0)

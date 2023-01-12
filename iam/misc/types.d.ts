@@ -35,9 +35,9 @@ export type EmailOptions = {
 export type UsersTablePermission = {
   id: number;
   user_id?: number;
-  can_create?: string;
+  can_create?: boolean;
   can_read?: string;
-  can_edit?: string;
+  can_update?: string;
   can_delete?: string;
   expires_at?: Date;
   updated_at?: Date;

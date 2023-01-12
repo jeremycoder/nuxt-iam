@@ -1,9 +1,9 @@
 import { H3Event, H3Error } from "h3";
 import {
-  getRolePermissions,
+  getUsersTablePermissions,
   createUsersTablePermission,
-  showRolePermission,
-  updateRolePermission,
+  showUsersTablePermission,
+  updateUsersTablePermission,
   destroyUsersTablePermission,
 } from "./queries";
 import {
@@ -61,25 +61,25 @@ export async function create(event: H3Event): Promise<JSONResponse> {
 }
 
 /**
- * @desc Show a particular role permission
+ * @desc Show a particular permission
  * @param event H3 Event passed from api
  * @returns {Promise<JSONResponse>} Returns success or fail api response
  */
 export async function show(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
-  const errorOrRolePerm = await showRolePermission(event);
+  const errorOrPerm = await showUsersTablePermission(event);
 
   // If error, return error
-  if (errorOrRolePerm instanceof H3Error) {
+  if (errorOrPerm instanceof H3Error) {
     response.status = "fail";
-    response.error = errorOrRolePerm;
+    response.error = errorOrPerm;
     return response;
   }
 
-  // Otherwise, return role permission
-  const rolePerm = errorOrRolePerm as RolePermission;
+  // Otherwise, return permission
+  const perm = errorOrPerm as UsersTablePermission;
   response.status = "success";
-  response.data = rolePerm;
+  response.data = perm;
 
   return response;
 }
@@ -91,7 +91,7 @@ export async function show(event: H3Event): Promise<JSONResponse> {
  */
 export async function update(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
-  const errorOrRolePerm = await updateRolePermission(event);
+  const errorOrRolePerm = await updateUsersTablePermission(event);
 
   // If error, return error
   if (errorOrRolePerm instanceof H3Error) {
@@ -101,7 +101,7 @@ export async function update(event: H3Event): Promise<JSONResponse> {
   }
 
   // Otherwise, return role
-  const role = errorOrRolePerm as RolePermission;
+  const role = errorOrRolePerm as UsersTablePermission;
   response.status = "success";
   response.data = role;
 

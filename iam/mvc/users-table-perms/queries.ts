@@ -7,13 +7,13 @@ const prisma = new PrismaClient();
 const rowLimit = 100;
 
 /**
- * @desc Gets all role permissions
+ * @desc Gets permissions
  * @param event H3Event
  */
 export async function getUsersTablePermissions(
   event: H3Event
-): Promise<RolePermissions | H3Error> {
-  let rolePermissions = [] as RolePermissions;
+): Promise<UsersTablePermissions | H3Error> {
+  let permissions = [] as UsersTablePermissions;
   let error = null;
 
   await prisma.users_table_perms
@@ -21,16 +21,16 @@ export async function getUsersTablePermissions(
       take: rowLimit,
     })
     .then(async (result) => {
-      rolePermissions = result;
+      permissions = result as UsersTablePermissions;
     })
     .catch(async (e) => {
       console.error(e);
       error = e;
     });
 
-  // Return error or role permissions
+  // Return error or permissions
   if (error) return error;
-  else return rolePermissions;
+  else return permissions;
 }
 
 /**
@@ -64,7 +64,7 @@ export async function createUsersTablePermission(
       },
     })
     .then(async (result) => {
-      permission = result;
+      permission = result as UsersTablePermission;
     })
     .catch(async (e) => {
       console.error(e);
@@ -87,15 +87,15 @@ export async function createUsersTablePermission(
 }
 
 /**
- * @desc Gets one role permission
+ * @desc Gets one permission
  * @param event H3Event
  */
-export async function showRolePermission(
+export async function showUsersTablePermission(
   event: H3Event
-): Promise<RolePermission | H3Error> {
+): Promise<UsersTablePermission | H3Error> {
   const { id } = event.context.params.fromRoute;
   let error = null;
-  let rolePerm = {} as RolePermission | null;
+  let permission = {} as UsersTablePermission | null;
 
   // Error if not id
   if (!id)
@@ -111,7 +111,7 @@ export async function showRolePermission(
       },
     })
     .then(async (result) => {
-      if (result) rolePerm = result;
+      permission = result as UsersTablePermission;
     })
     .catch(async (e) => {
       console.error(e);
@@ -121,26 +121,27 @@ export async function showRolePermission(
   // If error, return error
   if (error) return error;
 
-  // Because Prisma can return null for role permission, we have to check for null before returning role permission
-  if (rolePerm === null)
+  // Because Prisma can return null for permission, we have to check for null before returning permission
+  if (permission === null)
     return createError({
       statusCode: 404,
-      statusMessage: "Role permission not found",
+      statusMessage: "Permission not found",
     });
-  else return rolePerm;
+  else return permission;
 }
 
 /**
  * @desc Update a role permission
  * @param event H3Event
  */
-export async function updateRolePermission(
+export async function updateUsersTablePermission(
   event: H3Event
-): Promise<RolePermission | H3Error> {
+): Promise<UsersTablePermission | H3Error> {
   // Get parameters
   const body = await readBody(event);
   const { id } = event.context.params.fromRoute;
-  let rolePerm = {} as RolePermission;
+  let permission = {} as UsersTablePermission;
+  let updatedPermission = {} as UsersTablePermission;
   let error = null;
 
   // Error if no id
@@ -150,20 +151,61 @@ export async function updateRolePermission(
       statusMessage: "id is required",
     });
 
+  // First get current values
+  await prisma.users_table_perms
+    .findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    })
+    .then(async (result) => {
+      permission = result as UsersTablePermission;
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // If error, return error
+  if (error) return error;
+
+  // Because Prisma can return null for permission, we have to check for null before returning permission
+  if (permission === null)
+    return createError({
+      statusCode: 404,
+      statusMessage: "Permission not found",
+    });
+
+  // Get current values
+  let canCreate = permission.can_create;
+  let canRead = permission.can_read;
+  let canUpdate = permission.can_update;
+  let canDelete = permission.can_delete;
+  let expiresAt = permission.expires_at;
+
+  // Update values if values are sent in body
+  if ("can_create" in body) canCreate = body.can_create;
+  if ("can_read" in body) canRead = body.can_read;
+  if ("can_update" in body) canUpdate = body.can_update;
+  if ("can_delete" in body) canDelete = body.can_delete;
+  if ("expires_at" in body) expiresAt = body.expires_at;
+
   await prisma.users_table_perms
     .update({
       where: {
         id: parseInt(id),
       },
       data: {
-        is_super_admin: body.is_super_admin,
-        is_admin: body.is_admin,
-        is_general: body.is_general,
+        can_create: canCreate,
+        can_read: canRead,
+        can_update: canUpdate,
+        can_delete: canDelete,
+        expires_at: expiresAt,
         updated_at: new Date(),
       },
     })
     .then(async (response) => {
-      rolePerm = response;
+      updatedPermission = response as UsersTablePermission;
     })
     .catch(async (e) => {
       console.error(e);
@@ -172,14 +214,14 @@ export async function updateRolePermission(
 
   // If error, return error
   if (error) {
-    console.log("Error updating role permission");
+    console.log("Error updating permission");
     return createError({
       statusCode: 500,
       statusMessage: "Server error",
     });
   }
 
-  return rolePerm;
+  return updatedPermission;
 }
 
 /**
