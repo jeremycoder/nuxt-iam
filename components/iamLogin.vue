@@ -1,23 +1,22 @@
 <template>
   <div class="container">
-    <!-- If we receive an error -->
-    <div
-      v-if="loginError"
-      class="alert alert-danger alert-dismissable"
-      role="alert"
-    >
-      <button
-        @click="loginError = null"
-        type="button"
-        class="close"
-        aria-label="Close"
-      >
-        <span aria-hidden="true">&times;</span></button
-      >{{ loginError.message }}
-    </div>
-    <div class="login-form">
+    <div class="login-form" style="margin-bottom: 40px">
       <div style="margin-left: 64px">
-        <img src="~~/iam/ui/img/nuxt-iam-logo.png/" />
+        <img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 200px" />
+      </div>
+      <div
+        v-if="loginError"
+        class="alert alert-danger alert-dismissable"
+        role="alert"
+      >
+        <button
+          @click="loginError = null"
+          type="button"
+          class="close"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span></button
+        >{{ loginError.message }}
       </div>
       <form>
         <h2 class="text-center">Log in</h2>
@@ -100,8 +99,8 @@ async function tryLogin() {
   loginData.value = loginResponse.data;
   console.log("loginResponse: ", loginResponse);
 
-  // If login successful, route to profile page
-  if (loginStatus.value === "success") router.push("/iam/profile");
+  // If login successful, route to dashboard page
+  if (loginStatus.value === "success") router.push("/iam/dashboard");
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
@@ -111,12 +110,6 @@ useHead({
     rel: "stylesheet",
     href: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",
     type: "text/css",
-  },
-  script: {
-    src: "https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js",
-  },
-  script: {
-    src: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js",
   },
 });
 </script>

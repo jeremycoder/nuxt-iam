@@ -5,6 +5,7 @@ export type User = {
   uuid: string;
   email: string;
   password: string;
+  avatar?: string;
   role: "SUPER_ADMIN" | "ADMIN" | "GENERAL";
   email_verified: boolean;
   last_login: Date | null;

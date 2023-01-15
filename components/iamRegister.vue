@@ -1,26 +1,25 @@
 <template>
   <div class="container">
-    <!-- If we receive an error -->
-    <div
-      v-if="registerError"
-      class="alert alert-danger alert-dismissable"
-      role="alert"
-    >
-      <button
-        @click="registerError = null"
-        type="button"
-        class="close"
-        aria-label="Close"
-      >
-        <span aria-hidden="true">&times;</span></button
-      >{{ registerError.message }}
-    </div>
-    <div class="register-form">
+    <div class="register-form" style="margin-bottom: 40px">
       <div style="margin-left: 64px">
-        <img src="~~/iam/ui/img/nuxt-iam-logo.png/" />
+        <img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 200px" />
       </div>
       <div v-if="verifyRegistrations" class="alert alert-warning" role="alert">
         <strong>Email verification is required.</strong>
+      </div>
+      <div
+        v-if="registerError"
+        class="alert alert-danger alert-dismissable"
+        role="alert"
+      >
+        <button
+          @click="registerError = null"
+          type="button"
+          class="close"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span></button
+        >{{ registerError.message }}
       </div>
       <form>
         <h2 class="text-center">Register</h2>

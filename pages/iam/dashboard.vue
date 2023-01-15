@@ -1,5 +1,5 @@
 <template>
   <div>
-    <iamAdmin />
+    <iamDashboard />
   </div>
 </template>
