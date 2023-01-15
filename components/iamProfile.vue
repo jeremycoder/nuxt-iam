@@ -57,169 +57,282 @@
           >Profile updated successfully
         </div>
         <!-- profile button -->
-        <div class="row">
-          <div class="col-xl-10">
-            <h1>Profile</h1>
-          </div>
-          <div class="col-xl-1">
-            <button
-              type="button"
-              class="btn btn-outline-primary mb-3"
-              @click="getMyProfile"
-            >
-              Profile
-            </button>
-          </div>
-          <div class="col-xl-1">
-            <button
-              type="button"
-              class="btn btn-outline-secondary mb-3"
-              @click="logMeOut"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-        <hr class="mt-0 mb-4" />
-        <div v-if="showProfile" class="row">
-          <div class="col-xl-8">
-            <!-- Account details card-->
-            <div class="card mb-4">
-              <div class="card-header">Account Details</div>
-              <div class="card-body">
-                <form>
-                  <!-- Form Row-->
-                  <div class="row gx-3 mb-3">
-                    <!-- Form Group (first name)-->
-                    <div class="col-md-6">
-                      <label class="medium mb-1" for="inputFirstName"
-                        >First name</label
-                      >
-                      <input
-                        v-model="profile.firstName"
-                        class="form-control"
-                        id="inputFirstName"
-                        type="text"
-                        placeholder="Enter your first name"
-                      />
-                    </div>
-                    <!-- Form Group (last name)-->
-                    <div class="col-md-6">
-                      <label class="medium mb-1" for="inputLastName"
-                        >Last name</label
-                      >
-                      <input
-                        v-model="profile.lastName"
-                        class="form-control"
-                        id="inputLastName"
-                        type="text"
-                        placeholder="Enter your last name"
-                      />
-                    </div>
-                  </div>
-                  <!-- Form Group (email address)-->
-                  <div class="mb-3">
-                    <label class="medium mb-1" for="inputEmailAddress"
-                      >Email address</label
-                    >
-                    <input
-                      class="form-control bg-light"
-                      id="inputEmailAddress"
-                      type="email"
-                      :value="profile.email"
-                      aria-label="Disabled input example"
-                      disabled
-                      readonly
-                    />
-                  </div>
-                  <!-- Save changes button-->
+        <div class="row no-gutters row-bordered row-border-light">
+          <div class="col-md-3">
+            <div class="flex-shrink-0 p-3 bg-white" style="width: 280px">
+              <a
+                href="/"
+                class="d-flex align-items-center pb-3 mb-3 link-dark text-decoration-none border-bottom"
+              >
+                <svg class="bi me-2" width="30" height="24">
+                  <use xlink:href="#bootstrap" />
+                </svg>
+                <span class="fs-5 fw-semibold">Collapsible</span>
+              </a>
+              <ul class="list-unstyled ps-0">
+                <li class="mb-1">
                   <button
-                    class="btn btn-primary"
-                    type="button"
-                    @click="updateMyProfile(profile)"
+                    class="btn btn-toggle align-items-center rounded collapsed"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#home-collapse"
+                    aria-expanded="true"
                   >
-                    Save changes
+                    Home
                   </button>
-                </form>
-              </div>
+                  <div class="collapse show" id="home-collapse">
+                    <ul
+                      class="btn-toggle-nav list-unstyled fw-normal pb-1 small"
+                    >
+                      <li>
+                        <a href="#" class="link-dark rounded">Overview</a>
+                      </li>
+                      <li><a href="#" class="link-dark rounded">Updates</a></li>
+                      <li><a href="#" class="link-dark rounded">Reports</a></li>
+                    </ul>
+                  </div>
+                </li>
+                <li class="mb-1">
+                  <button
+                    class="btn btn-toggle align-items-center rounded collapsed"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#dashboard-collapse"
+                    aria-expanded="false"
+                  >
+                    Dashboard
+                  </button>
+                  <div class="collapse" id="dashboard-collapse">
+                    <ul
+                      class="btn-toggle-nav list-unstyled fw-normal pb-1 small"
+                    >
+                      <li>
+                        <a href="#" class="link-dark rounded">Overview</a>
+                      </li>
+                      <li><a href="#" class="link-dark rounded">Weekly</a></li>
+                      <li><a href="#" class="link-dark rounded">Monthly</a></li>
+                      <li>
+                        <a href="#" class="link-dark rounded">Annually</a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+                <li class="mb-1">
+                  <button
+                    class="btn btn-toggle align-items-center rounded collapsed"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#orders-collapse"
+                    aria-expanded="false"
+                  >
+                    Orders
+                  </button>
+                  <div class="collapse" id="orders-collapse">
+                    <ul
+                      class="btn-toggle-nav list-unstyled fw-normal pb-1 small"
+                    >
+                      <li><a href="#" class="link-dark rounded">New</a></li>
+                      <li>
+                        <a href="#" class="link-dark rounded">Processed</a>
+                      </li>
+                      <li><a href="#" class="link-dark rounded">Shipped</a></li>
+                      <li>
+                        <a href="#" class="link-dark rounded">Returned</a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+                <li class="border-top my-3"></li>
+                <li class="mb-1">
+                  <button
+                    class="btn btn-toggle align-items-center rounded collapsed"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#account-collapse"
+                    aria-expanded="false"
+                  >
+                    Account
+                  </button>
+                  <div class="collapse" id="account-collapse">
+                    <ul
+                      class="btn-toggle-nav list-unstyled fw-normal pb-1 small"
+                    >
+                      <li><a href="#" class="link-dark rounded">New...</a></li>
+                      <li><a href="#" class="link-dark rounded">Profile</a></li>
+                      <li>
+                        <a href="#" class="link-dark rounded">Settings</a>
+                      </li>
+                      <li>
+                        <a href="#" class="link-dark rounded">Sign out</a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
-        </div>
-        <hr class="mt-0 mb-4" />
-        <div v-if="showProfile" class="row">
-          <div class="col-lg-8">
-            <!-- Change password card-->
-            <div class="card mb-4">
-              <div class="card-header">Change Password</div>
-              <div class="card-body">
-                <form>
-                  <!-- Form Group (current password)-->
-                  <div class="mb-3">
-                    <label class="medium mb-1" for="currentPassword"
-                      >Current Password</label
-                    >
-                    <input
-                      v-model="profile.currentPassword"
-                      class="form-control"
-                      id="currentPassword"
-                      type="password"
-                      placeholder="Enter current password"
-                    />
-                  </div>
-                  <!-- Form Group (new password)-->
-                  <div class="mb-3">
-                    <label class="medium mb-1" for="newPassword"
-                      >New Password</label
-                    >
-                    <input
-                      v-model="profile.newPassword"
-                      class="form-control"
-                      id="newPassword"
-                      type="password"
-                      placeholder="Enter new password"
-                    />
-                  </div>
-                  <!-- Form Group (confirm password)-->
-                  <div class="mb-3">
-                    <label class="medium mb-1" for="confirmPassword"
-                      >Confirm Password</label
-                    >
-                    <input
-                      v-model="profile.confirmNewPassword"
-                      class="form-control"
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirm new password"
-                    />
-                  </div>
-                  <button
-                    class="btn btn-primary"
-                    type="button"
-                    @click="updateMyProfileWithPassword(profile)"
-                  >
-                    Update password
-                  </button>
-                </form>
+          <div class="col-md-9">
+            <div class="row">
+              <div class="col-xl-10">
+                <h1>Profile</h1>
               </div>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <!-- Delete account card-->
-            <div class="card mb-4">
-              <div class="card-header">Delete Account</div>
-              <div class="card-body">
-                <p>
-                  Deleting your account is a permanent action and cannot be
-                  undone. If you are sure you want to delete your account,
-                  select the button below.
-                </p>
+              <div class="col-xl-1">
                 <button
-                  class="btn btn-danger"
                   type="button"
-                  @click="deleteMyAccount(profile)"
+                  class="btn btn-outline-primary mb-3"
+                  @click="getMyProfile"
                 >
-                  I understand, delete my account
+                  Profile
                 </button>
+              </div>
+              <div class="col-xl-1">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary mb-3"
+                  @click="logMeOut"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+            <hr class="mt-0 mb-4" />
+            <div v-if="showProfile" class="row">
+              <div class="col-xl-8">
+                <!-- Account details card-->
+                <div class="card mb-4">
+                  <div class="card-header">Account Details</div>
+                  <div class="card-body">
+                    <form>
+                      <!-- Form Row-->
+                      <div class="row gx-3 mb-3">
+                        <!-- Form Group (first name)-->
+                        <div class="col-md-6">
+                          <label class="medium mb-1" for="inputFirstName"
+                            >First name</label
+                          >
+                          <input
+                            v-model="profile.firstName"
+                            class="form-control"
+                            id="inputFirstName"
+                            type="text"
+                            placeholder="Enter your first name"
+                          />
+                        </div>
+                        <!-- Form Group (last name)-->
+                        <div class="col-md-6">
+                          <label class="medium mb-1" for="inputLastName"
+                            >Last name</label
+                          >
+                          <input
+                            v-model="profile.lastName"
+                            class="form-control"
+                            id="inputLastName"
+                            type="text"
+                            placeholder="Enter your last name"
+                          />
+                        </div>
+                      </div>
+                      <!-- Form Group (email address)-->
+                      <div class="mb-3">
+                        <label class="medium mb-1" for="inputEmailAddress"
+                          >Email address</label
+                        >
+                        <input
+                          class="form-control bg-light"
+                          id="inputEmailAddress"
+                          type="email"
+                          :value="profile.email"
+                          aria-label="Disabled input example"
+                          disabled
+                          readonly
+                        />
+                      </div>
+                      <!-- Save changes button-->
+                      <button
+                        class="btn btn-primary"
+                        type="button"
+                        @click="updateMyProfile(profile)"
+                      >
+                        Save changes
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr class="mt-0 mb-4" />
+            <div v-if="showProfile" class="row">
+              <div class="col-lg-8">
+                <!-- Change password card-->
+                <div class="card mb-4">
+                  <div class="card-header">Change Password</div>
+                  <div class="card-body">
+                    <form>
+                      <!-- Form Group (current password)-->
+                      <div class="mb-3">
+                        <label class="medium mb-1" for="currentPassword"
+                          >Current Password</label
+                        >
+                        <input
+                          v-model="profile.currentPassword"
+                          class="form-control"
+                          id="currentPassword"
+                          type="password"
+                          placeholder="Enter current password"
+                        />
+                      </div>
+                      <!-- Form Group (new password)-->
+                      <div class="mb-3">
+                        <label class="medium mb-1" for="newPassword"
+                          >New Password</label
+                        >
+                        <input
+                          v-model="profile.newPassword"
+                          class="form-control"
+                          id="newPassword"
+                          type="password"
+                          placeholder="Enter new password"
+                        />
+                      </div>
+                      <!-- Form Group (confirm password)-->
+                      <div class="mb-3">
+                        <label class="medium mb-1" for="confirmPassword"
+                          >Confirm Password</label
+                        >
+                        <input
+                          v-model="profile.confirmNewPassword"
+                          class="form-control"
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="Confirm new password"
+                        />
+                      </div>
+                      <button
+                        class="btn btn-primary"
+                        type="button"
+                        @click="updateMyProfileWithPassword(profile)"
+                      >
+                        Update password
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <!-- Delete account card-->
+                <div class="card mb-4">
+                  <div class="card-header">Delete Account</div>
+                  <div class="card-body">
+                    <p>
+                      Deleting your account is a permanent action and cannot be
+                      undone. If you are sure you want to delete your account,
+                      select the button below.
+                    </p>
+                    <button
+                      class="btn btn-danger"
+                      type="button"
+                      @click="deleteMyAccount(profile)"
+                    >
+                      I understand, delete my account
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
