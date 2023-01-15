@@ -91,7 +91,12 @@
           </nav>
         </header>
 
-        <div class="container"></div>
+        <div class="container">
+          <div class="page-header">
+            <h2>Hello {{ profile.firstName }},</h2>
+          </div>
+          <p>This is your dashboard.</p>
+        </div>
       </div>
     </div>
   </div>
