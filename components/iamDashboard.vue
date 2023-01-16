@@ -31,12 +31,15 @@
         <header>
           <nav class="navbar navbar-default">
             <div class="navbar-header">
-              <a class="navbar-brand" href="#"
-                ><img
-                  src="~~/iam/ui/img/nuxt-iam-logo-symbol.png"
-                  style="width: 17%; display: inline"
-                /><span style="color: #184b81">Nuxt<b>IAM</b></span></a
+              <NuxtLink to="/iam/dashboard"
+                ><a class="navbar-brand"
+                  ><img
+                    src="~~/iam/ui/img/nuxt-iam-logo-symbol.png"
+                    style="width: 17%; display: inline"
+                  /><span style="color: #184b81">Nuxt<b>IAM</b></span></a
+                ></NuxtLink
               >
+
               <button
                 type="button"
                 data-target="#navbarCollapse"
@@ -56,7 +59,9 @@
               :class="showMobileNav ? '' : 'collapse'"
             >
               <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
+                <li class="active">
+                  <NuxtLink to="/iam/dashboard">Home</NuxtLink>
+                </li>
                 <li><a href="#">Admin</a></li>
               </ul>
 
@@ -77,7 +82,7 @@
                   ></a>
                   <ul class="dropdown-menu">
                     <li>
-                      <a href="#"><i class="fa fa-user-o"></i> Profile</a>
+                      <NuxtLink to="/iam/dashboard/profile">Profile</NuxtLink>
                     </li>
                     <li>
                       <a href="#"><i class="fa fa-sliders"></i> Settings</a>
@@ -92,16 +97,7 @@
             </div>
           </nav>
         </header>
-
-        <!-- Child component pages -->
-        <div class="container">
-          <div class="page-header">
-            <h2>Dashboard</h2>
-          </div>
-          <h2>Hello {{ profile.firstName }},</h2>
-          <p>This is your dashboard.</p>
-        </div>
-        <!-- End child pages -->
+        <NuxtPage :profile="profile" />
       </div>
     </div>
   </div>
