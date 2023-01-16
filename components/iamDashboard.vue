@@ -316,10 +316,10 @@ useHead({
 });
 </script>
 
-<style>
+<style scoped>
 body {
   /* background: #eeeeee; */
-  font-size: 135%;
+  font-size: 150%;
 }
 .form-inline {
   display: inline-block;
