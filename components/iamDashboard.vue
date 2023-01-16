@@ -32,8 +32,10 @@
           <nav class="navbar navbar-default">
             <div class="navbar-header">
               <a class="navbar-brand" href="#"
-                ><i class="fa fa-cube"></i
-                ><span style="color: #184b81">Nuxt<b>IAM</b></span></a
+                ><img
+                  src="~~/iam/ui/img/nuxt-iam-logo-symbol.png"
+                  style="width: 17%; display: inline"
+                /><span style="color: #184b81">Nuxt<b>IAM</b></span></a
               >
               <button
                 type="button"
@@ -91,12 +93,15 @@
           </nav>
         </header>
 
+        <!-- Child component pages -->
         <div class="container">
           <div class="page-header">
-            <h2>Hello {{ profile.firstName }},</h2>
+            <h2>Dashboard</h2>
           </div>
+          <h2>Hello {{ profile.firstName }},</h2>
           <p>This is your dashboard.</p>
         </div>
+        <!-- End child pages -->
       </div>
     </div>
   </div>
@@ -312,9 +317,10 @@ useHead({
 </script>
 
 <style>
-/* body {
-  background: #eeeeee;
-} */
+body {
+  /* background: #eeeeee; */
+  font-size: 135%;
+}
 .form-inline {
   display: inline-block;
 }
