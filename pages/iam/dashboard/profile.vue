@@ -3,7 +3,7 @@
     <div class="page-header">
       <h2>Profile</h2>
     </div>
-    <p>Your profile goes here</p>
+    <p>Update your profile here.</p>
     <!-- Profile errors notification -->
     <div
       v-if="profileError"
@@ -50,6 +50,14 @@
           class="form-control"
           style="display: block; margin: 0 0 15px 0; width: 300px"
           :value="$attrs.profile.email"
+          disabled
+        />
+        <label>Role</label>
+        <input
+          type="text"
+          class="form-control"
+          style="display: block; margin: 0 0 15px 0; width: 300px"
+          :value="$attrs.profile.role"
           disabled
         />
         <label>First name</label>
@@ -100,7 +108,12 @@ profile.lastName = attrs.profile.lastName;
 
 // Attempt to update user profile
 async function updateMyProfile() {
-  console.log("profile: ", profile);
+  if (
+    profile.firstName === attrs.profile.firstName &&
+    profile.lastName === attrs.profile.lastName
+  )
+    return;
+
   const { error } = await updateProfile(
     profile.uuid,
     profile.firstName,

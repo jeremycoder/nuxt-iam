@@ -340,7 +340,6 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
 
     // Otherwise, hide password (password is one-way hashed and cannot be retrieved from hash anyway, it just looks nicer) return the user
     user.password = "[hidden]";
-    user.id = 0;
     return user;
   }
 }

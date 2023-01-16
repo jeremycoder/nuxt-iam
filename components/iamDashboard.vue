@@ -154,6 +154,7 @@ const profile = {
   firstName: "",
   lastName: "",
   email: "",
+  role: "",
   avatar: "",
   currentPassword: "",
   newPassword: "",
@@ -198,6 +199,7 @@ async function getMyProfile() {
     profile.lastName = data.last_name;
     profile.email = data.email;
     profile.avatar = data.avatar;
+    profile.role = data.role;
 
     // Check email verification status
     emailIsVerified.value = data.email_verified;
