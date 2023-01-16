@@ -62,7 +62,9 @@
                 <li class="active">
                   <NuxtLink to="/iam/dashboard">Home</NuxtLink>
                 </li>
-                <li><a href="#">Admin</a></li>
+                <li>
+                  <NuxtLink to="/iam/dashboard/admin"><a>Admin</a></NuxtLink>
+                </li>
               </ul>
 
               <ul class="nav navbar-nav navbar-right">
@@ -85,7 +87,7 @@
                       <NuxtLink to="/iam/dashboard/profile">Profile</NuxtLink>
                     </li>
                     <li>
-                      <a href="#"><i class="fa fa-sliders"></i> Settings</a>
+                      <NuxtLink to="/iam/dashboard/settings">Settings</NuxtLink>
                     </li>
                     <li class="divider"></li>
                     <li>
