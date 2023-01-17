@@ -24,11 +24,6 @@
         placeholder="Search"
         aria-label="Search"
       /> -->
-      <!-- <div class="navbar-nav">
-        <div class="nav-item text-nowrap">
-          <a class="nav-link px-3" href="#">Sign out</a>
-        </div>
-      </div> -->
       <div
         class="dropdown text-end"
         style="margin-right: 5px"
@@ -59,6 +54,11 @@
           <li><a class="dropdown-item" href="#">Sign out</a></li>
         </ul>
       </div>
+      <!-- <div class="navbar-nav">
+        <div class="nav-item text-nowrap">
+          <a class="nav-link px-3" href="#">Sign out</a>
+        </div>
+      </div> -->
     </header>
 
     <div class="container-fluid">
