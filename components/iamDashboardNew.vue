@@ -29,7 +29,11 @@
           <a class="nav-link px-3" href="#">Sign out</a>
         </div>
       </div> -->
-      <div class="dropdown text-end">
+      <div
+        class="dropdown text-end"
+        style="margin-right: 5px"
+        @click="toggleShowProfileNav"
+      >
         <a
           href="#"
           class="d-block link-dark text-decoration-none dropdown-toggle"
@@ -44,7 +48,10 @@
             class="rounded-circle"
           />
         </a>
-        <ul class="dropdown-menu text-small">
+        <ul
+          class="dropdown-menu text-small"
+          :class="showProfileNav ? 'show' : ''"
+        >
           <li><a class="dropdown-item" href="#">New project...</a></li>
           <li><a class="dropdown-item" href="#">Settings</a></li>
           <li><a class="dropdown-item" href="#">Profile</a></li>
@@ -326,12 +333,20 @@
 
 <script setup>
 const showMobileNav = ref(false);
+const showProfileNav = ref(false);
 
 /**
  * @desc Toggle showing mobile navigation
  */
 function toggleShowMobileNav() {
   showMobileNav.value = !showMobileNav.value;
+}
+
+/**
+ * @desc Toggle showing mobile navigation
+ */
+function toggleShowProfileNav() {
+  showProfileNav.value = !showProfileNav.value;
 }
 
 useHead({
