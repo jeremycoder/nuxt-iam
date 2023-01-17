@@ -55,7 +55,7 @@
                     class="rounded-circle"
                   />
                   <span class="mx-1 profile-name"
-                    >{{ profile.firstName }} {{ profile.lastName }}</span
+                    >{{ firstName }} {{ lastName }}</span
                   >
                 </a>
                 <ul class="dropdown-menu text-small">
@@ -182,6 +182,8 @@ const showProfile = ref(false);
 let profileError = ref(null);
 let updateSuccessful = ref(false);
 let verificationEmailSent = ref(false);
+const firstName = ref("");
+const lastName = ref("");
 
 // Check email verification
 const verifyRegistrations =
@@ -238,7 +240,6 @@ async function logMeOut() {
 
 // Attempt to get user profile
 async function getMyProfile() {
-  console.log("get profile");
   const { status, error, data } = await getProfile();
 
   // If error, show error
@@ -255,6 +256,10 @@ async function getMyProfile() {
     profile.email = data.email;
     profile.avatar = data.avatar;
     profile.role = data.role;
+
+    // Assign to local reactive variables
+    firstName.value = profile.firstName;
+    lastName.value = profile.lastName;
 
     // Check email verification status
     emailIsVerified.value = data.email_verified;
