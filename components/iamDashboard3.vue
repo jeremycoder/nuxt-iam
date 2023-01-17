@@ -1,77 +1,165 @@
 <template>
-  <div>
-    <nav class="navbar bg-body-tertiary fixed-top">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Offcanvas navbar</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#offcanvasNavbar"
-          aria-controls="offcanvasNavbar"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div
-          class="offcanvas offcanvas-end show"
-          tabindex="-1"
-          id="offcanvasNavbar"
-          aria-labelledby="offcanvasNavbarLabel"
-        >
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Offcanvas</h5>
+  <div v-if="isLoaded">
+    <div v-if="isLoggedIn">
+      <!-- Check if email is verified -->
+      <div
+        v-if="verifyRegistrations && !emailIsVerified"
+        class="container-xl px-4 mt-4"
+      >
+        <div>
+          <h2>Email verification is required</h2>
+          <h4 v-if="!verificationEmailSent">
+            <p>Please click the button below to verify your email</p>
             <button
+              class="btn btn-primary"
               type="button"
-              class="btn-close"
-              data-bs-dismiss="offcanvas"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="offcanvas-body">
-            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
-              </li>
-              <li class="nav-item dropdown">
+              @click="verifyMyEmail(profile.email)"
+            >
+              Send email verification
+            </button>
+          </h4>
+          <h4 v-else>
+            <p>
+              Please check your email. Check your spam folder too. You should
+              receive it within 15 minutes.
+            </p>
+          </h4>
+        </div>
+      </div>
+      <div v-else>
+        <header>
+          <nav
+            class="navbar bg-body-tertiary bg-white fixed-top p-3 mb-3 border-bottom border-{#FF0}"
+          >
+            <div class="container-fluid">
+              <NuxtLink class="navbar-brand" to="/iam/dashboard3"
+                ><img
+                  src="~~/iam/ui/img/nuxt-iam-logo-symbol.png"
+                  style="width: 17%; display: inline"
+                /><span style="color: #184b81">Nuxt<b>IAM</b></span></NuxtLink
+              >
+              <!-- Profile icon -->
+              <div class="dropdown text-end">
                 <a
-                  class="nav-link dropdown-toggle"
+                  v-if="profile"
                   href="#"
-                  role="button"
+                  class="d-block link-dark text-decoration-none dropdown-toggle"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Dropdown
+                  <img
+                    src="https://github.com/mdo.png"
+                    alt="mdo"
+                    width="32"
+                    height="32"
+                    class="rounded-circle"
+                  />
+                  <span class="mx-1 profile-name"
+                    >{{ profile.firstName }} {{ profile.lastName }}</span
+                  >
                 </a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Action</a></li>
-                  <li><a class="dropdown-item" href="#">Another action</a></li>
+                <ul class="dropdown-menu text-small">
                   <li>
-                    <hr class="dropdown-divider" />
+                    <NuxtLink class="dropdown-item" to="/iam/dashboard3/profile"
+                      >Profile</NuxtLink
+                    >
                   </li>
                   <li>
-                    <a class="dropdown-item" href="#">Something else here</a>
+                    <NuxtLink
+                      class="dropdown-item"
+                      to="/iam/dashboard3/settings"
+                      >Settings</NuxtLink
+                    >
+                  </li>
+                  <li><hr class="dropdown-divider" /></li>
+                  <li>
+                    <a class="dropdown-item" href="#" @click="logMeOut"
+                      >Logout</a
+                    >
                   </li>
                 </ul>
-              </li>
-            </ul>
-            <form class="d-flex mt-3" role="search">
-              <input
-                class="form-control me-2"
-                type="search"
-                placeholder="Search"
-                aria-label="Search"
-              />
-              <button class="btn btn-outline-success" type="submit">
-                Search
+              </div>
+
+              <!-- Menu toggler -->
+              <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar"
+                aria-controls="offcanvasNavbar"
+              >
+                <span class="navbar-toggler-icon"></span>
               </button>
-            </form>
-          </div>
-        </div>
+
+              <div
+                class="offcanvas offcanvas-end"
+                tabindex="-1"
+                id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel"
+              >
+                <div class="offcanvas-header">
+                  <h5 class="offcanvas-title" id="offcanvasNavbarLabel">
+                    Menu
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="offcanvas"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="offcanvas-body">
+                  <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+                    <li class="nav-item">
+                      <a class="nav-link active" aria-current="page" href="#"
+                        >Home</a
+                      >
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#">Admin</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                      <a
+                        class="nav-link dropdown-toggle"
+                        href="#"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                      >
+                        Sample Dropdown
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li>
+                          <a class="dropdown-item" href="#">Another action</a>
+                        </li>
+                        <li>
+                          <hr class="dropdown-divider" />
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="#"
+                            >Something else here</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </nav>
+        </header>
       </div>
-    </nav>
+      <!-- Main content -->
+      <main style="margin-top: 86px">
+        <div class="container">
+          <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
+        </div>
+      </main>
+    </div>
+  </div>
+  <div v-else class="container-xl px-4 mt-4">
+    <div class="spinner-border" role="status"></div>
   </div>
 </template>
 
@@ -150,6 +238,7 @@ async function logMeOut() {
 
 // Attempt to get user profile
 async function getMyProfile() {
+  console.log("get profile");
   const { status, error, data } = await getProfile();
 
   // If error, show error
@@ -185,3 +274,11 @@ useHead({
   },
 });
 </script>
+
+<style scoped>
+@media only screen and (max-width: 515px) {
+  .profile-name {
+    display: none;
+  }
+}
+</style>
