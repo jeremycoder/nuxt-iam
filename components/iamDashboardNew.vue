@@ -1,6 +1,88 @@
 <template>
   <div>
-    <header class="navbar bg-light sticky-top flex-md-nowrap p-0 shadow">
+    <header class="p-3 mb-3 border-bottom">
+      <div class="container">
+        <div
+          class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"
+        >
+          <a
+            href="/"
+            class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none"
+          >
+            <svg
+              class="bi me-2"
+              width="40"
+              height="32"
+              role="img"
+              aria-label="Bootstrap"
+            >
+              <use xlink:href="#bootstrap" />
+            </svg>
+          </a>
+
+          <ul
+            class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0"
+          >
+            <li>
+              <a href="#" class="nav-link px-2 link-secondary">Overview</a>
+            </li>
+            <li><a href="#" class="nav-link px-2 link-dark">Inventory</a></li>
+            <li><a href="#" class="nav-link px-2 link-dark">Customers</a></li>
+            <li><a href="#" class="nav-link px-2 link-dark">Products</a></li>
+          </ul>
+
+          <button
+            class="navbar-toggler position-absolute d-md-none collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#sidebarMenu"
+            aria-controls="sidebarMenu"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span
+              class="navbar-toggler-icon"
+              @click="toggleShowMobileNav"
+            ></span>
+          </button>
+
+          <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Search..."
+              aria-label="Search"
+            />
+          </form>
+
+          <div class="dropdown text-end">
+            <a
+              href="#"
+              class="d-block link-dark text-decoration-none dropdown-toggle"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="https://github.com/mdo.png"
+                alt="mdo"
+                width="32"
+                height="32"
+                class="rounded-circle"
+              />
+            </a>
+            <ul class="dropdown-menu text-small">
+              <li><a class="dropdown-item" href="#">New project...</a></li>
+              <li><a class="dropdown-item" href="#">Settings</a></li>
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item" href="#">Sign out</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- <header class="navbar bg-light sticky-top flex-md-nowrap p-0 shadow">
       <a class="navbar-brand bg-light col-md-3 col-lg-2 me-0 px-3 fs-6"
         ><NuxtLink to="/iam/dashboardnew/"
           ><img
@@ -57,16 +139,20 @@
             >
           </li>
           <li><hr class="dropdown-divider" /></li>
-          <li><a class="dropdown-item" href="#">Sign out</a></li>
+          <li>
+            <NuxtLink to="/iam/dashboardnew/settings" class="dropdown-item"
+              >Log out</NuxtLink
+            >
+          </li>
         </ul>
       </div>
-    </header>
+    </header> -->
 
     <div class="container-fluid">
       <div class="row">
         <nav
           id="sidebarMenu"
-          class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse"
+          class="col-md-3 col-lg-2 d-md-block sidebar collapse"
           :class="showMobileNav ? 'show' : ''"
         >
           <div class="position-sticky pt-3 sidebar-sticky">
@@ -84,18 +170,35 @@
             </ul>
           </div>
         </nav>
-
-        <!-- Children go here -->
         <NuxtPage />
-        <!-- End children -->
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+const {
+  isAuthenticated,
+  verifyEmail,
+  getProfile,
+  updateProfile,
+  logout,
+  deleteAccount,
+} = useIam();
 const showMobileNav = ref(false);
 const showProfileNav = ref(false);
+const router = useRouter();
+const isLoaded = ref(false);
+const iAmLoggedIn = ref(false);
+const showProfile = ref(false);
+let profileError = ref(null);
+let updateSuccessful = ref(false);
+let verificationEmailSent = ref(false);
+
+// Check email verification
+const verifyRegistrations =
+  useRuntimeConfig().public.iamVerifyRegistrations === "true";
+const emailIsVerified = ref(false);
 
 /**
  * @desc Toggle showing mobile navigation
@@ -109,6 +212,65 @@ function toggleShowMobileNav() {
  */
 function toggleShowProfileNav() {
   showProfileNav.value = !showProfileNav.value;
+}
+
+// User profile
+const profile = {
+  uuid: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  role: "",
+  avatar: "",
+  currentPassword: "",
+  newPassword: "",
+  confirmNewPassword: "",
+};
+
+onMounted(async () => {
+  await isLoggedIn();
+  await getMyProfile();
+  isLoaded.value = true;
+});
+
+async function isLoggedIn() {
+  iAmLoggedIn.value = await isAuthenticated();
+
+  // If user is not authenticated, push to login page
+  if (!iAmLoggedIn.value) router.push("/iam/login");
+}
+
+// Log user out
+async function logMeOut() {
+  const { status } = await logout();
+  if (status === "success") {
+    router.push("/iam/login");
+  }
+}
+
+// Attempt to get user profile
+async function getMyProfile() {
+  const { status, error, data } = await getProfile();
+
+  // If error, show error
+  if (error) {
+    console.log("error: ", error);
+    profileError.value = error;
+  }
+
+  // If successful, data will contain profile
+  if (status === "success") {
+    profile.uuid = data.uuid;
+    profile.firstName = data.first_name;
+    profile.lastName = data.last_name;
+    profile.email = data.email;
+    profile.avatar = data.avatar;
+    profile.role = data.role;
+
+    // Check email verification status
+    emailIsVerified.value = data.email_verified;
+    showProfile.value = true;
+  }
 }
 
 useHead({
