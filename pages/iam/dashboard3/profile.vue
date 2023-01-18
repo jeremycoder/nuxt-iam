@@ -15,6 +15,7 @@
       class="btn-close"
       data-bs-dismiss="alert"
       aria-label="Close"
+      @click="profileError = null"
     ></button>
   </div>
   <!-- Profile success notification -->
@@ -29,6 +30,7 @@
       class="btn-close"
       data-bs-dismiss="alert"
       aria-label="Close"
+      @click="updateSuccessful = false"
     ></button>
   </div>
   <form>

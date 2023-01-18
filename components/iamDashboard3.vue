@@ -6,7 +6,7 @@
         v-if="verifyRegistrations && !emailIsVerified"
         class="container-xl px-4 mt-4"
       >
-        <div>
+        <div class="container">
           <h2>Email verification is required</h2>
           <h4 v-if="!verificationEmailSent">
             <p>Please click the button below to verify your email</p>
@@ -20,8 +20,9 @@
           </h4>
           <h4 v-else>
             <p>
-              Please check your email. Check your spam folder too. You should
-              receive it within 15 minutes.
+              Please check your email. Check your spam folder too. Click the
+              link in the email to verify your email. You should receive it
+              within 15 minutes.
             </p>
           </h4>
         </div>
@@ -111,12 +112,14 @@
                 <div class="offcanvas-body">
                   <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
                     <li class="nav-item">
-                      <a class="nav-link active" aria-current="page" href="#"
-                        >Home</a
+                      <NuxtLink class="nav-link active" to="/iam/dashboard3/"
+                        >Home</NuxtLink
                       >
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="#">Admin</a>
+                      <NuxtLink class="nav-link" to="/iam/dashboard3/admin"
+                        >Admin</NuxtLink
+                      >
                     </li>
                     <li class="nav-item dropdown">
                       <a
@@ -128,17 +131,28 @@
                       >
                         Sample Dropdown
                       </a>
-                      <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
+                      <ul
+                        class="dropdown-menu gap-1 p-2 rounded-3 mx-0 shadow w-220px"
+                      >
                         <li>
-                          <a class="dropdown-item" href="#">Another action</a>
+                          <a class="dropdown-item rounded-2 active" href="#"
+                            >Action</a
+                          >
                         </li>
                         <li>
-                          <hr class="dropdown-divider" />
+                          <a class="dropdown-item rounded-2" href="#"
+                            >Another action</a
+                          >
                         </li>
                         <li>
-                          <a class="dropdown-item" href="#"
+                          <a class="dropdown-item rounded-2" href="#"
                             >Something else here</a
+                          >
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                          <a class="dropdown-item rounded-2" href="#"
+                            >Separated link</a
                           >
                         </li>
                       </ul>
