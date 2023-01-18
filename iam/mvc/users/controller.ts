@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
   const url = event.node.req.url;
   const method = event.node.req.method;
   let result = null;
+  const response = {} as JSONResponse;
 
   // Middleware for all user routes
   const errorOrPlatform = usersMiddleware(event);
@@ -26,6 +27,18 @@ export default defineEventHandler(async (event) => {
         result = new route("/api/iam/users").match(url);
         if (result) {
           event.context.params.fromRoute = result;
+
+          // Potential - get access token, check user credentials for this route
+          // if (!hasPermissions("get", "/api/iam/users", event)) {
+          //   response.status = "fail";
+          //   response.error = createError({
+          //     statusCode: 405,
+          //     statusMessage: "Method not allowed",
+          //   });
+
+          //   return response;
+          // }
+
           return await index(event);
         }
 
@@ -66,7 +79,6 @@ export default defineEventHandler(async (event) => {
     }
 
   // Return method not allowed error
-  const response = {} as JSONResponse;
   response.status = "fail";
   response.error = createError({
     statusCode: 405,
