@@ -1,11 +1,6 @@
 <template>
-  <div class="container">
-    <div class="page-header">
-      <h2>Dashboard</h2>
-    </div>
-    <h2>Hello {{ $attrs.profile.firstName }},</h2>
-    <p>This is your dashboard.</p>
+  <div>
+    <h1 class="mt-5">Dashboard</h1>
+    <p class="lead">This is your dashboard.</p>
   </div>
 </template>
-
-<script setup></script>

@@ -1,392 +1,172 @@
 <template>
-  <div class="container">
-    <div class="page-header">
-      <h2>Admin</h2>
-    </div>
-    <p>Administer users here.</p>
-    <!-- Users table -->
-    <div>
-      <div class="table-title">
-        <div class="row">
-          <div class="col-sm-8">
-            <h2>Users</h2>
-          </div>
-          <div class="col-sm-4">
-            <button type="button" class="btn btn-info add-new">
-              <i class="fa fa-plus"></i> Add New
-            </button>
-          </div>
+  <div>
+    <h1 class="mt-5">Admin</h1>
+    <p class="lead">This is your admin center.</p>
+  </div>
+  <!-- Admin errors notification -->
+  <div
+    v-if="adminError"
+    class="alert alert-danger alert-dismissible fade show"
+    role="alert"
+  >
+    <strong>{{ adminError.message }}</strong>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+      @click="adminError = null"
+    ></button>
+  </div>
+  <!-- Admin success notification -->
+  <div
+    v-if="updateSuccessful"
+    class="alert alert-success alert-dismissible fade show"
+    role="alert"
+  >
+    <strong>Data updated successfully</strong>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+      @click="updateSuccessful = false"
+    ></button>
+  </div>
+  <!-- Edit Modal -->
+  <div
+    class="modal fade"
+    id="exampleModal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">{{ currentRecord }}</div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="button" class="btn btn-primary">Save changes</button>
         </div>
       </div>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Phone</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John Doe</td>
-            <td>Administration</td>
-            <td>(171) 555-2222</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td>Peter Parker</td>
-            <td>Customer Service</td>
-            <td>(313) 555-5735</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td>Fran Wilson</td>
-            <td>Human Resources</td>
-            <td>(503) 555-9931</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
-    <!-- Users table permissions-->
-    <div>
-      <div class="table-title">
-        <div class="row">
-          <div class="col-sm-8">
-            <h2>Users Table <b>Permissions</b></h2>
-          </div>
-          <div class="col-sm-4">
-            <button type="button" class="btn btn-info add-new">
-              <i class="fa fa-plus"></i> Add New
+  </div>
+  <!-- Users table error -->
+  <div
+    v-if="usersTableError"
+    class="alert alert-danger alert-dismissible fade show"
+    role="alert"
+  >
+    <strong>{{ usersTableError.message }}</strong>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+      @click="usersTableError = null"
+    ></button>
+  </div>
+  <!-- Users table -->
+  <div v-else="usersTable">
+    <!-- {{ usersTable }} -->
+    <h3>Users table</h3>
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">email</th>
+          <th scope="col">first_name</th>
+          <th scope="col">last_name</th>
+          <th scope="col">edit</th>
+          <th scope="col">delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, index) in usersTable">
+          <th scope="row">{{ index + 1 }}</th>
+          <td>{{ row.email }}</td>
+          <td>{{ row.first_name }}</td>
+          <td>{{ row.last_name }}</td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-warning btn-sm"
+              data-bs-toggle="modal"
+              data-bs-target="#exampleModal"
+              @click="currentRecord = row"
+            >
+              edit
             </button>
-          </div>
-        </div>
-      </div>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Phone</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John Doe</td>
-            <td>Administration</td>
-            <td>(171) 555-2222</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td>Peter Parker</td>
-            <td>Customer Service</td>
-            <td>(313) 555-5735</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td>Fran Wilson</td>
-            <td>Human Resources</td>
-            <td>(503) 555-9931</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- Refresh tokens -->
-    <div>
-      <div class="table-title">
-        <div class="row">
-          <div class="col-sm-8">
-            <h2>Refresh <b>Tokens</b></h2>
-          </div>
-          <div class="col-sm-4">
-            <button type="button" class="btn btn-info add-new">
-              <i class="fa fa-plus"></i> Add New
+          </td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-danger btn-sm"
+              @click="
+                () => {
+                  currentRecord = row;
+                  deleteRecord(row);
+                }
+              "
+            >
+              delete
             </button>
-          </div>
-        </div>
-      </div>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Phone</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John Doe</td>
-            <td>Administration</td>
-            <td>(171) 555-2222</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td>Peter Parker</td>
-            <td>Customer Service</td>
-            <td>(313) 555-5735</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td>Fran Wilson</td>
-            <td>Human Resources</td>
-            <td>(503) 555-9931</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- Refresh tokens -->
-    <div>
-      <div class="table-title">
-        <div class="row">
-          <div class="col-sm-8">
-            <h2>One-time <b>Tokens</b></h2>
-          </div>
-          <div class="col-sm-4">
-            <button type="button" class="btn btn-info add-new">
-              <i class="fa fa-plus"></i> Add New
-            </button>
-          </div>
-        </div>
-      </div>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Phone</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John Doe</td>
-            <td>Administration</td>
-            <td>(171) 555-2222</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td>Peter Parker</td>
-            <td>Customer Service</td>
-            <td>(313) 555-5735</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-          <tr>
-            <td>Fran Wilson</td>
-            <td>Human Resources</td>
-            <td>(503) 555-9931</td>
-            <td>
-              <a class="add" title="Add" data-toggle="tooltip"
-                ><i class="material-icons">&#xE03B;</i></a
-              >
-              <a class="edit" title="Edit" data-toggle="tooltip"
-                ><i class="material-icons">&#xE254;</i></a
-              >
-              <a class="delete" title="Delete" data-toggle="tooltip"
-                ><i class="material-icons">&#xE872;</i></a
-              >
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+const { getUsers } = useIamAdmin();
+const attrs = useAttrs();
+const profile = attrs.profile;
 
-<style scoped>
-.table-wrapper {
-  width: 700px;
-  margin: 30px auto;
-  background: #fff;
-  padding: 20px;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+// Holds current record
+const currentRecord = ref(null);
+
+// Error variables
+const updateSuccessful = ref(false);
+let adminError = ref(null);
+
+// Prepare table variables
+const usersTable = ref(null);
+const usersTableError = ref(null);
+const usersTablePermsTable = ref(null);
+const refreshTokensTable = ref(null);
+const oneTimeTokensTable = ref(null);
+
+// Get users, check for error
+
+onMounted(async () => {
+  // Attempt to get users table data
+  const { error, data } = await getUsers();
+
+  // If error, report error, otherwise get data
+  if (error) {
+    usersTableError.value = error;
+  } else {
+    usersTable.value = data;
+  }
+});
+
+function deleteRecord(record) {
+  console.log("DELETE: ", record);
 }
-.table-title {
-  padding-bottom: 10px;
-  margin: 0 0 10px;
-}
-.table-title h2 {
-  margin: 6px 0 0;
-  font-size: 22px;
-}
-.table-title .add-new {
-  float: right;
-  height: 30px;
-  font-weight: bold;
-  font-size: 12px;
-  text-shadow: none;
-  min-width: 100px;
-  border-radius: 50px;
-  line-height: 13px;
-}
-.table-title .add-new i {
-  margin-right: 4px;
-}
-table.table {
-  table-layout: fixed;
-}
-table.table tr th,
-table.table tr td {
-  border-color: #e9e9e9;
-}
-table.table th i {
-  font-size: 13px;
-  margin: 0 5px;
-  cursor: pointer;
-}
-table.table th:last-child {
-  width: 100px;
-}
-table.table td a {
-  cursor: pointer;
-  display: inline-block;
-  margin: 0 5px;
-  min-width: 24px;
-}
-table.table td a.add {
-  color: #27c46b;
-}
-table.table td a.edit {
-  color: #ffc107;
-}
-table.table td a.delete {
-  color: #e34724;
-}
-table.table td i {
-  font-size: 19px;
-}
-table.table td a.add i {
-  font-size: 24px;
-  margin-right: -1px;
-  position: relative;
-  top: 3px;
-}
-table.table .form-control {
-  height: 32px;
-  line-height: 32px;
-  box-shadow: none;
-  border-radius: 2px;
-}
-table.table .form-control.error {
-  border-color: #f50000;
-}
-table.table td .add {
-  display: none;
-}
-</style>
+</script>

@@ -1,82 +1,125 @@
 <template>
-  <div class="container">
-    <div class="page-header">
-      <h2>Settings</h2>
-    </div>
-    <p>Update your settings here.</p>
-    <!-- Settings errors notification -->
-    <div
-      v-if="settingsError"
-      class="alert alert-danger alert-dismissable"
-      role="alert"
-    >
-      <button
-        @click="settingsError = null"
-        type="button"
-        class="close"
-        aria-label="Close"
-      >
-        <span aria-hidden="true">&times;</span></button
-      >{{ settingsError.message }}
-    </div>
-    <!-- Settings success notification -->
-    <div
-      v-if="updateSuccessful"
-      class="alert alert-success alert-dismissable"
-      role="alert"
-    >
-      <button
-        @click="updateSuccessful = false"
-        type="button"
-        class="close"
-        aria-label="Close"
-      >
-        <span aria-hidden="true">&times;</span></button
-      >Password updated successfully
-    </div>
-    <h3>Update your password</h3>
-    <form>
-      <div class="form-group">
-        <label>Current password</label>
-        <input
-          type="password"
-          class="form-control"
-          style="display: block; margin: 0 0 15px 0; width: 300px"
-        />
-        <label>New password</label>
-        <input
-          type="password"
-          class="form-control"
-          style="display: block; margin: 0 0 15px 0; width: 300px"
-        />
-        <label>Confirm password</label>
-        <input
-          type="password"
-          class="form-control"
-          style="display: block; margin: 0 0 15px 0; width: 300px"
-        />
+  <div>
+    <h1 class="mt-5">Settings</h1>
+    <p class="lead">Update your settings here.</p>
+    <div class="row">
+      <div class="col">
+        <div class="card mb-3 mx-10" style="max-width: 25rem">
+          <h4 class="card-header">Password</h4>
+          <div class="card-body">
+            <h5 class="card-title">Update Password</h5>
+            <p>Update your password below.</p>
+            <!-- Profile errors notification -->
+            <div
+              v-if="profileError"
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
+              <strong>{{ profileError.message }}</strong>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+                @click="profileError = null"
+              ></button>
+            </div>
+            <!-- Profile success notification -->
+            <div
+              v-if="updateSuccessful"
+              class="alert alert-success alert-dismissible fade show"
+              role="alert"
+            >
+              <strong>Profile updated successfully</strong>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+                @click="updateSuccessful = false"
+              ></button>
+            </div>
+            <form>
+              <div class="mb-3">
+                <label for="current_password" class="form-label"
+                  >Current Password</label
+                >
+                <input
+                  v-model="profile.currentPassword"
+                  type="password"
+                  class="form-control mb-3"
+                  id="current_password"
+                  style="width: 300px"
+                />
+                <label for="new_password" class="form-label"
+                  >New Password</label
+                >
+                <input
+                  v-model="profile.newPassword"
+                  type="password"
+                  class="form-control mb-3"
+                  id="new_password"
+                  style="width: 300px"
+                />
+                <label for="confirm_password" class="form-label"
+                  >Confirm New Password</label
+                >
+                <input
+                  v-model="profile.confirmNewPassword"
+                  type="password"
+                  class="form-control mb-3"
+                  id="confirm_password"
+                  style="width: 300px"
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                @click.prevent="updateMyProfileWithPassword()"
+              >
+                Update Password
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
-      <button
-        class="btn btn-primary"
-        style="display: block"
-        @click.prevent="updateMyProfile()"
-      >
-        Update Password
-      </button>
-    </form>
+      <div class="col">
+        <div class="card mb-3 mx-10 my-10" style="max-width: 25rem">
+          <h4 class="card-header">Account</h4>
+          <div class="card-body">
+            <h5 class="card-title text-danger">Delete Account</h5>
+            <p>
+              Deleting your account is a permanent action and cannot be undone.
+              If you are sure you want to delete your account, click the button
+              below.
+            </p>
+            <button
+              type="submit"
+              class="btn btn-danger"
+              @click.prevent="deleteMyAccount()"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-const { updateProfile } = useIam();
+const { updateProfile, deleteAccount } = useIam();
 const updateSuccessful = ref(false);
-let settingsError = ref(null);
+let profileError = ref(null);
 
-// Some profile values
+// Some profile values with added ones
 const profile = {
   uuid: "",
   firstName: "",
   lastName: "",
+  currentPassword: "",
+  newPassword: "",
+  confirmNewPassword: "",
 };
 
 // Get profile passed through attributes
@@ -85,32 +128,8 @@ profile.uuid = attrs.profile.uuid;
 profile.firstName = attrs.profile.firstName;
 profile.lastName = attrs.profile.lastName;
 
-// Attempt to update user profile
-async function updateMyProfile() {
-  if (
-    profile.firstName === attrs.profile.firstName &&
-    profile.lastName === attrs.profile.lastName
-  )
-    return;
-
-  const { error } = await updateProfile(
-    profile.uuid,
-    profile.firstName,
-    profile.lastName
-  );
-
-  // If error, display error
-  if (error) {
-    console.log("error: ", error);
-    settingsError.value = error;
-    return;
-  }
-
-  updateSuccessful.value = true;
-}
-
 // Attempt to update user profile with password
-async function updateMyProfileWithPassword(profile) {
+async function updateMyProfileWithPassword() {
   // Front end password validation
   if (
     !profile.currentPassword ||
@@ -151,8 +170,21 @@ async function updateMyProfileWithPassword(profile) {
     return;
   }
 
-  console.log("status: ", status);
-  console.log("data: ", data);
   updateSuccessful.value = true;
+}
+
+// Attempt to delete user account
+async function deleteMyAccount() {
+  const { status, error } = await deleteAccount(profile.uuid);
+
+  // If error, show error
+  if (error) {
+    profileError.value = error;
+    return;
+  }
+
+  // Otherwise, delete was successful, navigate to register
+  const router = useRouter();
+  router.push("/iam/register");
 }
 </script>
