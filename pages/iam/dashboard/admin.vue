@@ -36,15 +36,17 @@
   <!-- Edit Modal -->
   <div
     class="modal fade"
-    id="exampleModal"
+    id="usersTableModal"
     tabindex="-1"
-    aria-labelledby="exampleModalLabel"
+    aria-labelledby="usersTableModalLabel"
     aria-hidden="true"
   >
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <h1 class="modal-title fs-5" id="usersTableModalLabel">
+            Modal title
+          </h1>
           <button
             type="button"
             class="btn-close"
@@ -52,16 +54,113 @@
             aria-label="Close"
           ></button>
         </div>
-        <div class="modal-body">{{ currentRecord }}</div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Close
-          </button>
-          <button type="button" class="btn btn-primary">Save changes</button>
+        <div class="modal-body">
+          <form v-if="userTableRecord">
+            <div class="mb-3">
+              <label for="text" class="form-label">Uuid</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                id="uuid"
+                style="width: 300px"
+                :value="userTableRecord.uuid"
+                disabled
+              />
+              <label for="email" class="form-label">Email address</label>
+              <input
+                type="email"
+                class="form-control mb-3"
+                id="email"
+                style="width: 300px"
+                :value="userTableRecord.email"
+                disabled
+              />
+              <label for="email" class="form-label">Email verified</label>
+              <input
+                type="email"
+                class="form-control mb-3"
+                id="email"
+                style="width: 300px"
+                :value="userTableRecord.email_verified"
+                disabled
+              />
+              <label for="role" class="form-label">Role</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                id="role"
+                style="width: 300px"
+                :value="userTableRecord.role"
+                disabled
+              />
+              <label for="first_name" class="form-label">First name</label>
+              <input
+                v-model="userTableData.firstName"
+                type="text"
+                class="form-control mb-3"
+                id="first_name"
+                style="width: 300px"
+              />
+              <label for="last_name" class="form-label">Last name</label>
+              <input
+                v-model="userTableData.lastName"
+                type="text"
+                class="form-control mb-3"
+                id="last_name"
+                style="width: 300px"
+              />
+              <label for="last_login" class="form-label">Last login</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                id="last_login"
+                style="width: 300px"
+                :value="
+                  userTableRecord.last_login
+                    ? userTableRecord.last_login
+                    : 'null'
+                "
+                disabled
+              />
+              <label for="created_at" class="form-label">Created at</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                id="created_at"
+                style="width: 300px"
+                :value="userTableRecord.created_at"
+                disabled
+              />
+              <label for="created_at" class="form-label">Deleted at</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                id="created_at"
+                style="width: 300px"
+                :value="
+                  userTableRecord.deleted_at
+                    ? userTableRecord.deleted_at
+                    : 'null'
+                "
+                disabled
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              @click.prevent="updateUser()"
+            >
+              Update User
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary ms-3"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -107,8 +206,13 @@
               type="button"
               class="btn btn-warning btn-sm"
               data-bs-toggle="modal"
-              data-bs-target="#exampleModal"
-              @click="currentRecord = row"
+              data-bs-target="#usersTableModal"
+              @click="
+                () => {
+                  userTableRecord = row;
+                  addUserTableData(row);
+                }
+              "
             >
               edit
             </button>
@@ -119,7 +223,7 @@
               class="btn btn-danger btn-sm"
               @click="
                 () => {
-                  currentRecord = row;
+                  userTableRecord = row;
                   deleteRecord(row);
                 }
               "
@@ -135,11 +239,14 @@
 
 <script setup>
 const { getUsers } = useIamAdmin();
-const attrs = useAttrs();
-const profile = attrs.profile;
 
-// Holds current record
-const currentRecord = ref(null);
+// Holds current user table record
+const userTableRecord = ref(null);
+const userTableData = {
+  uuid: "",
+  firstName: "",
+  lastName: "",
+};
 
 // Error variables
 const updateSuccessful = ref(false);
@@ -165,6 +272,33 @@ onMounted(async () => {
     usersTable.value = data;
   }
 });
+
+/**
+ * @desc Add user data to specific variables
+ * @param tableData Data associated with users table
+ */
+function addUserTableData(tableData) {
+  userTableData.uuid = tableData.uuid;
+  userTableData.firstName = tableData.first_name;
+  userTableData.lastName = tableData.last_name;
+  userTableData.uuid = tableData.uuid;
+}
+
+/**
+ * @desc Updates a single user record
+ */
+function updateUser() {
+  // TODO: Need to get updated form data
+  const uuid = userTableData.uuid;
+  const firstName = userTableData.firstName;
+  const lastName = userTableData.lastName;
+
+  console.log("uuid: ", uuid);
+  console.log("first name: ", firstName);
+  console.log("last name: ", lastName);
+
+  // Update user
+}
 
 function deleteRecord(record) {
   console.log("DELETE: ", record);
