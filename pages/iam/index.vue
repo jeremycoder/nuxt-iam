@@ -160,7 +160,7 @@
         </div>
       </div>
 
-      <h3>Your usage of Nuxt IAM means you agree to the following terms</h3>
+      <h4>Software is provided as is</h4>
       <p>
         "The software is provided "as is," without warranty of any kind, express
         or implied, including but not limited to the warranties of
@@ -169,6 +169,37 @@
         claim, damages or other liability, whether in an action of contract,
         tort or otherwise, arising from, out of or in connection with the
         software or the use or other dealings in the software."
+      </p>
+      <h4>Liability waiver</h4>
+      <p>
+        "By using the software, you agree to waive any and all claims against
+        the creators, developers, and distributors of the software for any
+        damages, losses, costs, liabilities, and expenses, including but not
+        limited to, direct, indirect, incidental, consequential, and punitive
+        damages, arising out of or in any way connected with the use of the
+        software. This waiver applies to all claims, whether based on contract,
+        tort, strict liability, or any other legal theory, and whether or not
+        the creators, developers, and distributors of the software have been
+        advised of the possibility of such damage. You acknowledge that the
+        software may contain bugs, errors, and other issues, and that the
+        software may not perform as intended. You also acknowledge that the
+        software may be updated, modified, or discontinued at any time without
+        notice."
+      </p>
+      <h4>Use software at your own risk</h4>
+      <p>
+        "By using the software, you acknowledge that you are doing so at your
+        own risk. The creators, developers, and distributors of the software
+        make no warranties, express or implied, regarding the software's
+        performance, safety, or reliability. You understand that the software
+        may contain bugs, errors, and other issues and that the software may not
+        perform as intended. You also understand that the software may be
+        updated, modified, or discontinued at any time without notice. You agree
+        to indemnify and hold harmless the creators, developers, and
+        distributors of the software from any and all claims, damages, losses,
+        costs, liabilities, and expenses, including but not limited to, direct,
+        indirect, incidental, consequential, and punitive damages, arising out
+        of or in any way connected with your use of the software."
       </p>
 
       <div class="row">
