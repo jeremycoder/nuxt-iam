@@ -40,9 +40,8 @@
                 /><span style="color: #184b81">Nuxt<b>IAM</b></span></NuxtLink
               >
               <!-- Profile icon -->
-              <div class="dropdown text-end">
+              <div v-if="profile" class="dropdown text-end">
                 <a
-                  v-if="profile"
                   href="#"
                   class="d-block link-dark text-decoration-none dropdown-toggle"
                   data-bs-toggle="dropdown"

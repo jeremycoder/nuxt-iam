@@ -160,6 +160,17 @@
         </div>
       </div>
 
+      <h3>Your usage of Nuxt IAM means you agree to the following terms</h3>
+      <p>
+        "The software is provided "as is," without warranty of any kind, express
+        or implied, including but not limited to the warranties of
+        merchantability, fitness for a particular purpose and non-infringement.
+        In no event shall the authors or copyright holders be liable for any
+        claim, damages or other liability, whether in an action of contract,
+        tort or otherwise, arising from, out of or in connection with the
+        software or the use or other dealings in the software."
+      </p>
+
       <div class="row">
         <div
           class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3"
