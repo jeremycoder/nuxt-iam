@@ -206,6 +206,7 @@
         @click="usersTableError = null"
       ></button>
     </div>
+    <!-- Users table -->
     <table class="table table-sm table-striped">
       <thead>
         <tr>
@@ -264,7 +265,6 @@
 <script setup>
 const emit = defineEmits(["profileUpdate"]);
 const { getUsers, updateUser } = useIamAdmin();
-const { updateProfile } = useIam();
 const selectedRole = ref("");
 
 // Some profile values
@@ -343,18 +343,29 @@ async function updateThisUser() {
   };
 
   // Update user
-  const { status, error, data } = await updateUser(uuid, body);
+  const updateUserResult = await updateUser(uuid, body);
 
   // If we get an error, show error
-  if (error) {
-    console.log(error);
-    usersTableError.value = error;
+  if (updateUserResult.error) {
+    console.log(updateUserResult.error);
+    usersTableError.value = updateUserResult.error;
     return;
   }
 
-  // If successful
+  // If successful, emit profile update event and get users from database to update ui
   emit("profileUpdate");
-  await getUsers();
+  const getUsersResult = await getUsers();
+
+  // If error, show error
+  if (getUsersResult.error) {
+    console.log(getUsersResult.error);
+    usersTableError.value = getUsersResult.error;
+    return;
+  }
+
+  // Otherwise update users table
+  usersTable.value = getUsersResult.data;
+  console.log("usersTable.value: ", usersTable.value);
   updateSuccessful.value = true;
 }
 
@@ -366,7 +377,6 @@ function deleteRecord(record) {
     };
     return;
   }
-  const uuid = userTableData.uuid;
 
   console.log("DELETE: ", record);
 }
