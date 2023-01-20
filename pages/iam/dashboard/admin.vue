@@ -1,270 +1,276 @@
 <template>
   <div>
-    <h1 class="mt-5">Admin</h1>
-    <p class="lead">This is your admin center.</p>
-  </div>
-  <!-- Admin errors notification -->
-  <div
-    v-if="adminError"
-    class="alert alert-danger alert-dismissible fade show"
-    role="alert"
-  >
-    <strong>{{ adminError.message }}</strong>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="alert"
-      aria-label="Close"
-      @click="adminError = null"
-    ></button>
-  </div>
-  <!-- Admin success notification -->
-  <div
-    v-if="updateSuccessful"
-    class="alert alert-success alert-dismissible fade show"
-    role="alert"
-  >
-    <strong>Data updated successfully</strong>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="alert"
-      aria-label="Close"
-      @click="updateSuccessful = false"
-    ></button>
-  </div>
-  <!-- Users table edit Modal -->
-  <div
-    class="modal fade"
-    id="usersTableModal"
-    tabindex="-1"
-    aria-labelledby="usersTableModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="usersTableModalLabel">
-            Modal title
-          </h1>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <form v-if="userTableRecord">
-            <div class="mb-3">
-              <label for="text" class="form-label"><strong>Uuid</strong></label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                id="uuid"
-                style="width: 300px"
-                :value="userTableRecord.uuid"
-                disabled
-              />
-              <label for="email" class="form-label"
-                ><strong>Email address</strong></label
-              >
-              <input
-                type="email"
-                class="form-control mb-3"
-                id="email"
-                style="width: 300px"
-                :value="userTableRecord.email"
-                disabled
-              />
-              <label for="email" class="form-label"
-                ><strong>Email verified</strong></label
-              >
-              <input
-                type="email"
-                class="form-control mb-3"
-                id="email"
-                style="width: 300px"
-                :value="userTableRecord.email_verified"
-                disabled
-              />
-              <label for="role" class="form-label"><strong>Role</strong></label>
-              <p>Current role: {{ userTableRecord.role }}</p>
-              <p>
-                New role: <span>{{ selectedRole }}</span>
-              </p>
-              <select
-                class="form-select form-control mb-3"
-                id="role"
-                aria-label="Role select"
-                style="width: 300px"
-                v-model="selectedRole"
-              >
-                <option>SUPER_ADMIN</option>
-                <option>ADMIN</option>
-                <option>GENERAL</option>
-              </select>
-
-              <label for="first_name" class="form-label"
-                ><strong>First name</strong></label
-              >
-              <input
-                v-model="userTableData.firstName"
-                type="text"
-                class="form-control mb-3"
-                id="first_name"
-                style="width: 300px"
-              />
-              <label for="last_name" class="form-label"
-                ><strong>Last name</strong></label
-              >
-              <input
-                v-model="userTableData.lastName"
-                type="text"
-                class="form-control mb-3"
-                id="last_name"
-                style="width: 300px"
-              />
-              <label for="last_login" class="form-label"
-                ><strong>Last login</strong></label
-              >
-              <input
-                type="text"
-                class="form-control mb-3"
-                id="last_login"
-                style="width: 300px"
-                :value="
-                  userTableRecord.last_login
-                    ? userTableRecord.last_login
-                    : 'null'
-                "
-                disabled
-              />
-              <label for="created_at" class="form-label"
-                ><strong>Created at</strong></label
-              >
-              <input
-                type="text"
-                class="form-control mb-3"
-                id="created_at"
-                style="width: 300px"
-                :value="userTableRecord.created_at"
-                disabled
-              />
-              <label for="created_at" class="form-label"
-                ><strong>Deleted at</strong></label
-              >
-              <input
-                type="text"
-                class="form-control mb-3"
-                id="created_at"
-                style="width: 300px"
-                :value="
-                  userTableRecord.deleted_at
-                    ? userTableRecord.deleted_at
-                    : 'null'
-                "
-                disabled
-              />
-            </div>
-
-            <button
-              type="submit"
-              class="btn btn-primary"
-              @click.prevent="updateThisUser()"
-            >
-              Update User
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary ms-3"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-          </form>
-        </div>
-      </div>
+    <div>
+      <h1 class="mt-5">Admin</h1>
+      <p class="lead">This is your admin center.</p>
     </div>
-  </div>
-  <!-- Users table -->
-  <div>
-    <!-- {{ usersTable }} -->
-    <h3>Users table</h3>
-    <!-- Users table error -->
+    <!-- Admin errors notification -->
     <div
-      v-if="usersTableError"
+      v-if="adminError"
       class="alert alert-danger alert-dismissible fade show"
       role="alert"
     >
-      <strong>{{ usersTableError.message }}</strong>
+      <strong>{{ adminError.message }}</strong>
       <button
         type="button"
         class="btn-close"
         data-bs-dismiss="alert"
         aria-label="Close"
-        @click="usersTableError = null"
+        @click="adminError = null"
       ></button>
     </div>
+    <!-- Admin success notification -->
+    <div
+      v-if="updateSuccessful"
+      class="alert alert-success alert-dismissible fade show"
+      role="alert"
+    >
+      <strong>Data updated successfully</strong>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+        @click="updateSuccessful = false"
+      ></button>
+    </div>
+    <!-- Users table edit Modal -->
+    <div
+      class="modal fade"
+      id="usersTableModal"
+      tabindex="-1"
+      aria-labelledby="usersTableModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="usersTableModalLabel">
+              Modal title
+            </h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form v-if="userTableRecord">
+              <div class="mb-3">
+                <label for="text" class="form-label"
+                  ><strong>Uuid</strong></label
+                >
+                <input
+                  type="text"
+                  class="form-control mb-3"
+                  id="uuid"
+                  style="width: 300px"
+                  :value="userTableRecord.uuid"
+                  disabled
+                />
+                <label for="email" class="form-label"
+                  ><strong>Email address</strong></label
+                >
+                <input
+                  type="email"
+                  class="form-control mb-3"
+                  id="email"
+                  style="width: 300px"
+                  :value="userTableRecord.email"
+                  disabled
+                />
+                <label for="email" class="form-label"
+                  ><strong>Email verified</strong></label
+                >
+                <input
+                  type="email"
+                  class="form-control mb-3"
+                  id="email"
+                  style="width: 300px"
+                  :value="userTableRecord.email_verified"
+                  disabled
+                />
+                <label for="role" class="form-label"
+                  ><strong>Role</strong></label
+                >
+                <p>Current role: {{ userTableRecord.role }}</p>
+                <p>
+                  New role: <span>{{ selectedRole }}</span>
+                </p>
+                <select
+                  class="form-select form-control mb-3"
+                  id="role"
+                  aria-label="Role select"
+                  style="width: 300px"
+                  v-model="selectedRole"
+                >
+                  <option>SUPER_ADMIN</option>
+                  <option>ADMIN</option>
+                  <option>GENERAL</option>
+                </select>
+
+                <label for="first_name" class="form-label"
+                  ><strong>First name</strong></label
+                >
+                <input
+                  v-model="userTableData.firstName"
+                  type="text"
+                  class="form-control mb-3"
+                  id="first_name"
+                  style="width: 300px"
+                />
+                <label for="last_name" class="form-label"
+                  ><strong>Last name</strong></label
+                >
+                <input
+                  v-model="userTableData.lastName"
+                  type="text"
+                  class="form-control mb-3"
+                  id="last_name"
+                  style="width: 300px"
+                />
+                <label for="last_login" class="form-label"
+                  ><strong>Last login</strong></label
+                >
+                <input
+                  type="text"
+                  class="form-control mb-3"
+                  id="last_login"
+                  style="width: 300px"
+                  :value="
+                    userTableRecord.last_login
+                      ? userTableRecord.last_login
+                      : 'null'
+                  "
+                  disabled
+                />
+                <label for="created_at" class="form-label"
+                  ><strong>Created at</strong></label
+                >
+                <input
+                  type="text"
+                  class="form-control mb-3"
+                  id="created_at"
+                  style="width: 300px"
+                  :value="userTableRecord.created_at"
+                  disabled
+                />
+                <label for="created_at" class="form-label"
+                  ><strong>Deleted at</strong></label
+                >
+                <input
+                  type="text"
+                  class="form-control mb-3"
+                  id="created_at"
+                  style="width: 300px"
+                  :value="
+                    userTableRecord.deleted_at
+                      ? userTableRecord.deleted_at
+                      : 'null'
+                  "
+                  disabled
+                />
+              </div>
+
+              <button
+                type="submit"
+                class="btn btn-primary"
+                @click.prevent="updateThisUser()"
+              >
+                Update User
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary ms-3"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Users table -->
-    <table class="table table-sm table-striped">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">id</th>
-          <th scope="col">email</th>
-          <th scope="col">first_name</th>
-          <th scope="col">last_name</th>
-          <th scope="col">edit</th>
-          <th scope="col">delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, index) in usersTable">
-          <th scope="row">{{ index + 1 }}</th>
-          <td>{{ row.id }}</td>
-          <td>{{ row.email }}</td>
-          <td>{{ row.first_name }}</td>
-          <td>{{ row.last_name }}</td>
-          <td>
-            <button
-              type="button"
-              class="btn btn-warning btn-sm"
-              data-bs-toggle="modal"
-              data-bs-target="#usersTableModal"
-              @click="
-                () => {
-                  userTableRecord = row;
-                  addUserTableData(row);
-                }
-              "
-            >
-              edit
-            </button>
-          </td>
-          <td>
-            <button
-              type="button"
-              class="btn btn-danger btn-sm"
-              @click="
-                () => {
-                  userTableRecord = row;
-                  deleteRecord(row);
-                }
-              "
-            >
-              delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div>
+      <!-- {{ usersTable }} -->
+      <h3>Users table</h3>
+      <!-- Users table error -->
+      <div
+        v-if="usersTableError"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        <strong>{{ usersTableError.message }}</strong>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+          @click="usersTableError = null"
+        ></button>
+      </div>
+      <!-- Users table -->
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">id</th>
+            <th scope="col">email</th>
+            <th scope="col">first_name</th>
+            <th scope="col">last_name</th>
+            <th scope="col">edit</th>
+            <th scope="col">delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, index) in usersTable">
+            <th scope="row">{{ index + 1 }}</th>
+            <td>{{ row.id }}</td>
+            <td>{{ row.email }}</td>
+            <td>{{ row.first_name }}</td>
+            <td>{{ row.last_name }}</td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-warning btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#usersTableModal"
+                @click="
+                  () => {
+                    userTableRecord = row;
+                    addUserTableData(row);
+                  }
+                "
+              >
+                edit
+              </button>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                @click="
+                  () => {
+                    userTableRecord = row;
+                    deleteThisUser(row);
+                  }
+                "
+              >
+                delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script setup>
 const emit = defineEmits(["profileUpdate"]);
-const { getUsers, updateUser } = useIamAdmin();
+const { getUsers, updateUser, deleteUser } = useIamAdmin();
 const selectedRole = ref("");
 
 // Some profile values
@@ -365,11 +371,13 @@ async function updateThisUser() {
 
   // Otherwise update users table
   usersTable.value = getUsersResult.data;
-  console.log("usersTable.value: ", usersTable.value);
   updateSuccessful.value = true;
 }
 
-function deleteRecord(record) {
+/**
+ * @desc DEletes a single user record
+ */
+async function deleteThisUser(record) {
   // Cannot delete own record. Must go to profile
   if (profile.uuid === record.uuid) {
     usersTableError.value = {
@@ -378,6 +386,17 @@ function deleteRecord(record) {
     return;
   }
 
-  console.log("DELETE: ", record);
+  // Attempt to delete User
+  const deleteUserResult = await deleteUser(record.uuid);
+
+  // If error, show error, and return
+  if (deleteUserResult.error) {
+    usersTableError.value = deleteUserResult.error;
+    return;
+  }
+
+  // Otherwise update users table
+  usersTable.value = deleteUserResult.data;
+  updateSuccessful.value = true;
 }
 </script>

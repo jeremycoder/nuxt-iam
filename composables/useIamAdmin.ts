@@ -5,6 +5,7 @@ export default function useIamAdmin() {
   return {
     getUsers,
     updateUser,
+    deleteUser,
   };
 }
 
@@ -25,7 +26,7 @@ async function getUsers(): Promise<JSONResponse> {
 }
 
 /**
- * @desc Get users
+ * @desc Update a user
  * @returns {Promise<JSONResponse>}
  */
 async function updateUser(
@@ -34,14 +35,29 @@ async function updateUser(
 ): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
-  console.log("in useIamAdmin: update body: ", values);
-
   const response = await $fetch(`/api/iam/users/${uuid}`, {
     method: "PUT",
     headers: {
       "client-platform": clientPlatform,
     },
     body: values,
+  });
+
+  return response;
+}
+
+/**
+ * @desc Delete a user
+ * @returns {Promise<JSONResponse>}
+ */
+async function deleteUser(uuid: string): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch(`/api/iam/users/${uuid}`, {
+    method: "DELETE",
+    headers: {
+      "client-platform": clientPlatform,
+    },
   });
 
   return response;
