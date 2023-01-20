@@ -12,7 +12,7 @@ const rowLimit = 100;
  */
 export async function getAllUsers(
   event: H3Event
-): Promise<Array<any> | H3Error> {
+): Promise<Array<User> | H3Error> {
   let users = [] as Array<User>;
   let error = null;
 
@@ -29,8 +29,15 @@ export async function getAllUsers(
     });
 
   // Return error or users
-  if (error) return error;
-  else return users;
+  if (error) {
+    console.log("Error retrieving users");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  return users;
 }
 
 /**
@@ -57,7 +64,13 @@ export async function showUser(event: H3Event): Promise<User | H3Error> {
     });
 
   // If error, return error
-  if (error) return error;
+  if (error) {
+    console.log("Error getting one user");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
 
   // Prisma returns empty object if user not found, so check if user has email
   if (user && "email" in user === false) {
@@ -73,7 +86,8 @@ export async function showUser(event: H3Event): Promise<User | H3Error> {
       statusCode: 404,
       statusMessage: "User not found",
     });
-  else return user;
+
+  return user;
 }
 
 /**
@@ -86,24 +100,10 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
 
   // Get parameters
   const body = await readBody(event);
+
   const { fromRoute } = event.context.params;
   let user = {} as User;
   let error = null;
-
-  // Update password
-  // TODO: Check if current password AND new password exist in body
-  // TODO: If one exists but not the other return error
-
-  // TODO: If both are provided, check if current password is valid using validatePassword,
-  // TODO: If not, return error
-
-  // TODO: If password is valid, check is password is correct
-  // TODO: You'll have to retrieve user, and get user's password
-  // TODO: Then hash and compare, see how it's done in login
-
-  // TODO: If correct, hash new password
-
-  // TODO: Save and return the profile
 
   await prisma.users
     .update({
@@ -113,6 +113,7 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
       data: {
         first_name: body.first_name,
         last_name: body.last_name,
+        role: body.role,
       },
     })
     .then(async (response) => {
@@ -124,7 +125,11 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
     });
 
   // If error, return error
-  if (error) return error;
+  if (error)
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
 
   return user;
 }

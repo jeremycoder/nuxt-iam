@@ -1,9 +1,10 @@
-import { JSONResponse } from "~~/iam/misc/types";
+import { JSONResponse, UsersTableEditable } from "~~/iam/misc/types";
 
 // Composable to make user management tasks easier
 export default function useIamAdmin() {
   return {
     getUsers,
+    updateUser,
   };
 }
 
@@ -18,6 +19,29 @@ async function getUsers(): Promise<JSONResponse> {
     headers: {
       "client-platform": clientPlatform,
     },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Get users
+ * @returns {Promise<JSONResponse>}
+ */
+async function updateUser(
+  uuid: string,
+  values: UsersTableEditable
+): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  console.log("in useIamAdmin: update body: ", values);
+
+  const response = await $fetch(`/api/iam/users/${uuid}`, {
+    method: "PUT",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+    body: values,
   });
 
   return response;

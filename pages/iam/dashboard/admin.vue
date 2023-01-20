@@ -33,7 +33,7 @@
       @click="updateSuccessful = false"
     ></button>
   </div>
-  <!-- Edit Modal -->
+  <!-- Users table edit Modal -->
   <div
     class="modal fade"
     id="usersTableModal"
@@ -57,7 +57,7 @@
         <div class="modal-body">
           <form v-if="userTableRecord">
             <div class="mb-3">
-              <label for="text" class="form-label">Uuid</label>
+              <label for="text" class="form-label"><strong>Uuid</strong></label>
               <input
                 type="text"
                 class="form-control mb-3"
@@ -66,7 +66,9 @@
                 :value="userTableRecord.uuid"
                 disabled
               />
-              <label for="email" class="form-label">Email address</label>
+              <label for="email" class="form-label"
+                ><strong>Email address</strong></label
+              >
               <input
                 type="email"
                 class="form-control mb-3"
@@ -75,7 +77,9 @@
                 :value="userTableRecord.email"
                 disabled
               />
-              <label for="email" class="form-label">Email verified</label>
+              <label for="email" class="form-label"
+                ><strong>Email verified</strong></label
+              >
               <input
                 type="email"
                 class="form-control mb-3"
@@ -84,16 +88,26 @@
                 :value="userTableRecord.email_verified"
                 disabled
               />
-              <label for="role" class="form-label">Role</label>
-              <input
-                type="text"
-                class="form-control mb-3"
+              <label for="role" class="form-label"><strong>Role</strong></label>
+              <p>Current role: {{ userTableRecord.role }}</p>
+              <p>
+                New role: <span>{{ selectedRole }}</span>
+              </p>
+              <select
+                class="form-select form-control mb-3"
                 id="role"
+                aria-label="Role select"
                 style="width: 300px"
-                :value="userTableRecord.role"
-                disabled
-              />
-              <label for="first_name" class="form-label">First name</label>
+                v-model="selectedRole"
+              >
+                <option>SUPER_ADMIN</option>
+                <option>ADMIN</option>
+                <option>GENERAL</option>
+              </select>
+
+              <label for="first_name" class="form-label"
+                ><strong>First name</strong></label
+              >
               <input
                 v-model="userTableData.firstName"
                 type="text"
@@ -101,7 +115,9 @@
                 id="first_name"
                 style="width: 300px"
               />
-              <label for="last_name" class="form-label">Last name</label>
+              <label for="last_name" class="form-label"
+                ><strong>Last name</strong></label
+              >
               <input
                 v-model="userTableData.lastName"
                 type="text"
@@ -109,7 +125,9 @@
                 id="last_name"
                 style="width: 300px"
               />
-              <label for="last_login" class="form-label">Last login</label>
+              <label for="last_login" class="form-label"
+                ><strong>Last login</strong></label
+              >
               <input
                 type="text"
                 class="form-control mb-3"
@@ -122,7 +140,9 @@
                 "
                 disabled
               />
-              <label for="created_at" class="form-label">Created at</label>
+              <label for="created_at" class="form-label"
+                ><strong>Created at</strong></label
+              >
               <input
                 type="text"
                 class="form-control mb-3"
@@ -131,7 +151,9 @@
                 :value="userTableRecord.created_at"
                 disabled
               />
-              <label for="created_at" class="form-label">Deleted at</label>
+              <label for="created_at" class="form-label"
+                ><strong>Deleted at</strong></label
+              >
               <input
                 type="text"
                 class="form-control mb-3"
@@ -149,7 +171,7 @@
             <button
               type="submit"
               class="btn btn-primary"
-              @click.prevent="updateUser()"
+              @click.prevent="updateThisUser()"
             >
               Update User
             </button>
@@ -165,29 +187,30 @@
       </div>
     </div>
   </div>
-  <!-- Users table error -->
-  <div
-    v-if="usersTableError"
-    class="alert alert-danger alert-dismissible fade show"
-    role="alert"
-  >
-    <strong>{{ usersTableError.message }}</strong>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="alert"
-      aria-label="Close"
-      @click="usersTableError = null"
-    ></button>
-  </div>
   <!-- Users table -->
-  <div v-else="usersTable">
+  <div>
     <!-- {{ usersTable }} -->
     <h3>Users table</h3>
+    <!-- Users table error -->
+    <div
+      v-if="usersTableError"
+      class="alert alert-danger alert-dismissible fade show"
+      role="alert"
+    >
+      <strong>{{ usersTableError.message }}</strong>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+        @click="usersTableError = null"
+      ></button>
+    </div>
     <table class="table table-sm table-striped">
       <thead>
         <tr>
           <th scope="col">#</th>
+          <th scope="col">id</th>
           <th scope="col">email</th>
           <th scope="col">first_name</th>
           <th scope="col">last_name</th>
@@ -198,6 +221,7 @@
       <tbody>
         <tr v-for="(row, index) in usersTable">
           <th scope="row">{{ index + 1 }}</th>
+          <td>{{ row.id }}</td>
           <td>{{ row.email }}</td>
           <td>{{ row.first_name }}</td>
           <td>{{ row.last_name }}</td>
@@ -238,7 +262,19 @@
 </template>
 
 <script setup>
-const { getUsers } = useIamAdmin();
+const emit = defineEmits(["profileUpdate"]);
+const { getUsers, updateUser } = useIamAdmin();
+const { updateProfile } = useIam();
+const selectedRole = ref("");
+
+// Some profile values
+const profile = {
+  uuid: "",
+};
+
+// Get profile passed through attributes
+const attrs = useAttrs();
+profile.uuid = attrs.profile.uuid;
 
 // Holds current user table record
 const userTableRecord = ref(null);
@@ -246,6 +282,7 @@ const userTableData = {
   uuid: "",
   firstName: "",
   lastName: "",
+  role: "",
 };
 
 // Error variables
@@ -287,20 +324,50 @@ function addUserTableData(tableData) {
 /**
  * @desc Updates a single user record
  */
-function updateUser() {
+async function updateThisUser() {
   // TODO: Need to get updated form data
   const uuid = userTableData.uuid;
   const firstName = userTableData.firstName;
   const lastName = userTableData.lastName;
 
-  console.log("uuid: ", uuid);
-  console.log("first name: ", firstName);
-  console.log("last name: ", lastName);
+  // If we have a new selection for role, use that, otherwise, use the already selected role
+  const role = selectedRole.value
+    ? selectedRole.value
+    : userTableRecord.value.role;
+
+  // Create body to send to API
+  const body = {
+    first_name: firstName,
+    last_name: lastName,
+    role: role,
+  };
 
   // Update user
+  const { status, error, data } = await updateUser(uuid, body);
+
+  // If we get an error, show error
+  if (error) {
+    console.log(error);
+    usersTableError.value = error;
+    return;
+  }
+
+  // If successful
+  emit("profileUpdate");
+  await getUsers();
+  updateSuccessful.value = true;
 }
 
 function deleteRecord(record) {
+  // Cannot delete own record. Must go to profile
+  if (profile.uuid === record.uuid) {
+    usersTableError.value = {
+      message: "You must use your profile to delete your own record",
+    };
+    return;
+  }
+  const uuid = userTableData.uuid;
+
   console.log("DELETE: ", record);
 }
 </script>

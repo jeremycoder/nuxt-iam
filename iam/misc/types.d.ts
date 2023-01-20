@@ -46,3 +46,9 @@ export type UsersTablePermission = {
 };
 
 export type UsersTablePermissions = Array<UsersTablePermission>;
+
+export type UsersTableEditable = {
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+};

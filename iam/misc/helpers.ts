@@ -101,25 +101,36 @@ export async function validateUserUpdate(
       statusMessage: "User not found",
     });
 
-  // If first name and last name do not exist in body
-  if ("first_name" in body === false && "last_name" in body === false)
+  // If first name and last name and role do not exist in body
+  if (
+    "first_name" in body === false &&
+    "last_name" in body === false &&
+    "role" in body === false
+  )
     return createError({
       statusCode: 400,
       statusMessage: "No updatable properties supplied",
     });
 
   // If first_name empty
-  if (!body.first_name)
+  if ("first_name" in body && !body.first_name)
     return createError({
       statusCode: 400,
       statusMessage: "first_name must have data",
     });
 
   // If last_name empty
-  if (!body.last_name)
+  if ("last_name" in body && !body.last_name)
     return createError({
       statusCode: 400,
       statusMessage: "last_name must have data",
+    });
+
+  // If last_name empty
+  if ("role" in body && !body.role)
+    return createError({
+      statusCode: 400,
+      statusMessage: "role must have data",
     });
 }
 

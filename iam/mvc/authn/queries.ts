@@ -451,9 +451,9 @@ export async function updateProfile(event: H3Event): Promise<User | H3Error> {
     if (errorOrUser instanceof H3Error) return errorOrUser;
 
     const user = errorOrUser as User;
+
+    // Password hash is hidden
     user.password = "[hidden]";
-    // True user id is not 0, user.id is used by database, uuid is exposed to be used by client
-    user.id = 0;
     return user;
   }
 }

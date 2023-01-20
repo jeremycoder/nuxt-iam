@@ -166,13 +166,7 @@
       <main style="margin-top: 86px">
         <div class="container">
           <!-- Some child pages need profile data and some don't -->
-          <NuxtPage
-            v-if="routeNeedsProfile.has($route.fullPath)"
-            :profile="profile"
-            @profileUpdate="getMyProfile"
-          />
-
-          <NuxtPage v-else />
+          <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
         </div>
       </main>
     </div>
@@ -205,11 +199,6 @@ let verificationEmailSent = ref(false);
 // Profile variables
 const firstName = ref("");
 const lastName = ref("");
-
-// Add routes that need profile data
-const routeNeedsProfile = new Set();
-routeNeedsProfile.add("/iam/dashboard/profile");
-routeNeedsProfile.add("/iam/dashboard/settings");
 
 // Check email verification
 const verifyRegistrations =
