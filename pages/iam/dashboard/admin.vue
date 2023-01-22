@@ -317,6 +317,7 @@
         </div>
       </div>
     </div>
+
     <!-- Users table -->
     <div>
       <h3>Users table</h3>
@@ -431,17 +432,24 @@ const userTableData = {
   role: "",
 };
 
-// Prepare table variables
+// Holds current user table permissions record
+const userTablePermsRecord = ref(null);
+const userTablePermsData = {
+  uuid: "",
+  firstName: "",
+  lastName: "",
+  role: "",
+};
+
+// Users table variables
 const usersTable = ref(null);
 const usersTableError = ref(null);
 const usersTableDeleteError = ref(null);
 const createUserSuccessful = ref(false);
 const editUserSuccessful = ref(false);
-const usersTablePermsTable = ref(null);
+
 const refreshTokensTable = ref(null);
 const oneTimeTokensTable = ref(null);
-
-// Get users, check for error
 
 onMounted(async () => {
   // Attempt to get users table data
@@ -522,7 +530,6 @@ async function createThisUser() {
  * @desc Updates a single user record
  */
 async function updateThisUser() {
-  // TODO: Need to get updated form data
   const uuid = userTableData.uuid;
   const firstName = userTableData.firstName;
   const lastName = userTableData.lastName;
