@@ -7,6 +7,7 @@ import { usersMiddleware } from "./middleware";
 import { JSONResponse } from "~~/iam/misc/types";
 import { H3Error } from "h3";
 import { index, create, show, update, destroy } from "./model";
+import { isSuperAdmin, hasVerifiedEmail } from "~~/iam/authz/permissions";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -14,6 +15,14 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method;
   let result = null;
   const response = {} as JSONResponse;
+
+  // Create forbiddenError
+  const forbiddenError = {} as JSONResponse;
+  forbiddenError.status = "fail";
+  forbiddenError.error = createError({
+    statusCode: 403,
+    statusMessage: "Forbidden",
+  });
 
   // Middleware for all user routes
   const errorOrPlatform = usersMiddleware(event);
@@ -28,8 +37,11 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
 
+          // if (!isSuperAdmin) return forbiddenError;
+          // if (!hasVerifiedEmail) return forbiddenError;
+
           // Potential - get access token, check user credentials for this route
-          // if (!hasPermissions("get", "/api/iam/users", event)) {
+          // if (!isSuperAdmin() && !hasVerifiedEmail()) {
           //   response.status = "fail";
           //   response.error = createError({
           //     statusCode: 405,

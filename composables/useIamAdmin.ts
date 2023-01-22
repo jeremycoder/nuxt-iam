@@ -7,6 +7,9 @@ export default function useIamAdmin() {
     createUser,
     updateUser,
     deleteUser,
+    getRefreshTokens,
+    deleteRefreshToken,
+    deleteRefreshTokens,
   };
 }
 
@@ -76,6 +79,56 @@ async function deleteUser(uuid: string): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
   const response = await $fetch(`/api/iam/users/${uuid}`, {
+    method: "DELETE",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Get all refresh tokens
+ * @returns {Promise<JSONResponse>}
+ */
+async function getRefreshTokens(): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch("/api/iam/refresh-tokens", {
+    headers: {
+      "client-platform": clientPlatform,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Delete a refresh token
+ * @returns {Promise<JSONResponse>}
+ */
+async function deleteRefreshToken(id: number): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch(`/api/iam/refresh-tokens/${id}`, {
+    method: "DELETE",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Deletes all refresh token
+ * @returns {Promise<JSONResponse>}
+ */
+async function deleteRefreshTokens(): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch(`/api/iam/refresh-tokens/`, {
     method: "DELETE",
     headers: {
       "client-platform": clientPlatform,

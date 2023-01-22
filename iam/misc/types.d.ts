@@ -8,6 +8,7 @@ export type User = {
   avatar?: string;
   role: "SUPER_ADMIN" | "ADMIN" | "GENERAL";
   email_verified: boolean;
+  is_active: boolean;
   last_login: Date | null;
   created_at: Date;
 };
@@ -33,20 +34,6 @@ export type EmailOptions = {
   html?: string;
 };
 
-export type UsersTablePermission = {
-  id: number;
-  user_id?: number;
-  can_create?: boolean;
-  can_read?: string;
-  can_update?: string;
-  can_delete?: string;
-  expires_at?: Date;
-  updated_at?: Date;
-  created_at?: Date;
-};
-
-export type UsersTablePermissions = Array<UsersTablePermission>;
-
 export type UsersTableEditable = {
   first_name?: string;
   last_name?: string;
@@ -59,3 +46,13 @@ export type NewUser = {
   email: string;
   password: string;
 };
+
+export type RefreshToken = {
+  id: number;
+  token_id: string;
+  user_id: number;
+  is_active: boolean;
+  date_created: DateTime;
+};
+
+export type RefreshTokens = Array<RefreshToken>;

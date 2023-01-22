@@ -47,13 +47,32 @@
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  <img
-                    src="https://github.com/mdo.png"
-                    alt="mdo"
-                    width="32"
-                    height="32"
-                    class="rounded-circle"
-                  />
+                  <span v-if="profile.avatar">
+                    <img
+                      :src="profile.avatar"
+                      alt="mdo"
+                      width="32"
+                      height="32"
+                      class="rounded-circle"
+                    />
+                  </span>
+                  <span v-else>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      fill="currentColor"
+                      class="bi bi-person-circle"
+                      viewBox="0 0 16 16"
+                    >
+                      <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                      <path
+                        fill-rule="evenodd"
+                        d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
+                      />
+                    </svg>
+                  </span>
+
                   <span class="mx-1 profile-name"
                     >{{ firstName }} {{ lastName }}</span
                   >
@@ -113,7 +132,13 @@
                         >Home</NuxtLink
                       >
                     </li>
-                    <li class="nav-item">
+                    <li
+                      v-if="
+                        profile.permissions &&
+                        profile.permissions.includes('canAccessAdmin')
+                      "
+                      class="nav-item"
+                    >
                       <NuxtLink class="nav-link" to="/iam/dashboard/admin"
                         >Admin</NuxtLink
                       >
@@ -176,23 +201,14 @@
 </template>
 
 <script setup>
-const {
-  isAuthenticated,
-  verifyEmail,
-  getProfile,
-  updateProfile,
-  logout,
-  deleteAccount,
-} = useIam();
-const showMobileNav = ref(false);
-const showProfileNav = ref(false);
-const showSideNav = ref(false);
+const { isAuthenticated, getProfile, logout } = useIam();
+
 const router = useRouter();
 const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
 let profileError = ref(null);
-let updateSuccessful = ref(false);
+
 let verificationEmailSent = ref(false);
 
 // Profile variables
@@ -204,20 +220,6 @@ const verifyRegistrations =
   useRuntimeConfig().public.iamVerifyRegistrations === "true";
 const emailIsVerified = ref(false);
 
-/**
- * @desc Toggle showing mobile navigation
- */
-function toggleShowMobileNav() {
-  showMobileNav.value = !showMobileNav.value;
-}
-
-/**
- * @desc Toggle showing mobile navigation
- */
-function toggleShowProfileNav() {
-  showProfileNav.value = !showProfileNav.value;
-}
-
 // User profile
 const profile = {
   uuid: "",
@@ -226,9 +228,11 @@ const profile = {
   email: "",
   role: "",
   avatar: "",
+  isActive: "",
   currentPassword: "",
   newPassword: "",
   confirmNewPassword: "",
+  permissions: "",
 };
 
 onMounted(async () => {
@@ -269,7 +273,9 @@ async function getMyProfile() {
     profile.lastName = data.last_name;
     profile.email = data.email;
     profile.avatar = data.avatar;
+    profile.isActive = data.is_active;
     profile.role = data.role;
+    profile.permissions = data.permissions;
 
     // Assign to local reactive variables
     firstName.value = profile.firstName;

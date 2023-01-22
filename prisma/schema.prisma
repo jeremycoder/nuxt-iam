@@ -13,14 +13,15 @@ model users {
   email          String           @unique(map: "email") @db.VarChar(255)
   password       String           @db.VarChar(255)
   avatar         String?          @db.VarChar(255)
+  permissions    String?          @db.VarChar(4000)
   first_name     String           @db.VarChar(255)
   last_name      String           @db.VarChar(255)
   role           role             @default(GENERAL)
   email_verified Boolean          @default(false)
+  is_active      Boolean          @default(true)
   last_login     DateTime?        @db.DateTime(0)
   created_at     DateTime         @default(now()) @db.DateTime(0)
   deleted_at     DateTime?        @db.DateTime(0)
-  permissions    Json?
   refresh_tokens refresh_tokens[]
 }
 
@@ -33,7 +34,7 @@ enum role {
 model refresh_tokens {
   id           Int      @id @default(autoincrement())
   token_id     String   @unique(map: "token_id") @db.VarChar(60)
-  user         users?   @relation(fields: [user_id], references: [id])
+  user         users?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id      Int
   is_active    Boolean
   date_created DateTime @default(now()) @db.DateTime(0)

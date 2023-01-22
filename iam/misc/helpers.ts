@@ -105,7 +105,8 @@ export async function validateUserUpdate(
   if (
     "first_name" in body === false &&
     "last_name" in body === false &&
-    "role" in body === false
+    "role" in body === false &&
+    "permissions" in body === false
   )
     return createError({
       statusCode: 400,

@@ -1,5 +1,11 @@
 <template>
-  <div>
+  <!-- Look for permission attribute 'canAccessAdmin' -->
+  <div
+    v-if="
+      $attrs.profile.permissions &&
+      $attrs.profile.permissions.includes('canAccessAdmin')
+    "
+  >
     <div>
       <h1 class="mt-5">Admin</h1>
       <p class="lead">This is your admin center.</p>
@@ -124,6 +130,9 @@
                   id="first_name"
                   style="width: 300px"
                 />
+
+                {{ userTableData.isActive }}
+
                 <label for="last_name" class="form-label"
                   ><strong>Last name</strong></label
                 >
@@ -132,6 +141,20 @@
                   type="text"
                   class="form-control mb-3"
                   id="last_name"
+                  style="width: 300px"
+                />
+                <label for="permissions" class="form-label"
+                  ><strong>Permissions</strong></label
+                >
+                <p>Current permissions</p>
+                <code v-html="userTableRecord.permissions"></code>
+                <p />
+                <p>New permissions</p>
+                <input
+                  v-model="userTableData.permissions"
+                  type="text"
+                  class="form-control mb-3"
+                  id="permissions"
                   style="width: 300px"
                 />
                 <label for="last_login" class="form-label"
@@ -398,12 +421,119 @@
         </tbody>
       </table>
     </div>
+    <!-- Refresh Tokens -->
+    <div class="mt-5">
+      <h3>Refresh Tokens</h3>
+      <button
+        type="button"
+        class="btn btn-danger btn-sm mb-2 mt-2"
+        @click="deleteAllTokens"
+      >
+        Delete All
+      </button>
+      <p>
+        <small
+          >Deleting all will force every user to reauthenticate after their
+          access tokens expire.</small
+        >
+      </p>
+      <!-- Delete error -->
+      <div
+        v-if="refreshTokensTableDeleteError"
+        class="alert alert-danger alert-dismissible fade show m-2"
+        role="alert"
+      >
+        <strong>{{ refreshTokensTableDeleteError.message }}</strong>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+          @click="refreshTokensTableDeleteError = null"
+        ></button>
+      </div>
+      <!-- General refresh tokens error -->
+      <div
+        v-if="refreshTokensTableError"
+        class="alert alert-danger alert-dismissible fade show m-2"
+        role="alert"
+      >
+        <strong>{{ refreshTokensTableError.message }}</strong>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+          @click="refreshTokensTableError = null"
+        ></button>
+      </div>
+      <!-- Refresh tokens table -->
+      <table class="table table-sm table-striped mb-5">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">id</th>
+            <th scope="col">token_id</th>
+            <th scope="col">user_id</th>
+            <th scope="col">email</th>
+            <th scope="col">is_active</th>
+            <th scope="col">date_created</th>
+            <th scope="col">delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, index) in refreshTokensTable">
+            <th scope="row">{{ index + 1 }}</th>
+            <td>{{ row.id }}</td>
+            <td>{{ row.token_id }}</td>
+            <td>{{ row.user_id }}</td>
+            <!-- Example only -->
+            <td>
+              {{
+                usersTable.filter((user) => user.id === row.user_id)[0].email
+              }}
+            </td>
+            <td>{{ row.is_active }}</td>
+            <td>{{ row.date_created }}</td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                @click="
+                  () => {
+                    refreshTokenRecord = row;
+                    deleteThisToken(row);
+                  }
+                "
+              >
+                delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div v-else>
+    <div class="container">
+      <div class="text-center text-danger">
+        <h1>Access Forbidden</h1>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 const emit = defineEmits(["profileUpdate"]);
-const { getUsers, createUser, updateUser, deleteUser } = useIamAdmin();
+const {
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  getRefreshTokens,
+  deleteRefreshToken,
+  deleteRefreshTokens,
+} = useIamAdmin();
 const selectedRole = ref("");
 
 // Some profile values
@@ -430,16 +560,13 @@ const userTableData = {
   firstName: "",
   lastName: "",
   role: "",
+  avatar: "",
+  isActive: "",
+  permissions: "",
 };
 
-// Holds current user table permissions record
-const userTablePermsRecord = ref(null);
-const userTablePermsData = {
-  uuid: "",
-  firstName: "",
-  lastName: "",
-  role: "",
-};
+// Holds current refresh token record
+const refreshTokenRecord = ref(null);
 
 // Users table variables
 const usersTable = ref(null);
@@ -448,19 +575,20 @@ const usersTableDeleteError = ref(null);
 const createUserSuccessful = ref(false);
 const editUserSuccessful = ref(false);
 
+// Refresh tokens table variables
+const refreshTokensTableDeleteError = ref(null);
+const refreshTokensTableError = ref(null);
 const refreshTokensTable = ref(null);
-const oneTimeTokensTable = ref(null);
 
 onMounted(async () => {
   // Attempt to get users table data
-  const { error, data } = await getUsers();
+  const getUsersData = await getUsers();
 
   // If error, report error, otherwise get data
-  if (error) {
-    usersTableError.value = error;
-  } else {
-    usersTable.value = data;
-  }
+  if (getUsersData.error) usersTableError.value = getUsersData.error;
+  else usersTable.value = getUsersData.data;
+
+  await getAllRefreshTokens();
 });
 
 /**
@@ -472,6 +600,8 @@ function addUserTableData(tableData) {
   userTableData.firstName = tableData.first_name;
   userTableData.lastName = tableData.last_name;
   userTableData.uuid = tableData.uuid;
+  userTableData.isActive = tableData.is_active;
+  userTableData.permissions = tableData.permissions;
 }
 
 /**
@@ -533,6 +663,7 @@ async function updateThisUser() {
   const uuid = userTableData.uuid;
   const firstName = userTableData.firstName;
   const lastName = userTableData.lastName;
+  const permissions = userTableData.permissions;
 
   // If we have a new selection for role, use that, otherwise, use the already selected role
   const role = selectedRole.value
@@ -544,6 +675,7 @@ async function updateThisUser() {
     first_name: firstName,
     last_name: lastName,
     role: role,
+    permissions: permissions,
   };
 
   // Update user
@@ -574,6 +706,7 @@ async function updateThisUser() {
 
 /**
  * @desc Deletes a single user record
+ * @param record The record of the user to delete
  */
 async function deleteThisUser(record) {
   // Cannot delete own record. Must go to profile
@@ -595,6 +728,60 @@ async function deleteThisUser(record) {
 
   // Otherwise update users table
   usersTable.value = deleteUserResult.data;
-  updateSuccessful.value = true;
+}
+
+/**
+ * @desc Get all refresh tokens
+ */
+async function getAllRefreshTokens() {
+  // Attempt to get refresh tokens
+  const getRefreshTokensData = await getRefreshTokens();
+
+  // If error, report error, otherwise get data
+  if (getRefreshTokensData.error)
+    refreshTokensTableError.value = getRefreshTokensData.error;
+  else refreshTokensTable.value = getRefreshTokensData.data;
+}
+
+/**
+ * @desc Deletes a single refresh token
+ * @param record The record of the token to delete
+ */
+async function deleteThisToken(record) {
+  // Attempt to delete User
+  const deleteTokenResult = await deleteRefreshToken(record.id);
+
+  // If error, show error, and return
+  if (deleteTokenResult.error) {
+    refreshTokensTableError.value = deleteTokenResult.error;
+    return;
+  }
+
+  // Otherwise refresh tokens table
+  await getAllRefreshTokens();
+}
+
+/**
+ * @desc Deletes all refresh token
+ * @param record The record of the token to delete
+ */
+async function deleteAllTokens() {
+  // Attempt to delete User
+  const deleteTokenResult = await deleteRefreshTokens();
+
+  // If error, show error, and return
+  if (deleteTokenResult.error) {
+    refreshTokensTableError.value = deleteTokenResult.error;
+    return;
+  }
+
+  // Empty table in user interface
+  refreshTokensTable.value = null;
 }
 </script>
+
+<style scoped>
+table {
+  font-size: 90%;
+}
+</style>
