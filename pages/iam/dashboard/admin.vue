@@ -4,36 +4,6 @@
       <h1 class="mt-5">Admin</h1>
       <p class="lead">This is your admin center.</p>
     </div>
-    <!-- Admin errors notification -->
-    <div
-      v-if="adminError"
-      class="alert alert-danger alert-dismissible fade show"
-      role="alert"
-    >
-      <strong>{{ adminError.message }}</strong>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="alert"
-        aria-label="Close"
-        @click="adminError = null"
-      ></button>
-    </div>
-    <!-- Admin success notification -->
-    <div
-      v-if="updateSuccessful"
-      class="alert alert-success alert-dismissible fade show"
-      role="alert"
-    >
-      <strong>Data updated successfully</strong>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="alert"
-        aria-label="Close"
-        @click="updateSuccessful = false"
-      ></button>
-    </div>
     <!-- Users table edit Modal -->
     <div
       class="modal fade"
@@ -46,7 +16,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="usersTableModalLabel">
-              Modal title
+              Edit user
             </h1>
             <button
               type="button"
@@ -55,6 +25,40 @@
               aria-label="Close"
             ></button>
           </div>
+
+          <!-- Users table edit error -->
+          <div
+            v-if="usersTableError"
+            class="alert alert-danger alert-dismissible fade show m-2"
+            role="alert"
+          >
+            <strong>{{ usersTableError.message }}</strong>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+              @click="usersTableError = null"
+            ></button>
+          </div>
+
+          <!-- Edit user success notification -->
+          <div
+            v-if="editUserSuccessful"
+            class="alert alert-success alert-dismissible fade show m-2"
+            role="alert"
+          >
+            <strong>User updated successfully</strong>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+              @click="editUserSuccessful = false"
+            ></button>
+          </div>
+
+          <!-- Edit modal body  -->
           <div class="modal-body">
             <form v-if="userTableRecord">
               <div class="mb-3">
@@ -80,13 +84,13 @@
                   :value="userTableRecord.email"
                   disabled
                 />
-                <label for="email" class="form-label"
+                <label for="email_verified" class="form-label"
                   ><strong>Email verified</strong></label
                 >
                 <input
                   type="email"
                   class="form-control mb-3"
-                  id="email"
+                  id="email_verified"
                   style="width: 300px"
                   :value="userTableRecord.email_verified"
                   disabled
@@ -156,13 +160,13 @@
                   :value="userTableRecord.created_at"
                   disabled
                 />
-                <label for="created_at" class="form-label"
+                <label for="deleted_at" class="form-label"
                   ><strong>Deleted at</strong></label
                 >
                 <input
                   type="text"
                   class="form-control mb-3"
-                  id="created_at"
+                  id="deleted_at"
                   style="width: 300px"
                   :value="
                     userTableRecord.deleted_at
@@ -192,23 +196,151 @@
         </div>
       </div>
     </div>
+    <!-- Users table create Modal -->
+    <div
+      class="modal fade"
+      id="createUsersTableModal"
+      tabindex="-1"
+      aria-labelledby="createUsersTableModalLabel"
+      aria-hidden="true"
+    >
+      <div class="container"></div>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="createUsersTableModalLabel">
+              Create user
+            </h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+
+          <!-- Users table error -->
+          <div
+            v-if="usersTableError"
+            class="alert alert-danger alert-dismissible fade show m-2"
+            role="alert"
+          >
+            <strong>{{ usersTableError.message }}</strong>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+              @click="usersTableError = null"
+            ></button>
+          </div>
+
+          <!-- Create user success notification -->
+          <div
+            v-if="createUserSuccessful"
+            class="alert alert-success alert-dismissible fade show m-2"
+            role="alert"
+          >
+            <strong>User created successfully</strong>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+              @click="createUserSuccessful = false"
+            ></button>
+          </div>
+
+          <!-- Users create user modal body -->
+
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label for="create_first_name" class="form-label"
+                  ><strong>First name</strong></label
+                >
+                <input
+                  v-model="createProfile.first_name"
+                  type="text"
+                  class="form-control mb-3"
+                  id="create_first_name"
+                  style="width: 300px"
+                />
+                <label for="create_last_name" class="form-label"
+                  ><strong>Last name</strong></label
+                >
+                <input
+                  v-model="createProfile.last_name"
+                  type="text"
+                  class="form-control mb-3"
+                  id="create_last_name"
+                  style="width: 300px"
+                />
+                <label for="create_email" class="form-label"
+                  ><strong>Email</strong></label
+                >
+                <input
+                  v-model="createProfile.email"
+                  type="email"
+                  class="form-control mb-3"
+                  id="create_email"
+                  style="width: 300px"
+                />
+                <label for="create_password" class="form-label"
+                  ><strong>Password</strong></label
+                >
+                <input
+                  v-model="createProfile.password"
+                  type="password"
+                  class="form-control mb-3"
+                  id="create_password"
+                  style="width: 300px"
+                />
+              </div>
+
+              <button
+                type="submit"
+                class="btn btn-primary"
+                @click.prevent="createThisUser()"
+              >
+                Create User
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary ms-3"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Users table -->
     <div>
-      <!-- {{ usersTable }} -->
       <h3>Users table</h3>
-      <!-- Users table error -->
+      <button
+        type="button"
+        class="btn btn-success btn-sm mb-2 mt-2"
+        data-bs-toggle="modal"
+        data-bs-target="#createUsersTableModal"
+      >
+        Create User
+      </button>
+      <!-- Delete error -->
       <div
-        v-if="usersTableError"
-        class="alert alert-danger alert-dismissible fade show"
+        v-if="usersTableDeleteError"
+        class="alert alert-danger alert-dismissible fade show m-2"
         role="alert"
       >
-        <strong>{{ usersTableError.message }}</strong>
+        <strong>{{ usersTableDeleteError.message }}</strong>
         <button
           type="button"
           class="btn-close"
           data-bs-dismiss="alert"
           aria-label="Close"
-          @click="usersTableError = null"
+          @click="usersTableDeleteError = null"
         ></button>
       </div>
       <!-- Users table -->
@@ -270,12 +402,20 @@
 
 <script setup>
 const emit = defineEmits(["profileUpdate"]);
-const { getUsers, updateUser, deleteUser } = useIamAdmin();
+const { getUsers, createUser, updateUser, deleteUser } = useIamAdmin();
 const selectedRole = ref("");
 
 // Some profile values
 const profile = {
   uuid: "",
+};
+
+// Profile for creating user
+const createProfile = {
+  first_name: "",
+  last_name: "",
+  email: "",
+  password: "",
 };
 
 // Get profile passed through attributes
@@ -291,13 +431,12 @@ const userTableData = {
   role: "",
 };
 
-// Error variables
-const updateSuccessful = ref(false);
-let adminError = ref(null);
-
 // Prepare table variables
 const usersTable = ref(null);
 const usersTableError = ref(null);
+const usersTableDeleteError = ref(null);
+const createUserSuccessful = ref(false);
+const editUserSuccessful = ref(false);
 const usersTablePermsTable = ref(null);
 const refreshTokensTable = ref(null);
 const oneTimeTokensTable = ref(null);
@@ -325,6 +464,58 @@ function addUserTableData(tableData) {
   userTableData.firstName = tableData.first_name;
   userTableData.lastName = tableData.last_name;
   userTableData.uuid = tableData.uuid;
+}
+
+/**
+ * @desc Creates a new user record
+ */
+async function createThisUser() {
+  // Validate first name
+  if (!createProfile.first_name) {
+    usersTableError.value = { message: "First name is required" };
+    return;
+  }
+
+  // Validate last name
+  if (!createProfile.last_name) {
+    usersTableError.value = { message: "Last name is required" };
+    return;
+  }
+
+  // Validate email
+  if (!createProfile.email) {
+    usersTableError.value = { message: "Email is required" };
+    return;
+  }
+
+  // Validate password
+  if (!createProfile.password) {
+    usersTableError.value = { message: "Password is required" };
+    return;
+  }
+
+  // Attempt to create new user
+  const { error } = await createUser(createProfile);
+
+  // If error, show error and return
+  if (error) {
+    usersTableError.value = error;
+    return;
+  }
+
+  // If successful,  reget users from database to update ui
+  const getUsersResult = await getUsers();
+
+  // If error, show error
+  if (getUsersResult.error) {
+    console.log(getUsersResult.error);
+    usersTableError.value = getUsersResult.error;
+    return;
+  }
+
+  // Otherwise update users table
+  usersTable.value = getUsersResult.data;
+  createUserSuccessful.value = true;
 }
 
 /**
@@ -371,17 +562,17 @@ async function updateThisUser() {
 
   // Otherwise update users table
   usersTable.value = getUsersResult.data;
-  updateSuccessful.value = true;
+  editUserSuccessful.value = true;
 }
 
 /**
- * @desc DEletes a single user record
+ * @desc Deletes a single user record
  */
 async function deleteThisUser(record) {
   // Cannot delete own record. Must go to profile
   if (profile.uuid === record.uuid) {
-    usersTableError.value = {
-      message: "You must use your profile to delete your own record",
+    usersTableDeleteError.value = {
+      message: `You must use your profile settings to delete your own record`,
     };
     return;
   }

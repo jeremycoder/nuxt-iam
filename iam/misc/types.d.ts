@@ -52,3 +52,10 @@ export type UsersTableEditable = {
   last_name?: string;
   role?: string;
 };
+
+export type NewUser = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+};
