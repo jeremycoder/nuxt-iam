@@ -344,82 +344,92 @@
     <!-- Users table -->
     <div>
       <h3>Users table</h3>
-      <button
-        type="button"
-        class="btn btn-success btn-sm mb-2 mt-2"
-        data-bs-toggle="modal"
-        data-bs-target="#createUsersTableModal"
-      >
-        Create User
-      </button>
-      <!-- Delete error -->
+      <!-- Table get error -->
       <div
-        v-if="usersTableDeleteError"
-        class="alert alert-danger alert-dismissible fade show m-2"
+        v-if="usersTableGetError"
+        class="alert alert-danger fade show m-2"
         role="alert"
       >
-        <strong>{{ usersTableDeleteError.message }}</strong>
+        <strong>{{ usersTableGetError.message }}</strong>
+      </div>
+      <div v-else>
         <button
           type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-          @click="usersTableDeleteError = null"
-        ></button>
+          class="btn btn-success btn-sm mb-2 mt-2"
+          data-bs-toggle="modal"
+          data-bs-target="#createUsersTableModal"
+        >
+          Create User
+        </button>
+        <!-- Delete error -->
+        <div
+          v-if="usersTableDeleteError"
+          class="alert alert-danger alert-dismissible fade show m-2"
+          role="alert"
+        >
+          <strong>{{ usersTableDeleteError.message }}</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+            @click="usersTableDeleteError = null"
+          ></button>
+        </div>
+        <!-- Users table -->
+        <table class="table table-sm table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">id</th>
+              <th scope="col">email</th>
+              <th scope="col">first_name</th>
+              <th scope="col">last_name</th>
+              <th scope="col">edit</th>
+              <th scope="col">delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, index) in usersTable">
+              <th scope="row">{{ index + 1 }}</th>
+              <td>{{ row.id }}</td>
+              <td>{{ row.email }}</td>
+              <td>{{ row.first_name }}</td>
+              <td>{{ row.last_name }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-warning btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#usersTableModal"
+                  @click="
+                    () => {
+                      userTableRecord = row;
+                      addUserTableData(row);
+                    }
+                  "
+                >
+                  edit
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  @click="
+                    () => {
+                      userTableRecord = row;
+                      deleteThisUser(row);
+                    }
+                  "
+                >
+                  delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <!-- Users table -->
-      <table class="table table-sm table-striped">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">id</th>
-            <th scope="col">email</th>
-            <th scope="col">first_name</th>
-            <th scope="col">last_name</th>
-            <th scope="col">edit</th>
-            <th scope="col">delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, index) in usersTable">
-            <th scope="row">{{ index + 1 }}</th>
-            <td>{{ row.id }}</td>
-            <td>{{ row.email }}</td>
-            <td>{{ row.first_name }}</td>
-            <td>{{ row.last_name }}</td>
-            <td>
-              <button
-                type="button"
-                class="btn btn-warning btn-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#usersTableModal"
-                @click="
-                  () => {
-                    userTableRecord = row;
-                    addUserTableData(row);
-                  }
-                "
-              >
-                edit
-              </button>
-            </td>
-            <td>
-              <button
-                type="button"
-                class="btn btn-danger btn-sm"
-                @click="
-                  () => {
-                    userTableRecord = row;
-                    deleteThisUser(row);
-                  }
-                "
-              >
-                delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
     <!-- Refresh Tokens -->
     <div class="mt-5">
@@ -489,9 +499,11 @@
             <td>{{ row.user_id }}</td>
             <!-- Example only -->
             <td>
-              {{
-                usersTable.filter((user) => user.id === row.user_id)[0].email
-              }}
+              <span v-if="usersTable">
+                {{
+                  usersTable.filter((user) => user.id === row.user_id)[0].email
+                }}
+              </span>
             </td>
             <td>{{ row.is_active }}</td>
             <td>{{ row.date_created }}</td>
@@ -572,6 +584,7 @@ const refreshTokenRecord = ref(null);
 const usersTable = ref(null);
 const usersTableError = ref(null);
 const usersTableDeleteError = ref(null);
+const usersTableGetError = ref(null);
 const createUserSuccessful = ref(false);
 const editUserSuccessful = ref(false);
 
@@ -585,7 +598,7 @@ onMounted(async () => {
   const getUsersData = await getUsers();
 
   // If error, report error, otherwise get data
-  if (getUsersData.error) usersTableError.value = getUsersData.error;
+  if (getUsersData.error) usersTableGetError.value = getUsersData.error;
   else usersTable.value = getUsersData.data;
 
   await getAllRefreshTokens();
@@ -695,7 +708,7 @@ async function updateThisUser() {
   // If error, show error
   if (getUsersResult.error) {
     console.log(getUsersResult.error);
-    usersTableError.value = getUsersResult.error;
+    usersTableGetError.value = getUsersResult.error;
     return;
   }
 

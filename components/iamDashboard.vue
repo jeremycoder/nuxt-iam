@@ -185,14 +185,14 @@
             </div>
           </nav>
         </header>
+        <!-- Main content -->
+        <main style="margin-top: 86px">
+          <div class="container">
+            <!-- Some child pages need profile data and some don't -->
+            <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
+          </div>
+        </main>
       </div>
-      <!-- Main content -->
-      <main style="margin-top: 86px">
-        <div class="container">
-          <!-- Some child pages need profile data and some don't -->
-          <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
-        </div>
-      </main>
     </div>
   </div>
   <div v-else class="container-xl px-4 mt-4">
@@ -201,7 +201,7 @@
 </template>
 
 <script setup>
-const { isAuthenticated, getProfile, logout } = useIam();
+const { isAuthenticated, getProfile, logout, verifyEmail } = useIam();
 
 const router = useRouter();
 const isLoaded = ref(false);
@@ -285,6 +285,16 @@ async function getMyProfile() {
     emailIsVerified.value = data.email_verified;
     showProfile.value = true;
   }
+}
+
+/**
+ * @desc Sends API request to verify email
+ * @param email User email
+ */
+async function verifyMyEmail(email) {
+  console.log("Verifying my email: ", email);
+  verifyEmail(email);
+  verificationEmailSent.value = true;
 }
 
 useHead({

@@ -4,10 +4,16 @@
 
 import UrlPattern from "url-pattern";
 import { usersMiddleware } from "./middleware";
-import { JSONResponse } from "~~/iam/misc/types";
+import { JSONResponse, User } from "~~/iam/misc/types";
 import { H3Error } from "h3";
 import { index, create, show, update, destroy } from "./model";
-import { isSuperAdmin, hasVerifiedEmail } from "~~/iam/authz/permissions";
+import {
+  isSuperAdmin,
+  hasVerifiedEmail,
+  isOwner,
+  getUserFromAccessToken,
+  getUserUuidFromAccessToken,
+} from "~~/iam/authz/permissions";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -24,9 +30,15 @@ export default defineEventHandler(async (event) => {
     statusMessage: "Forbidden",
   });
 
-  // Middleware for all user routes
-  const errorOrPlatform = usersMiddleware(event);
-  if (errorOrPlatform instanceof H3Error) throw errorOrPlatform;
+  // Get user to prepare for permission checks
+  const userOrNull = await getUserFromAccessToken(event);
+  if (userOrNull === null) return forbiddenError;
+  const user = userOrNull as User;
+
+  // Get userUuid to prepare for permission checks
+  const userUuidOrNull = getUserUuidFromAccessToken(event);
+  if (userUuidOrNull === null) return forbiddenError;
+  const userUuid = userUuidOrNull as string;
 
   // Routes
   if (method && url)
@@ -35,28 +47,21 @@ export default defineEventHandler(async (event) => {
         // show all users
         result = new route("/api/iam/users").match(url);
         if (result) {
+          // Permissions
+          if (!isSuperAdmin(user)) return forbiddenError;
+          if (!hasVerifiedEmail(user)) return forbiddenError;
+
           event.context.params.fromRoute = result;
-
-          // if (!isSuperAdmin) return forbiddenError;
-          // if (!hasVerifiedEmail) return forbiddenError;
-
-          // Potential - get access token, check user credentials for this route
-          // if (!isSuperAdmin() && !hasVerifiedEmail()) {
-          //   response.status = "fail";
-          //   response.error = createError({
-          //     statusCode: 405,
-          //     statusMessage: "Method not allowed",
-          //   });
-
-          //   return response;
-          // }
-
           return await index(event);
         }
 
         // show a particular user
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
+          // Permissions
+          if (!isSuperAdmin(user) && !isOwner(userUuid, result.uuid))
+            return forbiddenError;
+
           event.context.params.fromRoute = result;
           return await show(event);
         }
@@ -66,6 +71,10 @@ export default defineEventHandler(async (event) => {
         // add new user to database
         result = new route("/api/iam/users/create").match(url);
         if (result) {
+          // Permissions
+          if (!isSuperAdmin(user)) return forbiddenError;
+          if (!hasVerifiedEmail(user)) return forbiddenError;
+
           event.context.params.fromRoute = result;
           return await create(event);
         }
@@ -75,6 +84,10 @@ export default defineEventHandler(async (event) => {
         // update particular user then redirect
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
+          // Permissions
+          if (!isSuperAdmin(user) && !isOwner(userUuid, result.uuid))
+            return forbiddenError;
+
           event.context.params.fromRoute = result;
           return await update(event);
         }
@@ -84,6 +97,10 @@ export default defineEventHandler(async (event) => {
         // delete particular user
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
+          // Permissions
+          if (!isSuperAdmin(user) && !isOwner(userUuid, result.uuid))
+            return forbiddenError;
+
           event.context.params.fromRoute = result;
           return await destroy(event);
         }

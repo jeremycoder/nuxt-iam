@@ -777,7 +777,6 @@ export async function createNewTokensFromRefresh(
   const publicUser = {
     uuid: user?.uuid,
     email: user?.email,
-    role: user?.role,
   };
 
   if (user) {
@@ -1028,7 +1027,6 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     const publicUser = {
       uuid: user.uuid,
       email: user.email,
-      role: user.role,
     };
 
     // Create access tokens
