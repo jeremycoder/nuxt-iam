@@ -3,9 +3,7 @@
  */
 
 import UrlPattern from "url-pattern";
-import { usersMiddleware } from "./middleware";
 import { JSONResponse, User } from "~~/iam/misc/types";
-import { H3Error } from "h3";
 import { index, create, show, update, destroy } from "./model";
 import {
   isSuperAdmin,
@@ -47,22 +45,24 @@ export default defineEventHandler(async (event) => {
         // show all users
         result = new route("/api/iam/users").match(url);
         if (result) {
+          event.context.params.fromRoute = result;
+
           // Permissions
           if (!isSuperAdmin(user)) return forbiddenError;
           if (!hasVerifiedEmail(user)) return forbiddenError;
 
-          event.context.params.fromRoute = result;
           return await index(event);
         }
 
         // show a particular user
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
+          event.context.params.fromRoute = result;
+
           // Permissions
           if (!isSuperAdmin(user) && !isOwner(userUuid, result.uuid))
             return forbiddenError;
 
-          event.context.params.fromRoute = result;
           return await show(event);
         }
         break;
@@ -71,11 +71,12 @@ export default defineEventHandler(async (event) => {
         // add new user to database
         result = new route("/api/iam/users/create").match(url);
         if (result) {
+          event.context.params.fromRoute = result;
+
           // Permissions
           if (!isSuperAdmin(user)) return forbiddenError;
           if (!hasVerifiedEmail(user)) return forbiddenError;
 
-          event.context.params.fromRoute = result;
           return await create(event);
         }
         break;
@@ -84,11 +85,12 @@ export default defineEventHandler(async (event) => {
         // update particular user then redirect
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
+          event.context.params.fromRoute = result;
+
           // Permissions
           if (!isSuperAdmin(user) && !isOwner(userUuid, result.uuid))
             return forbiddenError;
 
-          event.context.params.fromRoute = result;
           return await update(event);
         }
         break;
@@ -97,11 +99,12 @@ export default defineEventHandler(async (event) => {
         // delete particular user
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
+          event.context.params.fromRoute = result;
+
           // Permissions
           if (!isSuperAdmin(user) && !isOwner(userUuid, result.uuid))
             return forbiddenError;
 
-          event.context.params.fromRoute = result;
           return await destroy(event);
         }
         break;

@@ -3,10 +3,15 @@
  */
 
 import UrlPattern from "url-pattern";
-import { JSONResponse } from "~~/iam/misc/types";
-import { H3Error } from "h3";
+import { JSONResponse, User } from "~~/iam/misc/types";
 import { index, destroy, destroyAll } from "./model";
-import { isSuperAdmin, hasVerifiedEmail } from "~~/iam/authz/permissions";
+import {
+  isSuperAdmin,
+  hasVerifiedEmail,
+  isOwner,
+  getUserFromAccessToken,
+  getUserUuidFromAccessToken,
+} from "~~/iam/authz/permissions";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -23,6 +28,16 @@ export default defineEventHandler(async (event) => {
     statusMessage: "Forbidden",
   });
 
+  // Get user to prepare for permission checks
+  const userOrNull = await getUserFromAccessToken(event);
+  if (userOrNull === null) return forbiddenError;
+  const user = userOrNull as User;
+
+  // Get userUuid to prepare for permission checks
+  const userUuidOrNull = getUserUuidFromAccessToken(event);
+  if (userUuidOrNull === null) return forbiddenError;
+  const userUuid = userUuidOrNull as string;
+
   // Routes
   if (method && url)
     switch (method) {
@@ -32,6 +47,10 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
 
+          // Permissions
+          if (!isSuperAdmin(user)) return forbiddenError;
+          if (!hasVerifiedEmail(user)) return forbiddenError;
+
           return await index(event);
         }
 
@@ -40,6 +59,11 @@ export default defineEventHandler(async (event) => {
         result = new route("/api/iam/refresh-tokens(/:id)").match(url);
         if (result) {
           event.context.params.fromRoute = result;
+
+          // Permissions
+          if (!isSuperAdmin(user)) return forbiddenError;
+          if (!hasVerifiedEmail(user)) return forbiddenError;
+
           return await destroy(event);
         }
 
@@ -47,6 +71,11 @@ export default defineEventHandler(async (event) => {
         result = new route("/api/iam/refresh-tokens/").match(url);
         if (result) {
           event.context.params.fromRoute = result;
+
+          // Permissions
+          if (!isSuperAdmin(user)) return forbiddenError;
+          if (!hasVerifiedEmail(user)) return forbiddenError;
+
           return await destroyAll(event);
         }
         break;
