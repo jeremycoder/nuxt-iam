@@ -14,7 +14,7 @@ Add content here...
 Add content here...
 
 ## Configuration
-The following are runtime configuration options for Nuxt IAM. Please add the code below to your **nuxt.config** file. These to your **.env** file.
+The following are runtime configuration options for Nuxt IAM. Please add the code below to your **nuxt.config** file.
 ```
 export default defineNuxtConfig({
 //...
@@ -55,6 +55,56 @@ export default defineNuxtConfig({
 //...
   
 });
+```
+Here's an example of your .env file:
+
+```
+# Environment variables declared in this file are automatically made available to Prisma.
+# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
+
+# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
+# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
+
+# PRISMA DATABASE
+# DATABASE_URL="mysql://root:@localhost:3306/nuxtauth"
+DATABASE_URL="mysql://dbuser:dbpassword@dbserver:dbport/dbname"
+
+# NUXT IAM TOKEN SECRETS (Please change them every 2 - 4 weeks)
+# Can use in node 'crypto.randomBytes(64).toString('hex')'
+IAM_ACCESS_TOKEN_SECRET="fa85424538b2878a7785a703d168fc58550c8ef3a02c23b8aee5f8adf98159b218296926d37164db8ed48d28a73c01387cf4fd0032e7e76858e71a09b2b82c88"
+IAM_REFRESH_TOKEN_SECRET="c36f673adcbfe27859867697d6c98430c3757d3eafb7bca3fe90fe349baa9d88ec10932aba5da22f37264c2c2bd31404e5a22822be6f054ec9d40a56b28b97e1"
+IAM_RESET_TOKEN_SECRET="a67102c7d684ad370409855fe3e7a65f9f9ccffeb82b0d53fe328c66a1405b03737da79a4dd42266a5a83ea9826421b9b031703337be5fd1e1eac0feb1ae2166"
+IAM_VERIFY_TOKEN_SECRET="823459ed2ed1d80df1aedd3a5c03f1ee6132c20a076270d63d89e06c6b0f4fb7299991610f17dde4930b54432a6cf7b8d13b6da08b9f89bb8b30bb2c46c37f9e"
+
+# NUXT IAM
+# If using a browser like your Nuxt app, use 'browser' for production
+# If using a browser like your Nuxt app, use 'browser-dev' for development
+# If you're not using a browser, then use 'app'
+IAM_CLIENT_PLATFORM = "browser"
+
+IAM_PUBLIC_URL="http://localhost:3000"
+
+# NUXT IAM RESET EMAIL
+# nodemailer-service, nodemailer-smtp, sendgrid
+IAM_EMAILER="nodemailer-smtp"
+
+# nodemailer-service
+IAM_NODEMAILER_SERVICE="hotmail"
+IAM_NODEMAILER_SERVICE_SENDER="myusername@outlook.com"
+IAM_NODEMAILER_SERVICE_PASSWORD="myExcellentPassword767*"
+
+# nodemailer-smtp
+IAM_NODEMAILER_SMTP_HOST="mysmtp.host"
+IAM_NODEMAILER_SMTP_PORT="465"
+IAM_NODEMAILER_SMTP_SENDER="myname@mydomain.com"
+IAM_NODEMAILER_SMTP_PASSWORD="myAmazingPassword753$"
+
+# NUXT IAM VERIFY REGISTRATIONS
+IAM_VERIFY_REGISTRATIONS="false"
+
+# SENDGRID API KEY
+IAM_SENDGRID_API_KEY="12345678901234567890"
+IAM_SENDGRID_SENDER="myname@mysendgridaccount.com"
 ```
 
 ## Client Platform
