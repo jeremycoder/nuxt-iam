@@ -10,7 +10,7 @@ Nuxt IAM adds authentication and authorization components, pages, api routes, an
 
 ## Getting Started
 
-The fastest way to get started is to clone the repo or use the npm command.
+The fastest way to get started is to clone the repo or use the npm ``` npm i nuxt-iam ``` or ``` yarn add nuxt-iam ``` or ``` npx nuxt-iam ``` command.
 
 
 ## Setup
