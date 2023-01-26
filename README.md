@@ -14,21 +14,22 @@ Add content here...
 Add content here...
 
 ## Configuration
-The following are configuration options for Nuxt IAM. Please add these to your **.env** file.
+The following are runtime configuration options for Nuxt IAM. Please add the code below to your **nuxt.config** file. These to your **.env** file.
 ```
 export default defineNuxtConfig({
+//...
   runtimeConfig: {
     // IAM token secrets. Please rotate every 2 - 4 weeks
-    iamAccessTokenSecret: process.env.IAM_ACCESS_TOKEN_SECRET,
-    iamRefreshTokenSecret: process.env.IAM_REFRESH_TOKEN_SECRET,
-    iamResetTokenSecret: process.env.IAM_RESET_TOKEN_SECRET,
-    iamVerifyTokenSecret: process.env.IAM_VERIFY_TOKEN_SECRET,
+    iamAccessTokenSecret: process.env.IAM_ACCESS_TOKEN_SECRET, // Secret for creating access token
+    iamRefreshTokenSecret: process.env.IAM_REFRESH_TOKEN_SECRET, // Secret for creating refresh token
+    iamResetTokenSecret: process.env.IAM_RESET_TOKEN_SECRET, // Secret for creating password reset token
+    iamVerifyTokenSecret: process.env.IAM_VERIFY_TOKEN_SECRET, // Secret for creating email verification token
 
     // Public Url
-    iamPublicUrl: process.env.IAM_PUBLIC_URL,
+    iamPublicUrl: process.env.IAM_PUBLIC_URL, // Url used when sending out emails
 
     // IAM Emailer
-    iamEmailer: process.env.IAM_EMAILER,
+    iamEmailer: process.env.IAM_EMAILER, // Chosen email transport [node-smtp]|[nodemailer-service]|[sendgrid]
 
     // nodemailer-service
     iamNodemailerService: process.env.IAM_NODEMAILER_SERVICE,
@@ -51,10 +52,8 @@ export default defineNuxtConfig({
       iamVerifyRegistrations: process.env.IAM_VERIFY_REGISTRATIONS,
     },
   },
-
-  typescript: {
-    shim: false,
-  },
+//...
+  
 });
 ```
 
