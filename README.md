@@ -20,10 +20,10 @@ export default defineNuxtConfig({
 //...
   runtimeConfig: {
     // IAM token secrets. Please rotate every 2 - 4 weeks
-    iamAccessTokenSecret: process.env.IAM_ACCESS_TOKEN_SECRET, // Secret for creating access token
-    iamRefreshTokenSecret: process.env.IAM_REFRESH_TOKEN_SECRET, // Secret for creating refresh token
-    iamResetTokenSecret: process.env.IAM_RESET_TOKEN_SECRET, // Secret for creating password reset token
-    iamVerifyTokenSecret: process.env.IAM_VERIFY_TOKEN_SECRET, // Secret for creating email verification token
+    iamAccessTokenSecret: process.env.IAM_ACCESS_TOKEN_SECRET,
+    iamRefreshTokenSecret: process.env.IAM_REFRESH_TOKEN_SECRET,
+    iamResetTokenSecret: process.env.IAM_RESET_TOKEN_SECRET,
+    iamVerifyTokenSecret: process.env.IAM_VERIFY_TOKEN_SECRET,
 
     // Public Url
     iamPublicUrl: process.env.IAM_PUBLIC_URL, // Url used when sending out emails
@@ -56,7 +56,7 @@ export default defineNuxtConfig({
   
 });
 ```
-Here's an example of your .env file:
+Here's an example of your **.env** file:
 
 ```
 # Environment variables declared in this file are automatically made available to Prisma.
@@ -133,7 +133,12 @@ const response = await $fetch("/api/iam/authn/register", {
   });
   ```
 #### Response
-
+```
+"status": "success",
+    "data": {
+        "email": "jeremy@example.com"
+    }
+```
 
 ### Login user
 
