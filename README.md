@@ -66,7 +66,6 @@ Here's an example of your **.env** file:
 # See the documentation for all the connection string options: https://pris.ly/d/connection-strings
 
 # PRISMA DATABASE
-# DATABASE_URL="mysql://root:@localhost:3306/nuxtauth"
 DATABASE_URL="mysql://dbuser:dbpassword@dbserver:dbport/dbname"
 
 # NUXT IAM TOKEN SECRETS (Please change them every 2 - 4 weeks)
@@ -114,7 +113,19 @@ IAM_SENDGRID_SENDER="myname@mysendgridaccount.com"
 - ```browser-dev```: Use ```browser-dev``` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
 
 ## API Routes
-The following are API routes that Nuxt IAM adds to your app.
+The following are API routes that Nuxt IAM adds to your app. 
+
+#### API Responses
+API responses should always be in the format below
+
+```
+"status": ["success"] | ["fail"],
+ "data": {},
+ "error" {},
+ ```
+ 
+ ```status``` is always sent. ```data``` may or may not be sent depending on the request. ```error``` is only sent if an error occurred.
+
 ### Register user
 #### Request
 To register a user, send a POST request to ``` /api/iam/authn/register ```.
@@ -132,7 +143,7 @@ const response = await $fetch("/api/iam/authn/register", {
     },
   });
   ```
-#### Response
+#### Response 
 ```
 "status": "success",
     "data": {
