@@ -1,12 +1,24 @@
-# Nuxt IAM - Identity and Access Management for Nuxt
+# Nuxt IAM - Authentication and Authorization for Nuxt
 
-Nuxt IAM adds authentication and authorization to Nuxt apps. Nuxt IAM was built to help you get up and running with authentication and authorization best practices quickly. It is a full featured Nuxt 3 app.
-
-To learn more about Nuxt 3, look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Nuxt IAM stands for identity and access management. It adds authentication and authorization to Nuxt apps. Nuxt IAM was built to help you get up and running with authentication and authorization best practices quickly. It is a full featured Nuxt 3 app. To learn more about Nuxt 3, look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
 ## How it Works
 
-Nuxt IAM adds authentication and authorization components, pages, api routes, and logic to your Nuxt app allowing your app to have authentication and authorization logic.
+Nuxt IAM adds authentication and authorization components, pages, api routes, and logic to your Nuxt app allowing your app to have authentication and authorization logic. All the components, pages, api routes, and logic is 100% customizable so you can change things any way you want.
+
+## Features
+Nuxt IAM adds the following to your app:
+
+### Backend
+We add the following to the backend.
+✔️ user registration endpoint
+✔️ user login endpoint
+✔️ user get profile endpoint
+✔️ user isAuthentiated endpoint
+✔️ user refresh tokens endpoint
+✔️ user password endpoint
+- user login endpoint
+- user password reset endpoint
 
 ## Getting Started from Scratch
 
@@ -15,6 +27,9 @@ The fastest way to get started is to clone the repo or use the npm ``` npm i nux
 ## Adding Nuxt IAM to an existing Nuxt app
 
 Add content here
+
+## Backend for Frontend Concept
+Nuxt IAM uses a backend for frontend pattern to provide security with best practices for your app. That means that we modify security slightly depending on whether the request is coming from a browser or a non-browser content. If the request is from a browser, Nuxt IAM uses cookies
 
 ## Setup
 
