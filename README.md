@@ -6,6 +6,35 @@ Nuxt IAM stands for identity and access management. It adds authentication and a
 
 Nuxt IAM adds authentication and authorization components, pages, api routes, and logic to your Nuxt app allowing your app to have authentication and authorization logic. All the components, pages, api routes, and logic is 100% customizable so you can change things any way you want.
 
+## Client Platform
+```client-platform``` is a **required** header and it must be sent with every request. Client platform allows Nuxt IAM to provide the best practices for securing your app. ```client-platform``` must be:
+- ```app```: Use ```app``` if the request is coming from a non-browser such as a mobile app, tablet, or a tool like POSTMAN. Access and refresh tokens will be sent in the response headers. Can be used in **production**.
+- ```browser```: Use   ```browser``` if the request is coming from a browser. Access and refresh tokens will be sent in **secure, httpOnly** cookies. Can be used in **production**.
+- - ```browser-dev```: Use ```browser-dev``` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
+
+## API Routes
+The following are API routes that Nuxt IAM adds to your app.
+### Register user
+#### Request
+To register a user, send a POST request to ``` /api/iam/authn/register ```.
+```
+const response = await $fetch("/api/iam/authn/register", {
+    method: "POST",
+    headers: {
+      "client-platform": [app]|[browser]|[browser-dev],
+    },
+    body: {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      password: password,
+    },
+  });
+  ```
+
+
+### Login user
+
 ## Features
 Nuxt IAM adds the following to your app:
 
