@@ -56,7 +56,7 @@ export default defineNuxtConfig({
   
 });
 ```
-Here's an example of your **.env** file:
+Your nuxt.config file links to your .env file. Here's an example of your **.env** file:
 
 ```
 # Environment variables declared in this file are automatically made available to Prisma.
@@ -125,6 +125,24 @@ API responses should always be in the format below
  ```
  
  ```status``` is always sent. ```data``` may or may not be sent depending on the request. ```error``` is only sent if an error occurred.
+ 
+ Here's an example of a successful API response when a user is successfully registered:
+ ```
+ "status": "success",
+    "data": {
+        "email": "jeremy@example.com"
+    }
+    ```
+  
+  Here's an example of an error occuring when we try to register a user who already exists. Email must be unique throughout the system.
+  ```
+  "status": "fail",
+    "error": {
+        "message": "Email already exists",
+        "statusCode": 409,
+        "statusMessage": "Email already exists"
+    }
+  ```
 
 ### Register user
 #### Request
