@@ -4,6 +4,14 @@ Nuxt IAM adds authentication and authorization to Nuxt apps. Nuxt IAM was built 
 
 To learn more about Nuxt 3, look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
+## How it Works
+
+Nuxt IAM adds authentication and authorization components, pages, api routes, and logic to your Nuxt app allowing your app to have authentication and authorization logic.
+
+## Getting Started
+
+The fastest way to get started is to clone the repo or use the npm command.
+
 
 ## Setup
 
