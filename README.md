@@ -126,15 +126,18 @@ API responses should always be in the format below
  
  ```status``` is always sent. ```data``` may or may not be sent depending on the request. ```error``` is only sent if an error occurred.
  
+ ##### Success
  Here's an example of a successful API response when a user is successfully registered:
  ```
  "status": "success",
     "data": {
         "email": "jeremy@example.com"
     }
-    ```
+  ```
   
   Here's an example of an error occuring when we try to register a user who already exists. Email must be unique throughout the system.
+  
+  ##### Fail
   ```
   "status": "fail",
     "error": {
@@ -145,8 +148,9 @@ API responses should always be in the format below
   ```
 
 ### Register user
-#### Request
 To register a user, send a POST request to ``` /api/iam/authn/register ```.
+#### Request
+
 ```
 const response = await $fetch("/api/iam/authn/register", {
     method: "POST",
@@ -168,8 +172,45 @@ const response = await $fetch("/api/iam/authn/register", {
         "email": "jeremy@example.com"
     }
 ```
+If the response was ```success```, then the user was successfully registered and added to the database. A registered user can now be logged in.
 
 ### Login user
+To login, send a POST request to ``` /api/iam/authn/login ```.
+#### Request
+```
+const response = await $fetch("/api/iam/authn/login", {
+    method: "POST",
+    headers: {
+      "client-platform": ['app']|['browser']|['browser-dev'],
+    },
+    body: {
+      email: 'jeremy@example.com',
+      password: 'MyExamplePassword123*',
+    },
+  });
+  ```
+#### Response 
+##### Body
+```
+"status": "success",
+    "data": {
+        "email": "jeremy@example.com"
+    }
+```
+##### Headers
+```
+access-token: Bearer eyJhbGciOiJIUzI1NiIs...0g3IYFA
+
+refresh-token: Bearer
+Bearer eyJhbGciOiJIUzI1...xIMUybnk
+```
+In a successful login, an access token and a refresh token will be sent. If your ```client platform``` is ```app```, the tokens will be sent in the headers. If your ```client platform``` is ```browser```, the tokens will be sent in secure, httpOnly cookies. If your ```client platform``` is ```browser-dev```, the tokens will be sent in unsecure cookies.
+
+**Only use browser-dev in development**
+
+#### Tokens
+Access tokens expire every **15 minutes** Refresh tokens expire every **14 days**. If your access token expires, you'll need to login again. You can refresh your access and refresh tokens when you send a POST request to ```/api/iam/authn/refresh```.
+
 
 ## Features
 Nuxt IAM adds the following to your app:
