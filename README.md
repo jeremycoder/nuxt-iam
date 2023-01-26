@@ -201,15 +201,36 @@ const response = await $fetch("/api/iam/authn/login", {
 ```
 access-token: Bearer eyJhbGciOiJIUzI1NiIs...0g3IYFA
 
-refresh-token: Bearer
-Bearer eyJhbGciOiJIUzI1...xIMUybnk
+refresh-token: Bearer eyJhbGciOiJIUzI1...xIMUybnk
 ```
 In a successful login, an access token and a refresh token will be sent. If your ```client platform``` is ```app```, the tokens will be sent in the headers. If your ```client platform``` is ```browser```, the tokens will be sent in secure, httpOnly cookies. If your ```client platform``` is ```browser-dev```, the tokens will be sent in unsecure cookies.
 
 **Only use browser-dev in development**
 
 #### Tokens
-Access tokens expire every **15 minutes** Refresh tokens expire every **14 days**. If your access token expires, you'll need to login again. You can refresh your access and refresh tokens when you send a POST request to ```/api/iam/authn/refresh```.
+Access tokens expire every **15 minutes** Refresh tokens expire every **14 days**. If your access token expires, you'll need to login again. You can get a new set of access and refresh tokens when you send a POST request to ```/api/iam/authn/refresh``` with an unexpired refresh token. If your refresh token has expired, you will not be able to get a new set of tokens and you'll need to login.
+
+##### Automatic token rotation
+If your client platform is ```browser``` or ```browser-only```, Nuxt IAM will automatically refresh your tokens if it detects that your access token has expired, and that your refresh token is not expired. When using a browser, you really don't have to concern yourself with tokens. 
+
+#### Detecting stolen refresh tokens
+Nuxt IAM keeps track of expired refresh tokens. Let's say you you have a one refresh token in the database. If you refresh your tokens, you get a new set of tokens, and the old refresh token will be deactivated. If you or someone else steals the old refresh token and attempts to get a new set of tokens using that refresh token, all your refresh tokens will be deactivated, and you will have to login after your access token expires. This feature protects your account against stolen tokens.
+
+#### Client platform and tokens
+If your client platform is ```app``` and you need to access a protected resource that requires authentication or you need to refresh your tokens, you'll need to send valid access and refresh tokens in your **request headers**. For example:
+
+```
+const response = await $fetch("/api/iam/authn/refresh", {
+    method: "POST",
+    headers: {
+      "client-platform": "app",
+      "access-token": "Bearer eyJhbGciOiJI....UzI1NiIs",
+      "refresh-token": "Bearer eyJhbGcesTJI....UzI1NiIs",
+    },
+```
+
+If your client platform is ```browser``` or ```browser-dev,``` access and refresh tokens are automatically sent by your browser in cookies. You don't have to concern yourself with them.
+
 
 
 ## Features
