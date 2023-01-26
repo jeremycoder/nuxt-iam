@@ -1,5 +1,13 @@
 {
-  "private": true,
+  "name": "nuxtiam-test",
+  "version": "0.0.1",
+  "description": "Nuxtiam Test",
+  "keywords": [
+    "nuxtiam-test"
+  ],
+  "author": "Jeremy Mwangelwa",
+  "license": "MIT",
+  "private": false,
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",

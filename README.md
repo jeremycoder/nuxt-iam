@@ -172,7 +172,7 @@ const response = await $fetch("/api/iam/authn/register", {
         "email": "jeremy@example.com"
     }
 ```
-If the response was ```success```, then the user was successfully registered and added to the database. A registered user can now be logged in.
+If the response status was ```success```, then the user was successfully registered and added to the database. A registered user can now be logged in.
 
 ### Login user
 To login, send a POST request to ``` /api/iam/authn/login ```.
@@ -231,7 +231,29 @@ const response = await $fetch("/api/iam/authn/refresh", {
 
 If your client platform is ```browser``` or ```browser-dev,``` access and refresh tokens are automatically sent by your browser in cookies. You don't have to concern yourself with them.
 
+### Logout user
+To logout, send a POST request to ``` /api/iam/authn/logout ```.
+#### Request
 
+```
+const response = await $fetch("/api/iam/authn/logout", {
+    method: "POST",
+    headers: {
+      "client-platform": ['app']|['browser']|['browser-dev'],
+    },
+  });
+  ```
+ 
+If your client platform is ```browser``` or ```browser-dev```, Nuxt IAM will delete your access and refresh tokens and deactivate your refresh tokens in the database, and you will be immediately logged out of the system.
+If your client platform is ```app```, Nuxt IAM will deactivate your refresh tokens in the database. You will be logged out as soon as your access token expires.
+Logging out immediately is not possible because JSON web tokens cannot be revoked once given. We cannot revoke access tokens once given. However, the access token expires in 15 minutes,
+so 15 minutes is the maximum amount of time that a user on client platform ```app``` will be logged out but still be able to access resources.
+
+#### Response 
+```
+"status": "success"
+```
+If the response was ```success```, then the user was successfully registered and added to the database. A registered user can now be logged in.
 
 ## Features
 Nuxt IAM adds the following to your app:
