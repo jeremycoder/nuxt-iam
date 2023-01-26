@@ -54,3 +54,25 @@ npm run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+## API Routes
+The following are API routes that Nuxt IAM adds to your app.
+### Register user
+To register a user, send a POST request to ``` /api/iam/authn/register ```.
+```
+const response = await $fetch("/api/iam/authn/register", {
+    method: "POST",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+    body: {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      password: password,
+    },
+  });
+  ```
+
+
+### Login user
