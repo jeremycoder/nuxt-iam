@@ -11,12 +11,19 @@ Nuxt IAM adds the following to your app:
 
 ### Backend
 We add the following to the backend.
-✔️ user registration endpoint
-✔️ user login endpoint
-✔️ user get profile endpoint
-✔️ user isAuthentiated endpoint
-✔️ user refresh tokens endpoint
-✔️ user password endpoint
+- ✔️ user registration endpoint
+- ✔️ user email verification endpoint
+- ✔️ user verify email token endpoint
+- ✔️ user login endpoint
+- ✔️ user get profile endpoint
+- ✔️ user isAuthentiated endpoint
+- ✔️ user refresh tokens endpoint
+- ✔️ user profile update endpoint
+- ✔️ user logout endpoint
+- ✔️ user password reset endpoint
+- ✔️ user password reset verification endpoint
+- ✔️ user get profile/account delete endpoint
+
 - user login endpoint
 - user password reset endpoint
 
