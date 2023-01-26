@@ -10,7 +10,8 @@ Nuxt IAM adds authentication and authorization components, pages, api routes, an
 Nuxt IAM adds the following to your app:
 
 ### Backend
-We add the following to the backend.
+We add the following endpoints to the backend.
+#### Authentication
 - ✔️ user registration endpoint
 - ✔️ user email verification endpoint
 - ✔️ user verify email token endpoint
