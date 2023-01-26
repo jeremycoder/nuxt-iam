@@ -6,11 +6,63 @@ Nuxt IAM stands for identity and access management. It adds authentication and a
 
 Nuxt IAM adds authentication and authorization components, pages, api routes, and logic to your Nuxt app allowing your app to have authentication and authorization logic. All the components, pages, api routes, and logic is 100% customizable so you can change things any way you want.
 
+## Getting Started
+Follow the steps below to get started.
+### Starting from Scratch
+Add content here...
+### Adding Nuxt IAM to an existing Nuxt app
+Add content here...
+
+## Configuration
+The following are configuration options for Nuxt IAM. Please add these to your **.env** file.
+```
+export default defineNuxtConfig({
+  runtimeConfig: {
+    // IAM token secrets. Please rotate every 2 - 4 weeks
+    iamAccessTokenSecret: process.env.IAM_ACCESS_TOKEN_SECRET,
+    iamRefreshTokenSecret: process.env.IAM_REFRESH_TOKEN_SECRET,
+    iamResetTokenSecret: process.env.IAM_RESET_TOKEN_SECRET,
+    iamVerifyTokenSecret: process.env.IAM_VERIFY_TOKEN_SECRET,
+
+    // Public Url
+    iamPublicUrl: process.env.IAM_PUBLIC_URL,
+
+    // IAM Emailer
+    iamEmailer: process.env.IAM_EMAILER,
+
+    // nodemailer-service
+    iamNodemailerService: process.env.IAM_NODEMAILER_SERVICE,
+    iamNodemailerServiceSender: process.env.IAM_NODEMAILER_SERVICE_SENDER,
+    iamNodemailerServicePassword: process.env.IAM_NODEMAILER_SERVICE_PASSWORD,
+
+    // nodemailer-smtp
+    iamNodemailerSmtpHost: process.env.IAM_NODEMAILER_SMTP_HOST,
+    iamNodemailerSmtpPort: process.env.IAM_NODEMAILER_SMTP_PORT,
+    iamNodemailerSmtpSender: process.env.IAM_NODEMAILER_SMTP_SENDER,
+    iamNodemailerSmtpPassword: process.env.IAM_NODEMAILER_SMTP_PASSWORD,
+
+    // IAM SendGrid
+    iamSendGridApiKey: process.env.IAM_SENDGRID_API_KEY,
+    iamSendgridSender: process.env.IAM_SENDGRID_SENDER,
+
+    // Do not put secret information here
+    public: {
+      iamClientPlatform: process.env.IAM_CLIENT_PLATFORM,
+      iamVerifyRegistrations: process.env.IAM_VERIFY_REGISTRATIONS,
+    },
+  },
+
+  typescript: {
+    shim: false,
+  },
+});
+```
+
 ## Client Platform
 ```client-platform``` is a **required** header and it must be sent with every request. Client platform allows Nuxt IAM to provide the best practices for securing your app. ```client-platform``` must be:
 - ```app```: Use ```app``` if the request is coming from a non-browser such as a mobile app, tablet, or a tool like POSTMAN. Access and refresh tokens will be sent in the response headers. Can be used in **production**.
 - ```browser```: Use   ```browser``` if the request is coming from a browser. Access and refresh tokens will be sent in **secure, httpOnly** cookies. Can be used in **production**.
-- - ```browser-dev```: Use ```browser-dev``` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
+- ```browser-dev```: Use ```browser-dev``` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
 
 ## API Routes
 The following are API routes that Nuxt IAM adds to your app.
@@ -21,16 +73,17 @@ To register a user, send a POST request to ``` /api/iam/authn/register ```.
 const response = await $fetch("/api/iam/authn/register", {
     method: "POST",
     headers: {
-      "client-platform": [app]|[browser]|[browser-dev],
+      "client-platform": ['app']|['browser']|['browser-dev'],
     },
     body: {
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-      password: password,
+      first_name: 'Jeremy',
+      last_name: 'Mwangelwa',
+      email: 'jeremy@example.com',
+      password: 'MyExamplePassword123*',
     },
   });
   ```
+#### Response
 
 
 ### Login user
