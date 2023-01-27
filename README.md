@@ -1,4 +1,4 @@
-# nuxt-iam - identity and access management for Nuxt
+# nuxt-iam - powerful authentication & authorization for Nuxt
 
 Nuxt IAM stands for identity and access management. It adds authentication and authorization to Nuxt apps. Nuxt IAM was built to help you get up and running with authentication and authorization best practices quickly. It is a full featured Nuxt 3 app. 
 Sample app: https://nuxt-rest-api.vercel.app/iam/
@@ -172,6 +172,12 @@ Please rotate every 2 - 4 weeks
 ## BACKEND
 Nuxt IAM has an extensive backend which adds several API endpoints and logic to enable authorization and authentication.
 
+### Server
+Nuxt IAM adds the following directories to your **server/api** directory.
+- **iam/authn**: global authentication handler
+- **iam/refresh-tokens**: refresh tokens handler
+- **iam/users**: global users handler
+
 ### Client Platform
 
 `client-platform` is a **required** header and it must be sent with every request. Client platform allows Nuxt IAM to provide the best practices for securing your app. `client-platform` must be:
@@ -180,9 +186,19 @@ Nuxt IAM has an extensive backend which adds several API endpoints and logic to 
 - `browser`: Use `browser` if the request is coming from a browser. Access and refresh tokens will be sent in **secure, httpOnly** cookies. Can be used in **production**.
 - `browser-dev`: Use `browser-dev` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
 
-### API Routes
+### Authentication API Endpoints
+Nuxt IAM responds to the following endpoints sent to **api/iam/authn**. See api request and response examples for examples.
+
+- **iam/authn/register**: Register user
+- **iam/authn/login**: Log user in
+- **iam/authn/profile**: Get user profile
+- **iam/authn/update**: Update user profile
+- **iam/authn/reset**: Reset user password
+- Continue...
+
 
 The following are API routes that Nuxt IAM adds to your app.
+
 
 #### API Responses
 
