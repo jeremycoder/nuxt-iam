@@ -33,10 +33,9 @@ export default defineNuxtConfig({
     iamVerifyTokenSecret: process.env.IAM_VERIFY_TOKEN_SECRET,
 
     // Public Url
-    iamPublicUrl: process.env.IAM_PUBLIC_URL, // Url used when sending out emails
-
+    iamPublicUrl: process.env.IAM_PUBLIC_URL,
     // IAM Emailer
-    iamEmailer: process.env.IAM_EMAILER, // Chosen email transport [node-smtp]|[nodemailer-service]|[sendgrid]
+    iamEmailer: process.env.IAM_EMAILER,
 
     // nodemailer-service
     iamNodemailerService: process.env.IAM_NODEMAILER_SERVICE,
@@ -63,7 +62,7 @@ export default defineNuxtConfig({
 
 });
 ```
-
+### Example .env file
 Your nuxt.config file links to your .env file. Here's an example of your **.env** file:
 
 ```
@@ -113,6 +112,39 @@ IAM_VERIFY_REGISTRATIONS="false"
 IAM_SENDGRID_API_KEY="12345678901234567890"
 IAM_SENDGRID_SENDER="myname@mysendgridaccount.com"
 ```
+### .env Variables Explained
+#### IAM token secrets. 
+Please rotate every 2 - 4 weeks
+- **IAM_ACCESS_TOKEN_SECRET**: 
+- **IAM_REFRESH_TOKEN_SECRET**:
+- **IAM_RESET_TOKEN_SECRET**:
+- **IAM_VERIFY_TOKEN_SECRET**:
+
+// Public Url
+IAM_PUBLIC_URL,
+// IAM Emailer
+IAM_EMAILER,
+
+// nodemailer-service
+IAM_NODEMAILER_SERVICE,
+IAM_NODEMAILER_SERVICE_SENDER,
+IAM_NODEMAILER_SERVICE_PASSWORD,
+
+// nodemailer-smtp
+IAM_NODEMAILER_SMTP_HOST,
+IAM_NODEMAILER_SMTP_PORT,
+IAM_NODEMAILER_SMTP_SENDER,
+IAM_NODEMAILER_SMTP_PASSWORD,
+
+// IAM SendGrid
+IAM_SENDGRID_API_KEY,
+IAM_SENDGRID_SENDER,
+
+
+// Client Platform
+IAM_CLIENT_PLATFORM,
+IAM_VERIFY_REGISTRATIONS,
+ 
 
 ## Client Platform
 
