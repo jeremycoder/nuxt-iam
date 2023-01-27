@@ -1,4 +1,4 @@
-# Nuxt IAM - Authentication and Authorization for Nuxt
+# nuxt-iam - identity and access management for Nuxt
 
 Nuxt IAM stands for identity and access management. It adds authentication and authorization to Nuxt apps. Nuxt IAM was built to help you get up and running with authentication and authorization best practices quickly. It is a full featured Nuxt 3 app. To learn more about Nuxt 3, look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
@@ -306,14 +306,149 @@ const { status, error } = await $fetch("/api/iam/authn/isauthenticated", {
 
 #### Response
 
+If user is authenticated,
+
 ```
 "status": "success"
 ```
 
-or
+or if user is not authenticated, or an error occurred.
 
 ```
 "status": "fail"
+```
+
+### Get user profile
+
+An authenticated user can get their profile.
+
+#### Request
+
+```
+const response = await $fetch("/api/iam/authn/profile", {
+    headers: {
+      "client-platform": ['app']|['browser']|['browser-dev'],
+    },
+  });
+```
+
+#### Response
+
+Password is shown as `[hidden]` even though it is one-way hashed using argon 2. We just don't display the hash because the has looks quite ugly :P
+
+```
+"status": "success",
+    "data": {
+        "id": 25,
+        "uuid": "3b3b616e-3ac7-4f6f-a0fb-5825c46d24d0",
+        "email": "jeremy@example.com",
+        "password": "[hidden]",
+        "avatar": null,
+        "permissions": null,
+        "first_name": "Jeremy",
+        "last_name": "Mwangelwa",
+        "role": "GENERAL",
+        "email_verified": false,
+        "is_active": true,
+        "last_login": "2023-01-27T16:30:15.000Z",
+        "created_at": "2023-01-26T21:05:08.000Z",
+        "deleted_at": null
+    }
+```
+
+### Update user profile
+
+An authenticated user can update their profile. To update password, you must supply both "current_password" and "new_password." 8 characters, an upper-case letter, and a lower-case letter, a number, and a non-alphanumeric character.
+
+#### Request
+
+```
+const response = await $fetch("/api/iam/authn/update", {
+    headers: {
+      "client-platform": ['app']|['browser']|['browser-dev'],
+    },
+    body: {
+      "uuid": "3b3b616e-3ac7-4f6f-a0fb-5825c46d24d0",
+      "first_name" : "Jeremy Man",
+      "last_name" : "Manna",
+      "current_password": "MyExamplePassword123*",
+      "new_password": "MyExampleUpdatedPassword123*",
+    },
+  });
+```
+
+#### Response
+
+```
+"status": "success",
+    "data": {
+        "id": 25,
+        "uuid": "3b3b616e-3ac7-4f6f-a0fb-5825c46d24d0",
+        "email": "jeremy@example.com",
+        "password": "[hidden]",
+        "avatar": null,
+        "permissions": null,
+        "first_name": "Jeremy Man",
+        "last_name": "Manna",
+        "role": "GENERAL",
+        "email_verified": false,
+        "is_active": true,
+        "last_login": "2023-01-27T16:30:15.000Z",
+        "created_at": "2023-01-26T21:05:08.000Z",
+        "deleted_at": null
+    }
+```
+
+### Delete user profile / account
+
+An authenticated user can delete their profile.
+
+#### Request
+
+```
+  const response = await $fetch("/api/iam/authn/delete", {
+    method: "DELETE",
+    headers: {
+      "client-platform": ['app']|['browser']|['browser-dev'],
+    },
+    body: {
+      uuid: "3b3b616e-3ac7-4f6f-a0fb-5825c46d24d0",
+    },
+  });
+
+```
+
+#### Response
+
+```
+"status": "success",
+```
+
+### Reset user password
+
+A user can reset their password. An email is required and you need to have set up email transporting utilities. Nuxt IAM supports Nodemailer services, Nodemailer SMTP, and Sendgrid API. Please see .env for configuration.
+
+#### Request
+
+```
+  const response = await $fetch("/api/iam/authn/reset", {
+    method: "POST",
+    headers: {
+      "client-platform": ['app']|['browser']|['browser-dev'],
+    },
+    body: {
+      email: email,
+    },
+  });
+
+```
+
+#### Response
+
+For security purposes, response is always success.
+
+```
+"status": "success",
 ```
 
 ## Features

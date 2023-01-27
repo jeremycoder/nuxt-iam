@@ -101,7 +101,7 @@ export async function validateUserUpdate(
       statusMessage: "User not found",
     });
 
-  // If first name and last name and role do not exist in body
+  // If no updatable properties supplied
   if (
     "first_name" in body === false &&
     "last_name" in body === false &&
@@ -127,7 +127,7 @@ export async function validateUserUpdate(
       statusMessage: "last_name must have data",
     });
 
-  // If last_name empty
+  // If role empty
   if ("role" in body && !body.role)
     return createError({
       statusCode: 400,
@@ -149,6 +149,18 @@ export async function validateUserProfileUpdate(
     return createError({
       statusCode: 400,
       statusMessage: "User uuid not provided",
+    });
+
+  // If nothing supplied can be updated
+  if (
+    "first_name" in body === false &&
+    "last_name" in body === false &&
+    "current_password" in body === false &&
+    "new_password" in body === false
+  )
+    return createError({
+      statusCode: 400,
+      statusMessage: "No updatable properties supplied",
     });
 
   const user = await getUserByUuid(body.uuid);
@@ -1123,7 +1135,9 @@ export async function updateUserProfile(
 
   // After going through validateUserProfileUpdate, supplied values should be clean
   const body = await readBody(event);
+  console.log("body", body);
 
+  // Properties that user can update in their profile
   let user = {} as User;
   let error = null;
 
@@ -1139,16 +1153,21 @@ export async function updateUserProfile(
    * @param newValue The new value
    * @returns {string}
    */
-  function updateOrKeep(oldValue: string, newValue: string): string {
-    // If new value is empty string, keep old value
-    if (newValue.trim().length === 0) return oldValue.trim();
+  // function updateOrKeep(oldValue: string, newValue: string): string {
+  //   console.log("oldValue: ", oldValue);
+  //   console.log("newValue: ", newValue);
 
-    // If new value is same as old value, keep old value
-    if (newValue.trim() === oldValue.trim()) return oldValue.trim();
+  //   if (oldValue && newValue) {
+  //     // If new value is empty string, keep old value
+  //     if (newValue.trim().length === 0) return oldValue.trim();
 
-    // Otherwise return new value
-    return newValue.trim();
-  }
+  //     // If new value is same as old value, keep old value
+  //     if (newValue.trim() === oldValue.trim()) return oldValue.trim();
+  //   }
+
+  //   // Otherwise return new value
+  //   return newValue.trim();
+  // }
 
   // Attempt to hash new password, if error, return error
   let newHashedPassword = "";
@@ -1159,21 +1178,17 @@ export async function updateUserProfile(
     newHashedPassword = newHashedPasswordOrError as string;
   }
 
-  // Update values
-  const updatedFirstName = updateOrKeep(userData.first_name, body.first_name);
-  const updatedLastName = updateOrKeep(userData.last_name, body.last_name);
-
   await prisma.users
     .update({
       where: {
         uuid: body.uuid,
       },
       data: {
-        first_name: updatedFirstName,
-        last_name: updatedLastName,
+        first_name: body.first_name ? body.first_name : userData.first_name,
+        last_name: body.last_name ? body.last_name : userData.last_name,
         // If we got a new password, update it, otherwise keep old password
         password:
-          newHashedPassword.length > 0 ? newHashedPassword : user.password,
+          newHashedPassword.length > 0 ? newHashedPassword : userData.password,
       },
     })
     .then(async (response) => {
