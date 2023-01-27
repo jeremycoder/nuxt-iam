@@ -451,6 +451,33 @@ For security purposes, response is always success.
 "status": "success",
 ```
 
+### ADVANCED Verify reset token sent by user
+
+This endpoint verifies the reset password token sent by the user from their email. The token is a one-time use token. You'll need to create a front end
+page to receive the token. For a good example or starting point, use the provided pages for your Nuxt front end ```/iam/verifyreset```
+
+#### Request
+
+```
+  const response = await $fetch("/api/iam/authn/verifyemailtoken", {
+    method: "POST",
+    headers: {
+      "client-platform": ['app']|['browser']|['browser-dev'],
+    },
+    body: {
+      token: Bearer eyJhbGcesTJI....UzI1NiIs,
+    },
+  });
+
+```
+
+#### Response
+For a great working example of user password reset, please look at the provided Nuxt front end pages /iam/reset
+
+```
+"status": "success",
+```
+
 ## Features
 
 Nuxt IAM adds the following to your app:
