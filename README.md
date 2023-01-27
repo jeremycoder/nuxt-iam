@@ -18,6 +18,24 @@ Add content here...
 
 Add content here...
 
+## FRONTEND
+Nuxt IAM is both frontend and backend. The main authentication and authorization logic takes place in the backend, and you're welcome to change anything as suits your needs. Let's talk about the frontend.
+
+### Pages
+Nuxt IAM adds several pages to your apps frontend. Use these pages and components as starting points for making your app great. The following routes are added to your Nuxt front end. Find them in your pages directory:
+- **iam/index**: Introductory page for Nuxt IAM 
+- **iam/register**: User registration page. After successful registration, you will be directed to login page
+- **iam/verifyemail**: If email verification was set to true, (see configuration section), receives email verification token and sends it to backend for verification.
+- **iam/login**: User login page. After successful login, you will be directed to iam/dashboard/index  
+- **iam/dashboard/index**: User dashboard.
+- **iam/dashboard/profile**: User profile. User can update their account.
+- **iam/dashboard/settings**: User settings. User can update their password and delete their account.
+- **iam/reset**: User can reset their password. Does not have to be logged in. User will receive an email with a one-time password reset token.  
+- **iam/verify**: Page that receives password reset token and sends it to backend for verification 
+- **iam/verifyfailed**: Displays email or password verification failure.
+- **iam/verifysuccessful**: Displays password verification success and a temporary password.
+
+
 ## Configuration
 
 The following are runtime configuration options for Nuxt IAM. Please add the code below to your **nuxt.config** file.
@@ -121,32 +139,32 @@ Please rotate every 2 - 4 weeks
 - **IAM_VERIFY_TOKEN_SECRET**:
 
 #### Public Url
-**IAM_PUBLIC_URL**:
+- **IAM_PUBLIC_URL**:
 
 #### Chosen email service
-**IAM_EMAILER**:
+- **IAM_EMAILER**:
 
 #### Nodemailer-service
-**IAM_NODEMAILER_SERVICE**:
-**IAM_NODEMAILER_SERVICE_SENDER**:
-**IAM_NODEMAILER_SERVICE_PASSWORD**:
+- **IAM_NODEMAILER_SERVICE**:
+- **IAM_NODEMAILER_SERVICE_SENDER**:
+- **IAM_NODEMAILER_SERVICE_PASSWORD**:
 
 #### Nodemailer-smtp
-**IAM_NODEMAILER_SMTP_HOST**:
-**IAM_NODEMAILER_SMTP_PORT**:
-**IAM_NODEMAILER_SMTP_SENDER**:
-**IAM_NODEMAILER_SMTP_PASSWORD**:
+- **IAM_NODEMAILER_SMTP_HOST**:
+- **IAM_NODEMAILER_SMTP_PORT**:
+- **IAM_NODEMAILER_SMTP_SENDER**:
+- **IAM_NODEMAILER_SMTP_PASSWORD**:
 
 #### Sendgrid key and sender (email)
-**IAM_SENDGRID_API_KEY**:
-**IAM_SENDGRID_SENDER**:
+- **IAM_SENDGRID_API_KEY**:
+- **IAM_SENDGRID_SENDER**:
 
 
 #### Client Platform
-**IAM_CLIENT_PLATFORM**:
+- **IAM_CLIENT_PLATFORM**:
 
 #### Verify emails of registrations
-**IAM_VERIFY_REGISTRATIONS**:
+- **IAM_VERIFY_REGISTRATIONS**:
  
 
 ## Client Platform
@@ -486,32 +504,10 @@ For security purposes, response is always success.
 "status": "success",
 ```
 
-### ADVANCED Verify reset token sent by user
+### ADVANCED Verify password reset flow
 
-This endpoint verifies the reset password token sent by the user from their email. The token is a one-time use token. You'll need to create a front end
-page to receive the token. For a good example or starting point, use the provided pages for your Nuxt front end ```/iam/verifyreset```
+For a good example or starting point, use the provided pages for your Nuxt front end.
 
-#### Request
-
-```
-  const response = await $fetch("/api/iam/authn/verifyemailtoken", {
-    method: "POST",
-    headers: {
-      "client-platform": ['app']|['browser']|['browser-dev'],
-    },
-    body: {
-      token: Bearer eyJhbGcesTJI....UzI1NiIs,
-    },
-  });
-
-```
-
-#### Response
-For a great working example of user password reset, please look at the provided Nuxt front end pages /iam/reset
-
-```
-"status": "success",
-```
 
 ## Features
 
