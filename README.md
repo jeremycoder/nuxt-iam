@@ -22,7 +22,7 @@ Add content here...
 Nuxt IAM is both frontend and backend. The main authentication and authorization logic takes place in the backend, and you're welcome to change anything as suits your needs. Let's talk about the frontend.
 
 ### Pages
-Nuxt IAM adds several pages to your apps frontend. Use these pages and components as starting points for making your app great. The following routes are added to your Nuxt front end. Find them in your pages directory:
+Nuxt IAM adds several pages to your apps frontend. The pages are wrappers around components. Use these pages and components as starting points for making your app great. The following routes are added to your Nuxt front end. Find them in your pages directory:
 - **iam/index**: Introductory page for Nuxt IAM 
 - **iam/register**: User registration page. After successful registration, you will be directed to login page
 - **iam/verifyemail**: If email verification was set to true, (see configuration section), receives email verification token and sends it to backend for verification.
