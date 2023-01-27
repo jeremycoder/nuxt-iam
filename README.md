@@ -166,8 +166,10 @@ Please rotate every 2 - 4 weeks
 #### Verify emails of registrations
 - **IAM_VERIFY_REGISTRATIONS**:
  
+## BACKEND
+Nuxt IAM has an extensive backend which adds several API endpoints and logic to enable authorization and authentication.
 
-## Client Platform
+### Client Platform
 
 `client-platform` is a **required** header and it must be sent with every request. Client platform allows Nuxt IAM to provide the best practices for securing your app. `client-platform` must be:
 
@@ -175,7 +177,7 @@ Please rotate every 2 - 4 weeks
 - `browser`: Use `browser` if the request is coming from a browser. Access and refresh tokens will be sent in **secure, httpOnly** cookies. Can be used in **production**.
 - `browser-dev`: Use `browser-dev` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
 
-## API Routes
+### API Routes
 
 The following are API routes that Nuxt IAM adds to your app.
 
@@ -215,11 +217,11 @@ Here's an example of an error occuring when we try to register a user who alread
   }
 ```
 
-### Register user
+#### Register user
 
 To register a user, send a POST request to `/api/iam/authn/register`.
 
-#### Request
+##### Request
 
 ```
 const response = await $fetch("/api/iam/authn/register", {
@@ -236,7 +238,7 @@ const response = await $fetch("/api/iam/authn/register", {
   });
 ```
 
-#### Response
+##### Response
 
 ```
 "status": "success",
@@ -247,11 +249,11 @@ const response = await $fetch("/api/iam/authn/register", {
 
 If the response status was `success`, then the user was successfully registered and added to the database. A registered user can now be logged in.
 
-### Login user
+#### Login user
 
 To login, send a POST request to `/api/iam/authn/login`.
 
-#### Request
+##### Request
 
 ```
 const response = await $fetch("/api/iam/authn/login", {
@@ -266,9 +268,9 @@ const response = await $fetch("/api/iam/authn/login", {
   });
 ```
 
-#### Response
+##### Response
 
-##### Body
+###### Body
 
 ```
 "status": "success",
@@ -277,7 +279,7 @@ const response = await $fetch("/api/iam/authn/login", {
     }
 ```
 
-##### Headers
+###### Headers
 
 ```
 access-token: Bearer eyJhbGciOiJIUzI1NiIs...0g3IYFA
@@ -289,19 +291,19 @@ In a successful login, an access token and a refresh token will be sent. If your
 
 **Only use browser-dev in development**
 
-#### Tokens
+##### Tokens
 
 Access tokens expire every **15 minutes** Refresh tokens expire every **14 days**. If your access token expires, you'll need to login again. You can get a new set of access and refresh tokens when you send a POST request to `/api/iam/authn/refresh` with an unexpired refresh token. If your refresh token has expired, you will not be able to get a new set of tokens and you'll need to login.
 
-##### Automatic token rotation
+###### Automatic token rotation
 
 If your client platform is `browser` or `browser-only`, Nuxt IAM will automatically refresh your tokens if it detects that your access token has expired, and that your refresh token is not expired. When using a browser, you really don't have to concern yourself with tokens.
 
-#### Detecting stolen refresh tokens
+##### Detecting stolen refresh tokens
 
 Nuxt IAM keeps track of expired refresh tokens. Let's say you you have a one refresh token in the database. If you refresh your tokens, you get a new set of tokens, and the old refresh token will be deactivated. If you or someone else steals the old refresh token and attempts to get a new set of tokens using that refresh token, all your refresh tokens will be deactivated, and you will have to login after your access token expires. This feature protects your account against stolen tokens.
 
-#### Client platform and tokens
+##### Client platform and tokens
 
 If your client platform is `app` and you need to access a protected resource that requires authentication or you need to refresh your tokens, you'll need to send valid access and refresh tokens in your **request headers**. For example:
 
@@ -317,11 +319,11 @@ const response = await $fetch("/api/iam/authn/refresh", {
 
 If your client platform is `browser` or `browser-dev,` access and refresh tokens are automatically sent by your browser in cookies. You don't have to concern yourself with them.
 
-### Logout user
+#### Logout user
 
 To logout, send a POST request to `/api/iam/authn/logout`.
 
-#### Request
+##### Request
 
 ```
 const response = await $fetch("/api/iam/authn/logout", {
@@ -337,17 +339,17 @@ If your client platform is `app`, Nuxt IAM will deactivate your refresh tokens i
 Logging out immediately is not possible because JSON web tokens cannot be revoked once given. We cannot revoke access tokens once given. However, the access token expires in 15 minutes,
 so 15 minutes is the maximum amount of time that a user on client platform `app` will be logged out but still be able to access resources.
 
-#### Response
+##### Response
 
 ```
 "status": "success"
 ```
 
-### isAuthenticated
+#### isAuthenticated
 
 To check if the current user is authenticated,
 
-#### Request
+##### Request
 
 ```
 const { status, error } = await $fetch("/api/iam/authn/isauthenticated", {
@@ -357,7 +359,7 @@ const { status, error } = await $fetch("/api/iam/authn/isauthenticated", {
   });
 ```
 
-#### Response
+##### Response
 
 If user is authenticated,
 
@@ -371,11 +373,11 @@ or if user is not authenticated, or an error occurred.
 "status": "fail"
 ```
 
-### Get user profile
+#### Get user profile
 
 An authenticated user can get their profile.
 
-#### Request
+##### Request
 
 ```
 const response = await $fetch("/api/iam/authn/profile", {
@@ -385,7 +387,7 @@ const response = await $fetch("/api/iam/authn/profile", {
   });
 ```
 
-#### Response
+##### Response
 
 Password is shown as `[hidden]` even though it is one-way hashed using argon 2. We just don't display the hash because the has looks quite ugly :P
 
@@ -409,11 +411,11 @@ Password is shown as `[hidden]` even though it is one-way hashed using argon 2. 
     }
 ```
 
-### Update user profile
+#### Update user profile
 
 An authenticated user can update their profile. To update password, you must supply both "current_password" and "new_password." 8 characters, an upper-case letter, and a lower-case letter, a number, and a non-alphanumeric character.
 
-#### Request
+##### Request
 
 ```
 const response = await $fetch("/api/iam/authn/update", {
@@ -430,7 +432,7 @@ const response = await $fetch("/api/iam/authn/update", {
   });
 ```
 
-#### Response
+##### Response
 
 ```
 "status": "success",
@@ -452,11 +454,11 @@ const response = await $fetch("/api/iam/authn/update", {
     }
 ```
 
-### Delete user profile / account
+#### Delete user profile / account
 
 An authenticated user can delete their profile.
 
-#### Request
+##### Request
 
 ```
   const response = await $fetch("/api/iam/authn/delete", {
@@ -471,17 +473,17 @@ An authenticated user can delete their profile.
 
 ```
 
-#### Response
+##### Response
 
 ```
 "status": "success",
 ```
 
-### Reset user password
+#### Reset user password
 
 A user can reset their password. An email is required and you need to have set up email transporting utilities. Nuxt IAM supports Nodemailer services, Nodemailer SMTP, and Sendgrid API. Please see .env for configuration.
 
-#### Request
+##### Request
 
 ```
   const response = await $fetch("/api/iam/authn/reset", {
@@ -496,7 +498,7 @@ A user can reset their password. An email is required and you need to have set u
 
 ```
 
-#### Response
+##### Response
 
 For security purposes, response is always success.
 
@@ -504,7 +506,7 @@ For security purposes, response is always success.
 "status": "success",
 ```
 
-### ADVANCED Verify password reset flow
+#### ADVANCED Verify password reset flow
 
 For a good example or starting point, use the provided pages for your Nuxt front end.
 
