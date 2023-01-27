@@ -7,14 +7,21 @@ Nuxt IAM stands for identity and access management. It adds authentication and a
 Nuxt IAM adds authentication and authorization components, pages, api routes, and logic to your Nuxt app allowing your app to have authentication and authorization logic. All the components, pages, api routes, and logic is 100% customizable so you can change things any way you want.
 
 ## Getting Started
+
 Follow the steps below to get started.
+
 ### Starting from Scratch
+
 Add content here...
+
 ### Adding Nuxt IAM to an existing Nuxt app
+
 Add content here...
 
 ## Configuration
+
 The following are runtime configuration options for Nuxt IAM. Please add the code below to your **nuxt.config** file.
+
 ```
 export default defineNuxtConfig({
 //...
@@ -53,9 +60,10 @@ export default defineNuxtConfig({
     },
   },
 //...
-  
+
 });
 ```
+
 Your nuxt.config file links to your .env file. Here's an example of your **.env** file:
 
 ```
@@ -107,48 +115,57 @@ IAM_SENDGRID_SENDER="myname@mysendgridaccount.com"
 ```
 
 ## Client Platform
-```client-platform``` is a **required** header and it must be sent with every request. Client platform allows Nuxt IAM to provide the best practices for securing your app. ```client-platform``` must be:
-- ```app```: Use ```app``` if the request is coming from a non-browser such as a mobile app, tablet, or a tool like POSTMAN. Access and refresh tokens will be sent in the response headers. Can be used in **production**.
-- ```browser```: Use   ```browser``` if the request is coming from a browser. Access and refresh tokens will be sent in **secure, httpOnly** cookies. Can be used in **production**.
-- ```browser-dev```: Use ```browser-dev``` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
+
+`client-platform` is a **required** header and it must be sent with every request. Client platform allows Nuxt IAM to provide the best practices for securing your app. `client-platform` must be:
+
+- `app`: Use `app` if the request is coming from a non-browser such as a mobile app, tablet, or a tool like POSTMAN. Access and refresh tokens will be sent in the response headers. Can be used in **production**.
+- `browser`: Use `browser` if the request is coming from a browser. Access and refresh tokens will be sent in **secure, httpOnly** cookies. Can be used in **production**.
+- `browser-dev`: Use `browser-dev` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
 
 ## API Routes
-The following are API routes that Nuxt IAM adds to your app. 
+
+The following are API routes that Nuxt IAM adds to your app.
 
 #### API Responses
+
 API responses should always be in the format below
 
 ```
 "status": ["success"] | ["fail"],
  "data": {},
  "error" {},
- ```
- 
- ```status``` is always sent. ```data``` may or may not be sent depending on the request. ```error``` is only sent if an error occurred.
- 
- ##### Success
- Here's an example of a successful API response when a user is successfully registered:
- ```
- "status": "success",
-    "data": {
-        "email": "jeremy@example.com"
-    }
-  ```
-  
-  Here's an example of an error occuring when we try to register a user who already exists. Email must be unique throughout the system.
-  
-  ##### Fail
-  ```
-  "status": "fail",
-    "error": {
-        "message": "Email already exists",
-        "statusCode": 409,
-        "statusMessage": "Email already exists"
-    }
-  ```
+```
+
+`status` is always sent. `data` may or may not be sent depending on the request. `error` is only sent if an error occurred.
+
+##### Success
+
+Here's an example of a successful API response when a user is successfully registered:
+
+```
+"status": "success",
+   "data": {
+       "email": "jeremy@example.com"
+   }
+```
+
+Here's an example of an error occuring when we try to register a user who already exists. Email must be unique throughout the system.
+
+##### Fail
+
+```
+"status": "fail",
+  "error": {
+      "message": "Email already exists",
+      "statusCode": 409,
+      "statusMessage": "Email already exists"
+  }
+```
 
 ### Register user
-To register a user, send a POST request to ``` /api/iam/authn/register ```.
+
+To register a user, send a POST request to `/api/iam/authn/register`.
+
 #### Request
 
 ```
@@ -164,19 +181,25 @@ const response = await $fetch("/api/iam/authn/register", {
       password: 'MyExamplePassword123*',
     },
   });
-  ```
-#### Response 
+```
+
+#### Response
+
 ```
 "status": "success",
     "data": {
         "email": "jeremy@example.com"
     }
 ```
-If the response status was ```success```, then the user was successfully registered and added to the database. A registered user can now be logged in.
+
+If the response status was `success`, then the user was successfully registered and added to the database. A registered user can now be logged in.
 
 ### Login user
-To login, send a POST request to ``` /api/iam/authn/login ```.
+
+To login, send a POST request to `/api/iam/authn/login`.
+
 #### Request
+
 ```
 const response = await $fetch("/api/iam/authn/login", {
     method: "POST",
@@ -188,36 +211,46 @@ const response = await $fetch("/api/iam/authn/login", {
       password: 'MyExamplePassword123*',
     },
   });
-  ```
-#### Response 
+```
+
+#### Response
+
 ##### Body
+
 ```
 "status": "success",
     "data": {
         "email": "jeremy@example.com"
     }
 ```
+
 ##### Headers
+
 ```
 access-token: Bearer eyJhbGciOiJIUzI1NiIs...0g3IYFA
 
 refresh-token: Bearer eyJhbGciOiJIUzI1...xIMUybnk
 ```
-In a successful login, an access token and a refresh token will be sent. If your ```client platform``` is ```app```, the tokens will be sent in the headers. If your ```client platform``` is ```browser```, the tokens will be sent in secure, httpOnly cookies. If your ```client platform``` is ```browser-dev```, the tokens will be sent in unsecure cookies.
+
+In a successful login, an access token and a refresh token will be sent. If your `client platform` is `app`, the tokens will be sent in the headers. If your `client platform` is `browser`, the tokens will be sent in secure, httpOnly cookies. If your `client platform` is `browser-dev`, the tokens will be sent in unsecure cookies.
 
 **Only use browser-dev in development**
 
 #### Tokens
-Access tokens expire every **15 minutes** Refresh tokens expire every **14 days**. If your access token expires, you'll need to login again. You can get a new set of access and refresh tokens when you send a POST request to ```/api/iam/authn/refresh``` with an unexpired refresh token. If your refresh token has expired, you will not be able to get a new set of tokens and you'll need to login.
+
+Access tokens expire every **15 minutes** Refresh tokens expire every **14 days**. If your access token expires, you'll need to login again. You can get a new set of access and refresh tokens when you send a POST request to `/api/iam/authn/refresh` with an unexpired refresh token. If your refresh token has expired, you will not be able to get a new set of tokens and you'll need to login.
 
 ##### Automatic token rotation
-If your client platform is ```browser``` or ```browser-only```, Nuxt IAM will automatically refresh your tokens if it detects that your access token has expired, and that your refresh token is not expired. When using a browser, you really don't have to concern yourself with tokens. 
+
+If your client platform is `browser` or `browser-only`, Nuxt IAM will automatically refresh your tokens if it detects that your access token has expired, and that your refresh token is not expired. When using a browser, you really don't have to concern yourself with tokens.
 
 #### Detecting stolen refresh tokens
+
 Nuxt IAM keeps track of expired refresh tokens. Let's say you you have a one refresh token in the database. If you refresh your tokens, you get a new set of tokens, and the old refresh token will be deactivated. If you or someone else steals the old refresh token and attempts to get a new set of tokens using that refresh token, all your refresh tokens will be deactivated, and you will have to login after your access token expires. This feature protects your account against stolen tokens.
 
 #### Client platform and tokens
-If your client platform is ```app``` and you need to access a protected resource that requires authentication or you need to refresh your tokens, you'll need to send valid access and refresh tokens in your **request headers**. For example:
+
+If your client platform is `app` and you need to access a protected resource that requires authentication or you need to refresh your tokens, you'll need to send valid access and refresh tokens in your **request headers**. For example:
 
 ```
 const response = await $fetch("/api/iam/authn/refresh", {
@@ -229,10 +262,12 @@ const response = await $fetch("/api/iam/authn/refresh", {
     },
 ```
 
-If your client platform is ```browser``` or ```browser-dev,``` access and refresh tokens are automatically sent by your browser in cookies. You don't have to concern yourself with them.
+If your client platform is `browser` or `browser-dev,` access and refresh tokens are automatically sent by your browser in cookies. You don't have to concern yourself with them.
 
 ### Logout user
-To logout, send a POST request to ``` /api/iam/authn/logout ```.
+
+To logout, send a POST request to `/api/iam/authn/logout`.
+
 #### Request
 
 ```
@@ -242,25 +277,55 @@ const response = await $fetch("/api/iam/authn/logout", {
       "client-platform": ['app']|['browser']|['browser-dev'],
     },
   });
-  ```
- 
-If your client platform is ```browser``` or ```browser-dev```, Nuxt IAM will delete your access and refresh tokens and deactivate your refresh tokens in the database, and you will be immediately logged out of the system.
-If your client platform is ```app```, Nuxt IAM will deactivate your refresh tokens in the database. You will be logged out as soon as your access token expires.
-Logging out immediately is not possible because JSON web tokens cannot be revoked once given. We cannot revoke access tokens once given. However, the access token expires in 15 minutes,
-so 15 minutes is the maximum amount of time that a user on client platform ```app``` will be logged out but still be able to access resources.
+```
 
-#### Response 
+If your client platform is `browser` or `browser-dev`, Nuxt IAM will delete your access and refresh tokens and deactivate your refresh tokens in the database, and you will be immediately logged out of the system.
+If your client platform is `app`, Nuxt IAM will deactivate your refresh tokens in the database. You will be logged out as soon as your access token expires.
+Logging out immediately is not possible because JSON web tokens cannot be revoked once given. We cannot revoke access tokens once given. However, the access token expires in 15 minutes,
+so 15 minutes is the maximum amount of time that a user on client platform `app` will be logged out but still be able to access resources.
+
+#### Response
+
 ```
 "status": "success"
 ```
-If the response was ```success```, then the user was successfully registered and added to the database. A registered user can now be logged in.
+
+### isAuthenticated user
+
+To check if the current user is authenticated,
+
+#### Request
+
+```
+const response = await $fetch("/api/iam/authn/logout", {
+    method: "POST",
+    headers: {
+      "client-platform": ['app']|['browser']|['browser-dev'],
+    },
+  });
+```
+
+If your client platform is `browser` or `browser-dev`, Nuxt IAM will delete your access and refresh tokens and deactivate your refresh tokens in the database, and you will be immediately logged out of the system.
+If your client platform is `app`, Nuxt IAM will deactivate your refresh tokens in the database. You will be logged out as soon as your access token expires.
+Logging out immediately is not possible because JSON web tokens cannot be revoked once given. We cannot revoke access tokens once given. However, the access token expires in 15 minutes,
+so 15 minutes is the maximum amount of time that a user on client platform `app` will be logged out but still be able to access resources.
+
+#### Response
+
+```
+"status": "success"
+```
 
 ## Features
+
 Nuxt IAM adds the following to your app:
 
 ### Backend
+
 We add the following endpoints to the backend.
+
 #### Authentication
+
 - ✔️ user registration endpoint
 - ✔️ user email verification endpoint
 - ✔️ user verify email token endpoint
@@ -279,13 +344,14 @@ We add the following endpoints to the backend.
 
 ## Getting Started from Scratch
 
-The fastest way to get started is to clone the repo or use the npm ``` npm i nuxt-iam ``` or ``` yarn add nuxt-iam ``` or ``` npx nuxt-iam ``` command. This will add a fresh Nuxt 3 installation with the authentication and authorization logic already there.
+The fastest way to get started is to clone the repo or use the npm `npm i nuxt-iam` or `yarn add nuxt-iam` or `npx nuxt-iam` command. This will add a fresh Nuxt 3 installation with the authentication and authorization logic already there.
 
 ## Adding Nuxt IAM to an existing Nuxt app
 
 Add content here
 
 ## Backend for Frontend Concept
+
 Nuxt IAM uses a backend for frontend pattern to provide security with best practices for your app. That means that we modify security slightly depending on whether the request is coming from a browser or a non-browser content. If the request is from a browser, Nuxt IAM uses cookies
 
 ## Setup
@@ -328,9 +394,13 @@ npm run preview
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
 ## API Routes
+
 The following are API routes that Nuxt IAM adds to your app.
+
 ### Register user
-To register a user, send a POST request to ``` /api/iam/authn/register ```.
+
+To register a user, send a POST request to `/api/iam/authn/register`.
+
 ```
 const response = await $fetch("/api/iam/authn/register", {
     method: "POST",
@@ -344,7 +414,6 @@ const response = await $fetch("/api/iam/authn/register", {
       password: password,
     },
   });
-  ```
-
+```
 
 ### Login user
