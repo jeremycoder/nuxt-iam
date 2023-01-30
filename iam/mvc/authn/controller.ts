@@ -123,6 +123,7 @@ export default defineEventHandler(async (event) => {
         break;
     }
 
+  // If the wrong method
   const response = {} as JSONResponse;
   response.status = "fail";
   response.error = createError({

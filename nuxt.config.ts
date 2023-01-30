@@ -35,6 +35,12 @@ export default defineNuxtConfig({
     },
   },
 
+  modules: ["nuxt-vue3-google-signin"],
+  googleSignIn: {
+    clientId:
+      "264332974831-9q11ieeajca9a3je42hgqk0cf3b5vj6h.apps.googleusercontent.com",
+  },
+
   typescript: {
     shim: false,
   },

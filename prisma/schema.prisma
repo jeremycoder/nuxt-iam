@@ -23,6 +23,17 @@ model users {
   created_at     DateTime         @default(now()) @db.DateTime(0)
   deleted_at     DateTime?        @db.DateTime(0)
   refresh_tokens refresh_tokens[]
+  sessions       sessions[]
+}
+
+model sessions {
+  id         Int      @id @default(autoincrement())
+  user       users?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    Int
+  start_time DateTime @default(now())
+  csrf_token String
+  is_active  Boolean
+  ip_address String
 }
 
 enum role {

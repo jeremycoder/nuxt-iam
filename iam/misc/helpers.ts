@@ -1036,19 +1036,23 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
   if (await verifyPassword(user.password, body.password)) {
     updateLastLogin(user.email);
 
+    // TODO: Create CSRF token in user account / or create session token
+    // TODO: setUserSession(user.email)
+    // TODO: make also getActiveUserSession(user.email) gets active user session
+
     const publicUser = {
       uuid: user.uuid,
       email: user.email,
     };
 
-    // Create access tokens
+    // Create access token
     const accessToken = jwt.sign(publicUser, config.iamAccessTokenSecret, {
       expiresIn: "15m",
       issuer: "NuxtIam",
       jwtid: makeUuid(),
     });
 
-    // Create new tokens
+    // Create refresh token
     const tokenId = makeUuid();
     const refreshToken = jwt.sign(publicUser, config.iamRefreshTokenSecret, {
       expiresIn: "14d",

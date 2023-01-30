@@ -22,11 +22,11 @@
       </div>
       <form>
         <h2 class="text-center">Log in</h2>
-        <div class="text-center social-btn">
-          <a href="#" class="btn btn-danger btn-block"
-            ><i class="fa fa-google"></i> Sign in with <b>Google</b></a
-          >
-        </div>
+
+        <GoogleSignInButton
+          @success="handleLoginSuccess"
+          @error="handleLoginError"
+        ></GoogleSignInButton>
         <div class="or-seperator"><i>or</i></div>
         <div class="form-group">
           <input
@@ -71,12 +71,28 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import {
+  GoogleSignInButton,
+  type CredentialResponse,
+} from "vue3-google-signin";
+
 // Get necessary functions from useIam composable
 const { login } = useIam();
 
+// handle success event
+const handleLoginSuccess = (response: CredentialResponse) => {
+  const { credential } = response;
+  console.log("Access Token", credential);
+};
+
+// handle an error event
+const handleLoginError = () => {
+  console.error("Login failed");
+};
+
 // These variables come from response from calling Nuxt IAM api
-let loginStatus = ref(null);
+let loginStatus = ref();
 let loginError = ref(null);
 let loginData = ref(null);
 

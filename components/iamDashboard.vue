@@ -290,8 +290,6 @@ async function getMyProfile() {
     profile.role = data.role;
     profile.permissions = data.permissions;
 
-    console.log("profile: ", profile);
-
     // Assign to local reactive variables
     firstName.value = profile.firstName;
     lastName.value = profile.lastName;

@@ -22,6 +22,7 @@ import {
   addOneTimeToken,
   getTokenPayload,
   updateEmailVerifiedTrue,
+  makeUuid,
 } from "~~/iam/misc/helpers";
 
 /**
@@ -91,10 +92,17 @@ export async function login(event: H3Event): Promise<JSONResponse> {
   //Otherwise get tokens
   const tokens = errorOrTokens as Tokens;
 
+  // TODO: Get csrf token from user sessions
+  // TODO: Need to create sessions table
+  // TODO: Just an example
+  const csrfToken = makeUuid();
+
   // If platform is app dev/production, set tokens in header
   if (platform === "app") {
     setHeader(event, "access-token", "Bearer " + tokens.accessToken);
     setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+    // TODO
+    setHeader(event, "csrf-token", csrfToken);
   }
 
   // If platform is browser production, set tokens in secure, httpOnly cookies
@@ -131,6 +139,7 @@ export async function login(event: H3Event): Promise<JSONResponse> {
   response.status = "success";
   response.data = {
     email: body.email,
+    csrf_token: csrfToken,
   };
 
   return response;

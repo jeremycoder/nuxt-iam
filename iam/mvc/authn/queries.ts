@@ -279,13 +279,6 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
     // Otherwise, get tokens
     const tokens = errorOrTokens as Tokens;
 
-    // TODO: Is this repetitious?
-    // const errorOrPlatform = getClientPlatform(event);
-    // if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
-
-    // // Get access token from header or cookie
-    // const platform = errorOrPlatform as string;
-
     // If platform is app dev/production, set tokens in header
     if (platform === "app") {
       setHeader(event, "access-token", "Bearer " + tokens.accessToken);
@@ -337,6 +330,14 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
         statusMessage: "Failed to obtain user profile",
       });
     }
+
+    // If we have the user, but user is not active, return error
+    if (!user.is_active)
+      return createError({
+        statusCode: 403,
+        statusMessage:
+          "Forbidden. Account is has been deactivated. Please contact your administrator.",
+      });
 
     // Otherwise, hide password (password is one-way hashed and cannot be retrieved from hash anyway, it just looks nicer) return the user
     user.password = "[hidden]";

@@ -579,6 +579,7 @@ const createProfile = {
 // Get profile passed through attributes
 const attrs = useAttrs();
 profile.uuid = attrs.profile.uuid;
+isActive.value = attrs.profile.isActive;
 
 // Holds current user table record
 const userTableRecord = ref(null);
