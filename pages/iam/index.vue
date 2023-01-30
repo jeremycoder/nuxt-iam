@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <div class="container px-4 py-5 border shadow-lg" id="icon-grid">
+    <div class="container px-4 my-5 py-5 border shadow-lg" id="icon-grid">
       <h2 class="pb-2 border-bottom">Features</h2>
 
       <div
@@ -158,49 +158,7 @@
             <p>Manage your users from an admin panel</p>
           </div>
         </div>
-      </div>
-
-      <h4>Software is provided as is</h4>
-      <p>
-        "The software is provided "as is," without warranty of any kind, express
-        or implied, including but not limited to the warranties of
-        merchantability, fitness for a particular purpose and non-infringement.
-        In no event shall the authors or copyright holders be liable for any
-        claim, damages or other liability, whether in an action of contract,
-        tort or otherwise, arising from, out of or in connection with the
-        software or the use or other dealings in the software."
-      </p>
-      <h4>Liability waiver</h4>
-      <p>
-        "By using the software, you agree to waive any and all claims against
-        the creators, developers, and distributors of the software for any
-        damages, losses, costs, liabilities, and expenses, including but not
-        limited to, direct, indirect, incidental, consequential, and punitive
-        damages, arising out of or in any way connected with the use of the
-        software. This waiver applies to all claims, whether based on contract,
-        tort, strict liability, or any other legal theory, and whether or not
-        the creators, developers, and distributors of the software have been
-        advised of the possibility of such damage. You acknowledge that the
-        software may contain bugs, errors, and other issues, and that the
-        software may not perform as intended. You also acknowledge that the
-        software may be updated, modified, or discontinued at any time without
-        notice."
-      </p>
-      <h4>Use software at your own risk</h4>
-      <p>
-        "By using the software, you acknowledge that you are doing so at your
-        own risk. The creators, developers, and distributors of the software
-        make no warranties, express or implied, regarding the software's
-        performance, safety, or reliability. You understand that the software
-        may contain bugs, errors, and other issues and that the software may not
-        perform as intended. You also understand that the software may be
-        updated, modified, or discontinued at any time without notice. You agree
-        to indemnify and hold harmless the creators, developers, and
-        distributors of the software from any and all claims, damages, losses,
-        costs, liabilities, and expenses, including but not limited to, direct,
-        indirect, incidental, consequential, and punitive damages, arising out
-        of or in any way connected with your use of the software."
-      </p>
+      </div>      
 
       <div class="row">
         <div
@@ -221,6 +179,21 @@
         </div>
       </div>
     </div>
+
+    <div class="container px-4 my-5 py-5 border shadow-lg" id="icon-grid">
+      <h2 class="pb-2 border-bottom">MIT License</h2>
+      <p>COPYRIGHT 2023 Nuxt-IAM</p> 
+      <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+</p>
+      
+    
+    </div>
+
+   
   </div>
 </template>
 

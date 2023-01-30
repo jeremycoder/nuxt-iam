@@ -228,7 +228,7 @@ async function resetPassword(email: string): Promise<JSONResponse> {
 }
 
 /**
- * @desc Verify reset token sent by user
+ * @desc Verify reset password token sent by user
  * @returns {Promise<JSONResponse>}
  */
 async function verifyReset(token: string): Promise<JSONResponse> {

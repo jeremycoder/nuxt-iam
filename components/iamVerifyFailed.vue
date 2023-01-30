@@ -1,8 +1,10 @@
 <template>
-  <div>
-    <div style="margin-left: 64px">
-      <img src="~~/iam/ui/img/nuxt-iam-logo.png/" />
+  <div class="container">
+    <div>
+      <NuxtLink to="/iam/"
+        ><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 200px"
+      /></NuxtLink>
+      <h1>Verification failed. Link expired or other error. &#128542;</h1>
     </div>
-    <h1>Verification failed. Link expired or other error. &#128542;</h1>
   </div>
 </template>

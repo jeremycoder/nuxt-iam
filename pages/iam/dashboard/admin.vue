@@ -120,6 +120,20 @@
                   <option>GENERAL</option>
                 </select>
 
+                <label for="is_active" class="form-label"
+                  ><strong>Is Active</strong></label
+                >
+                <select
+                  class="form-select form-control mb-3"
+                  id="role"
+                  aria-label="Role select"
+                  style="width: 300px"
+                  v-model="isActive"
+                >
+                  <option>true</option>
+                  <option>false</option>
+                </select>
+
                 <label for="first_name" class="form-label"
                   ><strong>First name</strong></label
                 >
@@ -547,6 +561,7 @@ const {
   deleteRefreshTokens,
 } = useIamAdmin();
 const selectedRole = ref("");
+const isActive = ref(null);
 
 // Some profile values
 const profile = {
@@ -683,11 +698,17 @@ async function updateThisUser() {
     ? selectedRole.value
     : userTableRecord.value.role;
 
+  // If we have a new selection for isActive, use that, otherwise, use the already selected isActive
+  const isActiveSelection = isActive.value
+    ? isActive.value
+    : userTableRecord.value.isActive;
+
   // Create body to send to API
   const body = {
     first_name: firstName,
     last_name: lastName,
     role: role,
+    is_active: isActiveSelection === "true" ? true : false,
     permissions: permissions,
   };
 

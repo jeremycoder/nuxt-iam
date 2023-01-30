@@ -35,13 +35,31 @@
   </div>
   <form>
     <div class="mb-3">
-      <label for="text" class="form-label">Uuid</label>
+      <label for="uuid" class="form-label">Uuid</label>
       <input
         type="text"
         class="form-control mb-3"
         id="uuid"
         style="width: 415px"
         :value="$attrs.profile.uuid"
+        disabled
+      />
+      <label for="is_active" class="form-label">Is Active</label>
+      <input
+        type="text"
+        class="form-control mb-3"
+        id="is_active"
+        style="width: 415px"
+        :value="$attrs.profile.isActive"
+        disabled
+      />
+      <label for="permissions" class="form-label">Permissions</label>
+      <textarea
+        type="text"
+        class="form-control mb-3"
+        id="permissions"
+        style="width: 415px"
+        :value="$attrs.profile.permissions"
         disabled
       />
       <label for="email" class="form-label">Email address</label>

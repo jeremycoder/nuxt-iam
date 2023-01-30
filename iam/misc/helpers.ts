@@ -1146,29 +1146,6 @@ export async function updateUserProfile(
   if (userDataOrError instanceof H3Error) return userDataOrError;
   const userData = userDataOrError as User;
 
-  // Update user data if they are supplied
-  /**
-   * @desc Compares two string values and returns the updated valid value
-   * @param oldValue The old or current value
-   * @param newValue The new value
-   * @returns {string}
-   */
-  // function updateOrKeep(oldValue: string, newValue: string): string {
-  //   console.log("oldValue: ", oldValue);
-  //   console.log("newValue: ", newValue);
-
-  //   if (oldValue && newValue) {
-  //     // If new value is empty string, keep old value
-  //     if (newValue.trim().length === 0) return oldValue.trim();
-
-  //     // If new value is same as old value, keep old value
-  //     if (newValue.trim() === oldValue.trim()) return oldValue.trim();
-  //   }
-
-  //   // Otherwise return new value
-  //   return newValue.trim();
-  // }
-
   // Attempt to hash new password, if error, return error
   let newHashedPassword = "";
   if ("new_password" in body === true && "current_password" in body === true) {

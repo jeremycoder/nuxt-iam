@@ -115,6 +115,7 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
         last_name: body.last_name,
         role: body.role,
         permissions: body.permissions,
+        is_active: body.is_active,
       },
     })
     .then(async (response) => {

@@ -27,6 +27,19 @@
           </h4>
         </div>
       </div>
+      <div v-if="profile && profile.isActive === false" class="container my-5">
+        <div class="alert alert-danger" role="alert">
+          <h3 class="alert-heading">Account is not active!</h3>
+          <p>
+            Your account has been deactivated, and you cannot access it. Please
+            contact an administrator to restore it.
+          </p>
+          <hr />
+          <button type="button" class="btn btn-secondary" @click="logMeOut">
+            Log out
+          </button>
+        </div>
+      </div>
       <div v-else>
         <header>
           <nav
@@ -276,6 +289,8 @@ async function getMyProfile() {
     profile.isActive = data.is_active;
     profile.role = data.role;
     profile.permissions = data.permissions;
+
+    console.log("profile: ", profile);
 
     // Assign to local reactive variables
     firstName.value = profile.firstName;
