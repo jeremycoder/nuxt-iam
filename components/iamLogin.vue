@@ -22,7 +22,6 @@
       </div>
       <form>
         <h2 class="text-center">Log in</h2>
-
         <GoogleSignInButton
           @success="handleLoginSuccess"
           @error="handleLoginError"

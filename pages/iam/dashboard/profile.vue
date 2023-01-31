@@ -111,7 +111,7 @@
 <script setup>
 const emit = defineEmits(["profileUpdate"]);
 
-const { updateProfile } = useIam();
+const { updateProfile, getCsrfToken } = useIam();
 const updateSuccessful = ref(false);
 let profileError = ref(null);
 
@@ -128,6 +128,9 @@ profile.uuid = attrs.profile.uuid;
 profile.firstName = attrs.profile.firstName;
 profile.lastName = attrs.profile.lastName;
 
+// Get csrf token
+const csrfToken = await getCsrfToken(attrs.profile.id);
+
 // Attempt to update user profile
 async function updateMyProfile() {
   if (
@@ -139,7 +142,8 @@ async function updateMyProfile() {
   const { error } = await updateProfile(
     profile.uuid,
     profile.firstName,
-    profile.lastName
+    profile.lastName,
+    csrfToken
   );
 
   // If error, display error

@@ -22,6 +22,7 @@ export type JSONResponse = {
 export type Tokens = {
   accessToken: string;
   refreshToken: string;
+  csrfToken?: string;
 };
 
 export type ClientPlatforms = "app" | "browser" | "browser-dev";
@@ -56,3 +57,22 @@ export type RefreshToken = {
 };
 
 export type RefreshTokens = Array<RefreshToken>;
+
+export type Session = {
+  id: number;
+  user_id: number;
+  start_time: DateTime;
+  access_token: string;
+  csrf_token: string;
+  is_active: boolean;
+  ip_address: string;
+};
+
+export type ProfileUpdateValues = {
+  uuid: string;
+  firstName: string;
+  lastName: string;
+  csrfToken: string;
+  currentPassword?: string;
+  newPassword?: string;
+};

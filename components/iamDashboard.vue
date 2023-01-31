@@ -110,6 +110,10 @@
                 </ul>
               </div>
 
+              <button class="btn btn-large" @click="getMyProfile">
+                Get my profile
+              </button>
+
               <!-- Menu toggler -->
               <button
                 class="navbar-toggler"
@@ -259,6 +263,8 @@ async function isLoggedIn() {
 
   // If user is not authenticated, push to login page
   if (!iAmLoggedIn.value) router.push("/iam/login");
+
+  // If user is logged in, get csrf token
 }
 
 // Log user out
@@ -281,6 +287,7 @@ async function getMyProfile() {
 
   // If successful, data will contain profile
   if (status === "success") {
+    profile.id = data.id;
     profile.uuid = data.uuid;
     profile.firstName = data.first_name;
     profile.lastName = data.last_name;

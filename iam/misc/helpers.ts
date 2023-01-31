@@ -1,7 +1,7 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { User, Tokens, EmailOptions } from "~~/iam/misc/types";
+import { User, Tokens, EmailOptions, Session } from "~~/iam/misc/types";
 import { v4 as uuidv4 } from "uuid";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
@@ -12,6 +12,15 @@ import {
   emailWithNodemailerSmtp,
   emailWithSendgrid,
 } from "./email";
+import crypto from "crypto";
+
+/**
+ * @desc Returns a random string of 32 characters in hexadecimal
+ * @info Can be used to create a secret
+ */
+export function makeRandomString32(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
 
 const config = useRuntimeConfig();
 const prisma = new PrismaClient();
@@ -263,13 +272,7 @@ export async function validateUserLogin(
  * @desc Suite of checks to validate data before issuing refresh token
  * @param event Event from Api
  */
-export async function getRefreshTokens(
-  event: H3Event
-): Promise<H3Error | Tokens> {
-  // TODO: Need to check based on platform
-  // TODO: If platform is app, get from authorization header
-  // TODO: If platform is browser, get from cookies
-
+export async function getNewTokens(event: H3Event): Promise<H3Error | Tokens> {
   let refreshToken = null;
 
   // Get client platform
@@ -346,8 +349,8 @@ export async function getRefreshTokens(
     });
   }
 
-  // Get new access and refresh tokens
-  const errorOrTokens = createNewTokensFromRefresh(bearerToken[1]);
+  // Get new tokens
+  const errorOrTokens = createNewTokensFromRefresh(bearerToken[1], event);
   if (errorOrTokens instanceof H3Error) return errorOrTokens;
 
   const tokens = (await errorOrTokens) as Tokens;
@@ -407,8 +410,6 @@ export function validateEmail(email: string): boolean {
  * @desc Checks whether email already exists in database
  * @param email The email string
  */
-// TODO: This needs to return errors or boolean
-// TODO: Database errors are being masked and it's hard to debug
 export async function emailExists(email: string): Promise<boolean | H3Error> {
   if (!email) return false;
   let error = null;
@@ -779,7 +780,8 @@ export function verifyEmailVerificationToken(
  * @param token JSON web token
  */
 export async function createNewTokensFromRefresh(
-  token: string
+  token: string,
+  event: H3Event
 ): Promise<Tokens | H3Error> {
   const errorOrUser = await verifyRefreshToken(token);
   if (errorOrUser instanceof H3Error) return errorOrUser;
@@ -804,7 +806,7 @@ export async function createNewTokensFromRefresh(
       jwtid: refreshTokenId,
     });
 
-    // Deactivate current token
+    // Deactivate current refresh token
     const deactivateTokenError = await deactivateRefreshTokens(user.id);
     if (deactivateTokenError) return deactivateTokenError;
 
@@ -812,9 +814,22 @@ export async function createNewTokensFromRefresh(
     const storeTokenError = await _storeRefreshToken(refreshTokenId, user.id);
     if (storeTokenError) return storeTokenError;
 
+    // Deactivate current session
+    const deactivateSessionsError = await deactivateUserSessions(user.id);
+    if (deactivateSessionsError instanceof H3Error)
+      return deactivateSessionsError;
+
+    // Create new user session
+    const sessionOrError = await createUserSession(user.id, accessToken, event);
+
+    // Get session and csrf token
+    if (sessionOrError instanceof H3Error) return sessionOrError;
+    const session = sessionOrError as Session;
+
     return {
       accessToken: accessToken,
       refreshToken: refreshToken,
+      csrfToken: session.csrf_token,
     };
   }
 
@@ -853,7 +868,6 @@ async function _refreshTokenActive(tokenId: string): Promise<H3Error | void> {
  * @desc Verifies refresh token
  * @param token JSON web token
  */
-// TODO: Fix bug, should return H3Error or void
 export async function verifyRefreshToken(
   token: string
 ): Promise<H3Error | User> {
@@ -1019,6 +1033,7 @@ export async function deactivateRefreshTokens(
  * @param event Event from Api
  */
 export async function login(event: H3Event): Promise<H3Error | Tokens> {
+  const tokens = {} as Tokens;
   const body = await readBody(event);
 
   if (!body)
@@ -1034,11 +1049,8 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
   }
 
   if (await verifyPassword(user.password, body.password)) {
+    // Update last login time
     updateLastLogin(user.email);
-
-    // TODO: Create CSRF token in user account / or create session token
-    // TODO: setUserSession(user.email)
-    // TODO: make also getActiveUserSession(user.email) gets active user session
 
     const publicUser = {
       uuid: user.uuid,
@@ -1068,10 +1080,28 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
     const storeTokenError = await _storeRefreshToken(tokenId, user.id);
     if (storeTokenError) return storeTokenError;
 
-    return {
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    };
+    // Assign tokens
+    tokens.accessToken = accessToken;
+    tokens.refreshToken = refreshToken;
+
+    // Create user session, if error, return error
+    const sessionOrTokenError = await createUserSession(
+      user.id,
+      accessToken,
+      event
+    );
+
+    // If session error, return error
+    if (sessionOrTokenError instanceof H3Error) {
+      console.log("Trouble creating session");
+      return createError({ statusCode: 500, statusMessage: "Server error" });
+    }
+
+    // Get session and csrf token
+    const session = sessionOrTokenError as Session;
+    tokens.csrfToken = session.csrf_token;
+
+    return tokens;
   }
 
   return createError({ statusCode: 401, statusMessage: "Invalid login" });
@@ -1089,6 +1119,7 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
   // Delete access and refresh cookies
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
+  deleteCookie(event, "csrf-token");
 
   const body = await readBody(event);
 
@@ -1598,6 +1629,184 @@ export function getTokenPayload(
 
   // Return error (to satisfy Typescript demannds)
   console.log("We should never reach here");
+  return createError({
+    statusCode: 500,
+    statusMessage: "Server error",
+  });
+}
+
+/**
+ * @Desc Create user session
+ * @param user_id User id
+ * @returns {Promise<H3Error|string>} Returns error or the given uuid
+ */
+export async function createUserSession(
+  userId: number,
+  accessToken: string,
+  event: H3Event
+): Promise<H3Error | Session> {
+  let error = null;
+  let session = null;
+
+  // If no user id provided
+  if (!userId) {
+    console.log("User id not provided for create session");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If no access token provided
+  if (!accessToken) {
+    console.log("Access token not provided for create session");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If event notn provided
+  if (!event) {
+    console.log("Event not provided for create session");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  const csrfToken = makeRandomString32();
+  const ipAddress = getRequestHeader(event, "x-forwarded-for");
+
+  // Create session
+  await prisma.sessions
+    .create({
+      data: {
+        user_id: userId,
+        start_time: new Date(),
+        access_token: accessToken,
+        csrf_token: csrfToken,
+        is_active: true,
+        ip_address: ipAddress ? ipAddress : "unable to get IP address",
+      },
+    })
+    .then(async (result) => {
+      session = result as Session;
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // Check for database errors
+  if (error) {
+    console.log("Error creating user session");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If we have a session, return it
+  if (session) return session;
+
+  // Otherwise, return an error
+  console.log("We should not be getting this session error");
+  return createError({
+    statusCode: 500,
+    statusMessage: "Server error",
+  });
+}
+
+/**
+ * @Desc Returns session given session id
+ * @param user_id User id
+ * @returns {Promise<H3Error|Session>} Returns error or the given uuid
+ */
+export async function getSession(
+  sessionId: number
+): Promise<H3Error | Session> {
+  let error = null;
+  let session = null;
+
+  // Create session
+  await prisma.sessions
+    .findFirst({
+      where: {
+        id: sessionId,
+      },
+    })
+    .then(async (result) => {
+      session = result;
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // Check for database errors
+  if (error) {
+    console.log("Error retrieving user session");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If we have a session, return it
+  if (session) return session;
+
+  // Otherwise, return an error
+  console.log("We should not be getting this retrieve session error");
+  return createError({
+    statusCode: 500,
+    statusMessage: "Server error",
+  });
+}
+
+/**
+ * @Desc Deactivates all of a user's sessions
+ * @param userId User id
+ * @returns {Promise<H3Error|Session>} Returns error or the given uuid
+ */
+export async function deactivateUserSessions(
+  userId: number
+): Promise<H3Error | Session> {
+  let error = null;
+  let session = null;
+
+  // Deactivate session
+  await prisma.sessions
+    .update({
+      where: {
+        user_id: userId,
+      },
+      data: {
+        is_active: false,
+      },
+    })
+    .then(async (result) => {
+      session = result;
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // Check for database errors
+  if (error) {
+    console.log("Error deactivating user session");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If we have a session, return it
+  if (session) return session;
+
+  // Otherwise, return an error
+  console.log("We should not be getting this update user session error");
   return createError({
     statusCode: 500,
     statusMessage: "Server error",

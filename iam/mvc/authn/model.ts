@@ -13,7 +13,7 @@ import {
 } from "./queries";
 import { getClientPlatform } from "~~/iam/middleware";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { JSONResponse, User, Tokens } from "~~/iam/misc/types";
+import { JSONResponse, User, Tokens, Session } from "~~/iam/misc/types";
 import dayjs from "dayjs";
 import {
   verifyPasswordResetToken,
@@ -22,7 +22,7 @@ import {
   addOneTimeToken,
   getTokenPayload,
   updateEmailVerifiedTrue,
-  makeUuid,
+  getSession,
 } from "~~/iam/misc/helpers";
 
 /**
@@ -58,15 +58,17 @@ export async function register(event: H3Event): Promise<JSONResponse> {
  */
 export async function login(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
+  let sessionId = null;
 
   // Check client platform first
   const errorOrPlatform = getClientPlatform(event);
 
   // If error, return error
   if (errorOrPlatform instanceof H3Error) {
-    // Delete access and refresh tokens
+    // Delete tokens
     deleteCookie(event, "access-token");
     deleteCookie(event, "refresh-token");
+    deleteCookie(event, "csrf-token");
 
     response.status = "fail";
     response.error = errorOrPlatform;
@@ -80,9 +82,10 @@ export async function login(event: H3Event): Promise<JSONResponse> {
 
   // If error, return error
   if (errorOrTokens instanceof H3Error) {
-    // Delete access and refresh tokens
+    // Delete tokens
     deleteCookie(event, "access-token");
     deleteCookie(event, "refresh-token");
+    deleteCookie(event, "csrf-token");
 
     response.status = "fail";
     response.error = errorOrTokens;
@@ -92,17 +95,11 @@ export async function login(event: H3Event): Promise<JSONResponse> {
   //Otherwise get tokens
   const tokens = errorOrTokens as Tokens;
 
-  // TODO: Get csrf token from user sessions
-  // TODO: Need to create sessions table
-  // TODO: Just an example
-  const csrfToken = makeUuid();
-
   // If platform is app dev/production, set tokens in header
   if (platform === "app") {
     setHeader(event, "access-token", "Bearer " + tokens.accessToken);
     setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
-    // TODO
-    setHeader(event, "csrf-token", csrfToken);
+    if (tokens.csrfToken) setHeader(event, "csrf-token", tokens.csrfToken);
   }
 
   // If platform is browser production, set tokens in secure, httpOnly cookies
@@ -119,6 +116,9 @@ export async function login(event: H3Event): Promise<JSONResponse> {
       secure: true,
       expires: dayjs().add(14, "day").toDate(),
     });
+
+    // Set csrf token in cookie
+    if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
   }
 
   // Development cookies are not secure. Use only in development
@@ -130,6 +130,9 @@ export async function login(event: H3Event): Promise<JSONResponse> {
     setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
       expires: dayjs().add(1, "day").toDate(),
     });
+
+    // Set csrf token in cookie
+    if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
   }
 
   // Create api result
@@ -139,9 +142,7 @@ export async function login(event: H3Event): Promise<JSONResponse> {
   response.status = "success";
   response.data = {
     email: body.email,
-    csrf_token: csrfToken,
   };
-
   return response;
 }
 
@@ -183,6 +184,7 @@ export async function refresh(event: H3Event): Promise<JSONResponse> {
   if (platform === "app") {
     setHeader(event, "access-token", "Bearer " + tokens.accessToken);
     setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+    if (tokens.csrfToken) setHeader(event, "csrf-token", tokens.csrfToken);
   }
 
   // If platform is browser production, set tokens in secure, httpOnly cookies
@@ -199,6 +201,9 @@ export async function refresh(event: H3Event): Promise<JSONResponse> {
       secure: true,
       expires: dayjs().add(14, "day").toDate(),
     });
+
+    // Set csrf token
+    if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
   }
 
   // Development cookies are not secure. Use only in development
@@ -207,9 +212,13 @@ export async function refresh(event: H3Event): Promise<JSONResponse> {
       // Access tokens themselves expire in 15 mins
       expires: dayjs().add(1, "day").toDate(),
     });
+
     setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
       expires: dayjs().add(1, "day").toDate(),
     });
+
+    // Set csrf token
+    if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
   }
 
   // If all is successful
@@ -288,11 +297,84 @@ export async function profile(event: H3Event): Promise<JSONResponse> {
 }
 
 /**
+ * @desc Returns user's csrf token
+ * @info expects body to contain user id
+ * @param event H3 Event passed from api
+ * @returns {Promise<JSONResponse>}
+ */
+export async function getCsrfToken(event: H3Event): Promise<JSONResponse> {
+  const body = await readBody(event);
+  const response = {} as JSONResponse;
+  let sessionId = null;
+  let sessionOrError = null;
+
+  // Get client platform
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  // Client platform if not using Nuxt front end
+  const appClientPlatform = event.node.req.headers["client-platform"] as string;
+
+  // If client platform is app, get access token from headers
+  if (appClientPlatform === "app")
+    sessionId = event.node.req.headers["session-id"] as string;
+  // Otherwise, get it from cookies
+  else if (["browser", "browser-dev"].includes(clientPlatform)) {
+    sessionId = getCookie(event, "session-id") as string;
+  }
+  // If that fails, value is invalid
+  else {
+    console.log("Invalid client platform: ", clientPlatform);
+    response.error = createError({
+      statusCode: 400,
+      statusMessage:
+        "Invalid client platform. Client platform in header must be 'app', 'browser', or 'browser-dev'",
+    });
+  }
+
+  console.log("SESSION ID: " + sessionId);
+
+  // Return error if no session id provided
+  if (sessionId === null) {
+    console.log("Invalid session id");
+    response.error = createError({
+      statusCode: 400,
+      statusMessage: "No session id provided",
+    });
+  }
+
+  //Get session from db
+  if (sessionId) sessionOrError = await getSession(parseInt(sessionId));
+
+  // If error, return error
+  if (sessionOrError instanceof H3Error) {
+    console.log("Error retrieving user session");
+    response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // Get session and get csrf
+  const session = sessionOrError as Session;
+  const csrf = session.csrf_token;
+
+  // Create response
+  response.status = "success";
+  response.data = {
+    csrfToken: csrf,
+  };
+
+  return response;
+}
+
+/**
  * @desc Updates and returns updated profile of authenticated user
  * @param event H3 Event passed from api
  * @returns {Promise<JSONResponse>}
  */
 export async function update(event: H3Event): Promise<JSONResponse> {
+  // TODO: Check for valid csrf token in body, if none, return error
+
   const profileOrError = await updateProfile(event);
   const response = {} as JSONResponse;
 
@@ -353,9 +435,10 @@ export async function destroy(event: H3Event): Promise<JSONResponse> {
 export async function reset(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
 
-  // Delete access and refresh tokens
+  // Delete tokens
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
+  deleteCookie(event, "csrf-token");
 
   // Send user an email to reset their password
   const errorOrReset = await resetPassword(event);
@@ -382,6 +465,7 @@ export async function verifyReset(event: H3Event): Promise<JSONResponse> {
   // Delete access and refresh tokens
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
+  deleteCookie(event, "csrf-token");
 
   // Get token from body
   const body = await readBody(event);

@@ -6,7 +6,7 @@ import {
   makeUuid,
   validateUserLogin,
   login,
-  getRefreshTokens,
+  getNewTokens,
   logout,
   getUserByEmail,
   getUserByUuid,
@@ -97,7 +97,7 @@ export async function loginUser(event: H3Event): Promise<Tokens | H3Error> {
  * @param event H3Event
  */
 export async function refreshTokens(event: H3Event): Promise<Tokens | H3Error> {
-  const errorOrTokens = await getRefreshTokens(event);
+  const errorOrTokens = await getNewTokens(event);
   if (errorOrTokens instanceof H3Error) return errorOrTokens;
 
   const tokens = errorOrTokens as Tokens;
@@ -158,7 +158,7 @@ export async function isAuthenticated(
   // If error is an expired access token, attempt to reauthenticate
   if (errorOrUser instanceof jwt.TokenExpiredError) {
     console.log("Yes, attempt to reauthenticate");
-    const errorOrTokens = await getRefreshTokens(event);
+    const errorOrTokens = await getNewTokens(event);
 
     // If get an error, reauthentication failed
     if (errorOrTokens instanceof H3Error) {
@@ -182,6 +182,7 @@ export async function isAuthenticated(
     if (platform === "app") {
       setHeader(event, "access-token", "Bearer " + tokens.accessToken);
       setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+      if (tokens.csrfToken) setHeader(event, "csrf-token", tokens.csrfToken);
     }
 
     // If platform is browser production, set tokens in secure, httpOnly cookies
@@ -198,6 +199,9 @@ export async function isAuthenticated(
         secure: true,
         expires: dayjs().add(14, "day").toDate(),
       });
+
+      // Set csrf token
+      if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
     }
 
     // Development cookies are not secure. Use only in development
@@ -209,6 +213,8 @@ export async function isAuthenticated(
       setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
         expires: dayjs().add(1, "day").toDate(),
       });
+      // Set csrf token
+      if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
     }
 
     // Return authenticated
@@ -265,7 +271,7 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
   // If error is an expired access token, attempt to reauthenticate
   if (errorOrJwtPayload instanceof jwt.TokenExpiredError) {
     console.log("Yes, attempt to reauthenticate");
-    const errorOrTokens = await getRefreshTokens(event);
+    const errorOrTokens = await getNewTokens(event);
 
     // If get an error, reauthentication failed
     if (errorOrTokens instanceof H3Error) {
@@ -283,6 +289,7 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
     if (platform === "app") {
       setHeader(event, "access-token", "Bearer " + tokens.accessToken);
       setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+      if (tokens.csrfToken) setHeader(event, "csrf-token", tokens.csrfToken);
     }
 
     // If platform is browser production, set tokens in secure, httpOnly cookies
@@ -299,6 +306,9 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
         secure: true,
         expires: dayjs().add(14, "day").toDate(),
       });
+
+      // Set csrf token
+      if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
     }
 
     // Development cookies are not secure. Use only in development
@@ -307,9 +317,13 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
         // Access tokens themselves expire in 15 mins
         expires: dayjs().add(1, "day").toDate(),
       });
+
       setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
         expires: dayjs().add(1, "day").toDate(),
       });
+
+      // Set csrf token
+      if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
     }
   }
 
@@ -384,7 +398,7 @@ export async function updateProfile(event: H3Event): Promise<User | H3Error> {
   // If error is an expired access token, attempt to reauthenticate
   if (errorOrJwtPayload instanceof jwt.TokenExpiredError) {
     console.log("Yes, attempt to reauthenticate");
-    const errorOrTokens = await getRefreshTokens(event);
+    const errorOrTokens = await getNewTokens(event);
 
     // If get an error, reauthentication failed
     if (errorOrTokens instanceof H3Error) {
@@ -398,19 +412,11 @@ export async function updateProfile(event: H3Event): Promise<User | H3Error> {
     // Otherwise, get tokens
     const tokens = errorOrTokens as Tokens;
 
-    // TODO: Update client profile
-    // TODO: Read from body
-
-    // const errorOrPlatform = getClientPlatform(event);
-    // if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
-
-    // // Get access token from header or cookie
-    // const platform = errorOrPlatform as string;
-
     // If platform is app dev/production, set tokens in header
     if (platform === "app") {
       setHeader(event, "access-token", "Bearer " + tokens.accessToken);
       setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
+      if (tokens.csrfToken) setHeader(event, "csrf-token", tokens.csrfToken);
     }
 
     // If platform is browser production, set tokens in secure, httpOnly cookies
@@ -427,6 +433,9 @@ export async function updateProfile(event: H3Event): Promise<User | H3Error> {
         secure: true,
         expires: dayjs().add(14, "day").toDate(),
       });
+
+      // Set csrf token
+      if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
     }
 
     // Development cookies are not secure. Use only in development
@@ -435,9 +444,13 @@ export async function updateProfile(event: H3Event): Promise<User | H3Error> {
         // Access tokens themselves expire in 15 mins
         expires: dayjs().add(1, "day").toDate(),
       });
+
       setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
         expires: dayjs().add(1, "day").toDate(),
       });
+
+      // Set csrf token
+      if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
     }
   }
 
@@ -536,6 +549,7 @@ export async function deleteAccount(
   // Delete access and refresh cookies
   deleteCookie(event, "access-token");
   deleteCookie(event, "refresh-token");
+  deleteCookie(event, "csrf-token");
 
   // If we have a user, return the boolean
   if (deletedUser) return true;

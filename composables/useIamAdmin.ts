@@ -7,7 +7,7 @@ export default function useIamAdmin() {
     createUser,
     updateUser,
     deleteUser,
-    getRefreshTokens,
+    getNewTokens,
     deleteRefreshToken,
     deleteRefreshTokens,
   };
@@ -60,6 +60,8 @@ async function updateUser(
 ): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
+  console.log("Values: ", values);
+
   const response = await $fetch(`/api/iam/users/${uuid}`, {
     method: "PUT",
     headers: {
@@ -92,7 +94,7 @@ async function deleteUser(uuid: string): Promise<JSONResponse> {
  * @desc Get all refresh tokens
  * @returns {Promise<JSONResponse>}
  */
-async function getRefreshTokens(): Promise<JSONResponse> {
+async function getNewTokens(): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
   const response = await $fetch("/api/iam/refresh-tokens", {

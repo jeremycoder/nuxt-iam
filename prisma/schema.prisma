@@ -12,7 +12,7 @@ model users {
   uuid           String           @unique(map: "uuid") @db.VarChar(60)
   email          String           @unique(map: "email") @db.VarChar(255)
   password       String           @db.VarChar(255)
-  avatar         String?          @db.VarChar(255)
+  avatar         String?          @db.VarChar(1000)
   permissions    String?          @db.VarChar(4000)
   first_name     String           @db.VarChar(255)
   last_name      String           @db.VarChar(255)
@@ -27,13 +27,14 @@ model users {
 }
 
 model sessions {
-  id         Int      @id @default(autoincrement())
-  user       users?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id    Int
-  start_time DateTime @default(now())
-  csrf_token String
-  is_active  Boolean
-  ip_address String
+  id           Int      @id @default(autoincrement())
+  user         users?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id      Int      @unique(map: "user_id")
+  start_time   DateTime @default(now())
+  access_token String   @db.VarChar(4000)
+  csrf_token   String
+  is_active    Boolean
+  ip_address   String
 }
 
 enum role {

@@ -128,7 +128,7 @@
                   id="role"
                   aria-label="Role select"
                   style="width: 300px"
-                  v-model="isActive"
+                  v-model="userTableData.isActive"
                 >
                   <option>true</option>
                   <option>false</option>
@@ -556,7 +556,7 @@ const {
   createUser,
   updateUser,
   deleteUser,
-  getRefreshTokens,
+  getNewTokens,
   deleteRefreshToken,
   deleteRefreshTokens,
 } = useIamAdmin();
@@ -699,17 +699,12 @@ async function updateThisUser() {
     ? selectedRole.value
     : userTableRecord.value.role;
 
-  // If we have a new selection for isActive, use that, otherwise, use the already selected isActive
-  const isActiveSelection = isActive.value
-    ? isActive.value
-    : userTableRecord.value.isActive;
-
   // Create body to send to API
   const body = {
     first_name: firstName,
     last_name: lastName,
     role: role,
-    is_active: isActiveSelection === "true" ? true : false,
+    is_active: userTableData.isActive === "true" ? true : false,
     permissions: permissions,
   };
 
@@ -770,12 +765,12 @@ async function deleteThisUser(record) {
  */
 async function getAllRefreshTokens() {
   // Attempt to get refresh tokens
-  const getRefreshTokensData = await getRefreshTokens();
+  const getNewTokensData = await getNewTokens();
 
   // If error, report error, otherwise get data
-  if (getRefreshTokensData.error)
-    refreshTokensTableError.value = getRefreshTokensData.error;
-  else refreshTokensTable.value = getRefreshTokensData.data;
+  if (getNewTokensData.error)
+    refreshTokensTableError.value = getNewTokensData.error;
+  else refreshTokensTable.value = getNewTokensData.data;
 }
 
 /**
