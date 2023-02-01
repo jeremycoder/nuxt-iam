@@ -1,19 +1,19 @@
 # INCOMPLETE
+
 # nuxt-iam - powerful authentication & authorization for Nuxt
 
-Nuxt IAM (identity and access management) adds powerful authentication and authorization to your Nuxt app to help you get up and running with authentication and authorization best practices quickly. 
+Nuxt IAM (identity and access management) adds powerful authentication and authorization to your Nuxt app to help you get up and running with authentication and authorization best practices quickly.
 
-- ✔️ user registration 
+- ✔️ user registration
 - ✔️ user login
 - ✔️ user password reset
 - ✔️ user profile
 - ✔️ user profile update
 - ✔️ user profile delete
-     
 
 https://user-images.githubusercontent.com/7818102/215188979-fe272b3f-ef3a-4b8d-9cfc-0dedd6edb911.mp4
 
-It is a full featured Nuxt 3 app. 
+It is a full featured Nuxt 3 app.
 Sample app: https://nuxt-rest-api.vercel.app/iam/
 
 To learn more about Nuxt 3, look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
@@ -35,22 +35,24 @@ Add content here...
 Add content here...
 
 ## FRONTEND
+
 Nuxt IAM is both frontend and backend. The main authentication and authorization logic takes place in the backend, and you're welcome to change anything as suits your needs. Let's talk about the frontend.
 
 ### Pages
+
 Nuxt IAM adds several pages to your apps frontend. The pages are wrappers around components. Use these pages and components as starting points for making your app great. The following routes are added to your Nuxt front end. Find them in your pages directory:
-- **iam/index**: Introductory page for Nuxt IAM 
+
+- **iam/index**: Introductory page for Nuxt IAM
 - **iam/register**: User registration page. After successful registration, you will be directed to login page
 - **iam/verifyemail**: If email verification was set to true, (see configuration section), receives email verification token and sends it to backend for verification.
-- **iam/login**: User login page. After successful login, you will be directed to iam/dashboard/index  
+- **iam/login**: User login page. After successful login, you will be directed to iam/dashboard/index
 - **iam/dashboard/index**: User dashboard.
 - **iam/dashboard/profile**: User profile. User can update their account.
 - **iam/dashboard/settings**: User settings. User can update their password and delete their account.
-- **iam/reset**: User can reset their password. Does not have to be logged in. User will receive an email with a one-time password reset token.  
-- **iam/verify**: Page that receives password reset token and sends it to backend for verification 
+- **iam/reset**: User can reset their password. Does not have to be logged in. User will receive an email with a one-time password reset token.
+- **iam/verify**: Page that receives password reset token and sends it to backend for verification
 - **iam/verifyfailed**: Displays email or password verification failure.
 - **iam/verifysuccessful**: Displays password verification success and a temporary password.
-
 
 ## Configuration
 
@@ -96,7 +98,9 @@ export default defineNuxtConfig({
 
 });
 ```
+
 ### Example .env file
+
 Your nuxt.config file links to your .env file. Here's an example of your **.env** file:
 
 ```
@@ -146,47 +150,60 @@ IAM_VERIFY_REGISTRATIONS="false"
 IAM_SENDGRID_API_KEY="12345678901234567890"
 IAM_SENDGRID_SENDER="myname@mysendgridaccount.com"
 ```
+
 ### .env Variables Explained
-#### IAM token secrets. 
+
+#### IAM token secrets.
+
 Please rotate every 2 - 4 weeks
-- **IAM_ACCESS_TOKEN_SECRET**: 
+
+- **IAM_ACCESS_TOKEN_SECRET**:
 - **IAM_REFRESH_TOKEN_SECRET**:
 - **IAM_RESET_TOKEN_SECRET**:
 - **IAM_VERIFY_TOKEN_SECRET**:
 
 #### Public Url
+
 - **IAM_PUBLIC_URL**:
 
 #### Chosen email service
+
 - **IAM_EMAILER**:
 
 #### Nodemailer-service
+
 - **IAM_NODEMAILER_SERVICE**:
 - **IAM_NODEMAILER_SERVICE_SENDER**:
 - **IAM_NODEMAILER_SERVICE_PASSWORD**:
 
 #### Nodemailer-smtp
+
 - **IAM_NODEMAILER_SMTP_HOST**:
 - **IAM_NODEMAILER_SMTP_PORT**:
 - **IAM_NODEMAILER_SMTP_SENDER**:
 - **IAM_NODEMAILER_SMTP_PASSWORD**:
 
 #### Sendgrid key and sender (email)
+
 - **IAM_SENDGRID_API_KEY**:
 - **IAM_SENDGRID_SENDER**:
 
-
 #### Client Platform
+
 - **IAM_CLIENT_PLATFORM**:
 
 #### Verify emails of registrations
+
 - **IAM_VERIFY_REGISTRATIONS**:
- 
+
 ## BACKEND
+
 Nuxt IAM has an extensive backend which adds several API endpoints and logic to enable authorization and authentication.
 
 ### Server
+
 Nuxt IAM adds the following directories to your **server/api** directory.
+
 - **iam/authn**: global authentication handler
 - **iam/refresh-tokens**: refresh tokens handler
 - **iam/users**: global users handler
@@ -200,6 +217,7 @@ Nuxt IAM adds the following directories to your **server/api** directory.
 - `browser-dev`: Use `browser-dev` if the request is coming from a browser in a development environment. Access and refresh tokens are sent in **unsecure** cookies. Use only in **development.**
 
 ### Authentication API Endpoints
+
 Nuxt IAM responds to the following endpoints sent to **api/iam/authn**. See api request and response examples for examples.
 
 - **iam/authn/register**: Register user
@@ -209,9 +227,7 @@ Nuxt IAM responds to the following endpoints sent to **api/iam/authn**. See api 
 - **iam/authn/reset**: Reset user password
 - Continue...
 
-
 The following are API routes that Nuxt IAM adds to your app.
-
 
 #### API Responses
 
@@ -344,8 +360,8 @@ const response = await $fetch("/api/iam/authn/refresh", {
     method: "POST",
     headers: {
       "client-platform": "app",
-      "access-token": "Bearer eyJhbGciOiJI....UzI1NiIs",
-      "refresh-token": "Bearer eyJhbGcesTJI....UzI1NiIs",
+      "iam-access-token": "Bearer eyJhbGciOiJI....UzI1NiIs",
+      "iam-refresh-token": "Bearer eyJhbGcesTJI....UzI1NiIs",
     },
 ```
 
@@ -541,7 +557,6 @@ For security purposes, response is always success.
 #### ADVANCED Verify password reset flow
 
 For a good example or starting point, use the provided pages for your Nuxt front end.
-
 
 ## Features
 

@@ -445,9 +445,9 @@
         </table>
       </div>
     </div>
-    <!-- Refresh Tokens -->
+    <!-- Refresh TokensSession -->
     <div class="mt-5">
-      <h3>Refresh Tokens</h3>
+      <h3>Refresh TokensSession</h3>
       <button
         type="button"
         class="btn btn-danger btn-sm mb-2 mt-2"

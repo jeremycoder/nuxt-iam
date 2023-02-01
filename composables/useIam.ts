@@ -15,7 +15,6 @@ export default function useIam() {
     verifyReset,
     verifyEmail,
     verifyEmailToken,
-    getCsrfToken,
   };
 }
 
@@ -288,22 +287,4 @@ async function verifyEmailToken(token: string): Promise<JSONResponse> {
   });
 
   return response;
-}
-
-/**
- * @desc Get user's csrf (cross-site request forgery prevention) token
-  @info Uses session id stored in user's cookies or returned in headers
- * @returns {Promise<JSONResponse>}
- */
-async function getCsrfToken(): Promise<string> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
-  const response = await $fetch("/api/iam/authn/csrf", {
-    method: "POST",
-    headers: {
-      "client-platform": clientPlatform,
-    },
-  });
-
-  return response.data.csrfToken;
 }

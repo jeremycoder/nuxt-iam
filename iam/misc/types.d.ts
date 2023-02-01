@@ -5,7 +5,7 @@ export type User = {
   uuid: string;
   email: string;
   password: string;
-  avatar?: string;
+  avatar?: string | null;
   role: "SUPER_ADMIN" | "ADMIN" | "GENERAL";
   email_verified: boolean;
   is_active: boolean;
@@ -19,10 +19,10 @@ export type JSONResponse = {
   error?: any;
 };
 
-export type Tokens = {
+export type TokensSession = {
   accessToken: string;
   refreshToken: string;
-  csrfToken?: string;
+  sid?: string;
 };
 
 export type ClientPlatforms = "app" | "browser" | "browser-dev";
@@ -61,6 +61,7 @@ export type RefreshTokens = Array<RefreshToken>;
 export type Session = {
   id: number;
   user_id: number;
+  sid: string;
   start_time: DateTime;
   access_token: string;
   csrf_token: string;

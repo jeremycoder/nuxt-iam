@@ -10,7 +10,6 @@ import {
   register,
   login,
   profile,
-  getCsrfToken,
   update,
   refresh,
   logout,
@@ -104,13 +103,6 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await logout(event);
-        }
-
-        // get user's csrf token
-        result = new route("/api/iam/authn/csrf").match(url);
-        if (result) {
-          event.context.params.fromRoute = result;
-          return await getCsrfToken(event);
         }
         break;
       case "PUT":

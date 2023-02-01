@@ -13,7 +13,7 @@ import {
 } from "./queries";
 import { getClientPlatform } from "~~/iam/middleware";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { JSONResponse, User, Tokens, Session } from "~~/iam/misc/types";
+import { JSONResponse, User, TokensSession, Session } from "~~/iam/misc/types";
 import dayjs from "dayjs";
 import {
   verifyPasswordResetToken,
@@ -66,9 +66,9 @@ export async function login(event: H3Event): Promise<JSONResponse> {
   // If error, return error
   if (errorOrPlatform instanceof H3Error) {
     // Delete tokens
-    deleteCookie(event, "access-token");
-    deleteCookie(event, "refresh-token");
-    deleteCookie(event, "csrf-token");
+    deleteCookie(event, "iam-access-token");
+    deleteCookie(event, "iam-refresh-token");
+    deleteCookie(event, "iam-sid");
 
     response.status = "fail";
     response.error = errorOrPlatform;
@@ -83,9 +83,9 @@ export async function login(event: H3Event): Promise<JSONResponse> {
   // If error, return error
   if (errorOrTokens instanceof H3Error) {
     // Delete tokens
-    deleteCookie(event, "access-token");
-    deleteCookie(event, "refresh-token");
-    deleteCookie(event, "csrf-token");
+    deleteCookie(event, "iam-access-token");
+    deleteCookie(event, "iam-refresh-token");
+    deleteCookie(event, "iam-sid");
 
     response.status = "fail";
     response.error = errorOrTokens;
@@ -93,46 +93,46 @@ export async function login(event: H3Event): Promise<JSONResponse> {
   }
 
   //Otherwise get tokens
-  const tokens = errorOrTokens as Tokens;
+  const tokens = errorOrTokens as TokensSession;
 
   // If platform is app dev/production, set tokens in header
   if (platform === "app") {
-    setHeader(event, "access-token", "Bearer " + tokens.accessToken);
-    setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
-    if (tokens.csrfToken) setHeader(event, "csrf-token", tokens.csrfToken);
+    setHeader(event, "iam-access-token", "Bearer " + tokens.accessToken);
+    setHeader(event, "iam-refresh-token", "Bearer " + tokens.refreshToken);
+    if (tokens.sid) setHeader(event, "iam-sid", tokens.sid);
   }
 
   // If platform is browser production, set tokens in secure, httpOnly cookies
   if (platform === "browser") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+    setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
       httpOnly: true,
       secure: true,
     });
 
     // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
     // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+    setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
       httpOnly: true,
       secure: true,
       expires: dayjs().add(14, "day").toDate(),
     });
 
-    // Set csrf token in cookie
-    if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
+    // Set session id in cookie
+    if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
   }
 
   // Development cookies are not secure. Use only in development
   if (platform === "browser-dev") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+    setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
       // Access tokens themselves expire in 15 mins
       expires: dayjs().add(1, "day").toDate(),
     });
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+    setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
       expires: dayjs().add(1, "day").toDate(),
     });
 
-    // Set csrf token in cookie
-    if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
+    // Set session id token in cookie
+    if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
   }
 
   // Create api result
@@ -178,47 +178,47 @@ export async function refresh(event: H3Event): Promise<JSONResponse> {
   }
 
   //Otherwise get tokens
-  const tokens = errorOrTokens as Tokens;
+  const tokens = errorOrTokens as TokensSession;
 
   // If platform is app dev/production, set tokens in header
   if (platform === "app") {
-    setHeader(event, "access-token", "Bearer " + tokens.accessToken);
-    setHeader(event, "refresh-token", "Bearer " + tokens.refreshToken);
-    if (tokens.csrfToken) setHeader(event, "csrf-token", tokens.csrfToken);
+    setHeader(event, "iam-access-token", "Bearer " + tokens.accessToken);
+    setHeader(event, "iam-refresh-token", "Bearer " + tokens.refreshToken);
+    if (tokens.sid) setHeader(event, "iam-sid", tokens.sid);
   }
 
   // If platform is browser production, set tokens in secure, httpOnly cookies
   if (platform === "browser") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+    setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
       httpOnly: true,
       secure: true,
     });
 
     // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
     // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+    setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
       httpOnly: true,
       secure: true,
       expires: dayjs().add(14, "day").toDate(),
     });
 
-    // Set csrf token
-    if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
+    // Set session id
+    if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
   }
 
   // Development cookies are not secure. Use only in development
   if (platform === "browser-dev") {
-    setCookie(event, "access-token", "Bearer " + tokens.accessToken, {
+    setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
       // Access tokens themselves expire in 15 mins
       expires: dayjs().add(1, "day").toDate(),
     });
 
-    setCookie(event, "refresh-token", "Bearer " + tokens.refreshToken, {
+    setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
       expires: dayjs().add(1, "day").toDate(),
     });
 
-    // Set csrf token
-    if (tokens.csrfToken) setCookie(event, "csrf-token", tokens.csrfToken);
+    // Set session id
+    if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
   }
 
   // If all is successful
@@ -297,86 +297,40 @@ export async function profile(event: H3Event): Promise<JSONResponse> {
 }
 
 /**
- * @desc Returns user's csrf token
- * @info expects body to contain user id
- * @param event H3 Event passed from api
- * @returns {Promise<JSONResponse>}
- */
-export async function getCsrfToken(event: H3Event): Promise<JSONResponse> {
-  const body = await readBody(event);
-  const response = {} as JSONResponse;
-  let sessionId = null;
-  let sessionOrError = null;
-
-  // Get client platform
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
-  // Client platform if not using Nuxt front end
-  const appClientPlatform = event.node.req.headers["client-platform"] as string;
-
-  // If client platform is app, get access token from headers
-  if (appClientPlatform === "app")
-    sessionId = event.node.req.headers["session-id"] as string;
-  // Otherwise, get it from cookies
-  else if (["browser", "browser-dev"].includes(clientPlatform)) {
-    sessionId = getCookie(event, "session-id") as string;
-  }
-  // If that fails, value is invalid
-  else {
-    console.log("Invalid client platform: ", clientPlatform);
-    response.error = createError({
-      statusCode: 400,
-      statusMessage:
-        "Invalid client platform. Client platform in header must be 'app', 'browser', or 'browser-dev'",
-    });
-  }
-
-  console.log("SESSION ID: " + sessionId);
-
-  // Return error if no session id provided
-  if (sessionId === null) {
-    console.log("Invalid session id");
-    response.error = createError({
-      statusCode: 400,
-      statusMessage: "No session id provided",
-    });
-  }
-
-  //Get session from db
-  if (sessionId) sessionOrError = await getSession(parseInt(sessionId));
-
-  // If error, return error
-  if (sessionOrError instanceof H3Error) {
-    console.log("Error retrieving user session");
-    response.error = createError({
-      statusCode: 500,
-      statusMessage: "Server error",
-    });
-  }
-
-  // Get session and get csrf
-  const session = sessionOrError as Session;
-  const csrf = session.csrf_token;
-
-  // Create response
-  response.status = "success";
-  response.data = {
-    csrfToken: csrf,
-  };
-
-  return response;
-}
-
-/**
  * @desc Updates and returns updated profile of authenticated user
  * @param event H3 Event passed from api
  * @returns {Promise<JSONResponse>}
  */
 export async function update(event: H3Event): Promise<JSONResponse> {
-  // TODO: Check for valid csrf token in body, if none, return error
+  const body = await readBody(event);
+  const sessionId = getCookie(event, "iam-sid");
+  const response = {} as JSONResponse;
+
+  // If missing session id, should be part of validateCsrf() or validateSession() or validateTokenSession()
+  if (!sessionId) {
+    console.log("Missing session id cookie");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 403,
+      statusMessage: "Invalid session",
+    });
+    return response;
+  }
+
+  // If csrf token is missing should be part of validateCsrf() or validateSession() or validateTokenSession()
+  if (!body.csrfToken) {
+    console.log("Missing csrf token");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 403,
+      statusMessage: "Missing/invalid csrf token",
+    });
+    return response;
+  }
+
+  // TODO: Check if provided session id, csrf token, and user match. Session should also be active
 
   const profileOrError = await updateProfile(event);
-  const response = {} as JSONResponse;
 
   if (profileOrError instanceof H3Error) {
     response.status = "fail";
@@ -436,9 +390,9 @@ export async function reset(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
 
   // Delete tokens
-  deleteCookie(event, "access-token");
-  deleteCookie(event, "refresh-token");
-  deleteCookie(event, "csrf-token");
+  deleteCookie(event, "iam-access-token");
+  deleteCookie(event, "iam-refresh-token");
+  deleteCookie(event, "iam-sid");
 
   // Send user an email to reset their password
   const errorOrReset = await resetPassword(event);
@@ -463,9 +417,9 @@ export async function verifyReset(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
 
   // Delete access and refresh tokens
-  deleteCookie(event, "access-token");
-  deleteCookie(event, "refresh-token");
-  deleteCookie(event, "csrf-token");
+  deleteCookie(event, "iam-access-token");
+  deleteCookie(event, "iam-refresh-token");
+  deleteCookie(event, "iam-sid");
 
   // Get token from body
   const body = await readBody(event);

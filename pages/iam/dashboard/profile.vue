@@ -111,7 +111,7 @@
 <script setup>
 const emit = defineEmits(["profileUpdate"]);
 
-const { updateProfile, getCsrfToken } = useIam();
+const { updateProfile } = useIam();
 const updateSuccessful = ref(false);
 let profileError = ref(null);
 
@@ -129,7 +129,7 @@ profile.firstName = attrs.profile.firstName;
 profile.lastName = attrs.profile.lastName;
 
 // Get csrf token
-const csrfToken = await getCsrfToken(attrs.profile.id);
+const csrfToken = useCookie("iam-sid");
 
 // Attempt to update user profile
 async function updateMyProfile() {

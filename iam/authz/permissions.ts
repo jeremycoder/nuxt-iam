@@ -63,10 +63,10 @@ export async function getUserFromAccessToken(
 
   // If client platform is app, get access token from headers
   if (appClientPlatform === "app")
-    accessToken = event.node.req.headers["access-token"] as string;
+    accessToken = event.node.req.headers["iam-access-token"] as string;
   // Otherwise, get it from cookies
   else if (["browser", "browser-dev"].includes(clientPlatform)) {
-    accessToken = getCookie(event, "access-token") as string;
+    accessToken = getCookie(event, "iam-access-token") as string;
   }
   // If that fails, value is invalid
   else {
@@ -124,10 +124,10 @@ export function getUserUuidFromAccessToken(event: H3Event): string | null {
 
   // If client platform is app, get access token from headers
   if (appClientPlatform === "app")
-    accessToken = event.node.req.headers["access-token"] as string;
+    accessToken = event.node.req.headers["iam-access-token"] as string;
   // Otherwise, get it from cookies
   else if (["browser", "browser-dev"].includes(clientPlatform)) {
-    accessToken = getCookie(event, "access-token") as string;
+    accessToken = getCookie(event, "iam-access-token") as string;
   }
   // If that fails, value is invalid
   else {

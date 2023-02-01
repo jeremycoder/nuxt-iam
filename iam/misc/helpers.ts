@@ -1,7 +1,7 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { User, Tokens, EmailOptions, Session } from "~~/iam/misc/types";
+import { User, TokensSession, EmailOptions, Session } from "~~/iam/misc/types";
 import { v4 as uuidv4 } from "uuid";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
@@ -272,7 +272,9 @@ export async function validateUserLogin(
  * @desc Suite of checks to validate data before issuing refresh token
  * @param event Event from Api
  */
-export async function getNewTokens(event: H3Event): Promise<H3Error | Tokens> {
+export async function getNewTokens(
+  event: H3Event
+): Promise<H3Error | TokensSession> {
   let refreshToken = null;
 
   // Get client platform
@@ -283,9 +285,9 @@ export async function getNewTokens(event: H3Event): Promise<H3Error | Tokens> {
   const platform = errorOrPlatform as string;
   if (platform === "app")
     // If browser, get token from cookies
-    refreshToken = event.node.req.headers["refresh-token"] as string;
+    refreshToken = event.node.req.headers["iam-refresh-token"] as string;
   else if (["browser", "browser-dev"].includes(platform))
-    refreshToken = getCookie(event, "refresh-token") as string;
+    refreshToken = getCookie(event, "iam-refresh-token") as string;
 
   // If no token, user is not authenticated
   if (!refreshToken) {
@@ -353,7 +355,7 @@ export async function getNewTokens(event: H3Event): Promise<H3Error | Tokens> {
   const errorOrTokens = createNewTokensFromRefresh(bearerToken[1], event);
   if (errorOrTokens instanceof H3Error) return errorOrTokens;
 
-  const tokens = (await errorOrTokens) as Tokens;
+  const tokens = (await errorOrTokens) as TokensSession;
   return tokens;
 }
 
@@ -782,7 +784,7 @@ export function verifyEmailVerificationToken(
 export async function createNewTokensFromRefresh(
   token: string,
   event: H3Event
-): Promise<Tokens | H3Error> {
+): Promise<TokensSession | H3Error> {
   const errorOrUser = await verifyRefreshToken(token);
   if (errorOrUser instanceof H3Error) return errorOrUser;
 
@@ -822,14 +824,14 @@ export async function createNewTokensFromRefresh(
     // Create new user session
     const sessionOrError = await createUserSession(user.id, accessToken, event);
 
-    // Get session and csrf token
+    // Get session and session id
     if (sessionOrError instanceof H3Error) return sessionOrError;
     const session = sessionOrError as Session;
 
     return {
       accessToken: accessToken,
       refreshToken: refreshToken,
-      csrfToken: session.csrf_token,
+      sid: session.sid,
     };
   }
 
@@ -1032,8 +1034,8 @@ export async function deactivateRefreshTokens(
  * @desc Authenticates user
  * @param event Event from Api
  */
-export async function login(event: H3Event): Promise<H3Error | Tokens> {
-  const tokens = {} as Tokens;
+export async function login(event: H3Event): Promise<H3Error | TokensSession> {
+  const tokens = {} as TokensSession;
   const body = await readBody(event);
 
   if (!body)
@@ -1097,9 +1099,9 @@ export async function login(event: H3Event): Promise<H3Error | Tokens> {
       return createError({ statusCode: 500, statusMessage: "Server error" });
     }
 
-    // Get session and csrf token
+    // Get session and session id
     const session = sessionOrTokenError as Session;
-    tokens.csrfToken = session.csrf_token;
+    tokens.sid = session.sid;
 
     return tokens;
   }
@@ -1117,9 +1119,9 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
   refreshToken = event;
 
   // Delete access and refresh cookies
-  deleteCookie(event, "access-token");
-  deleteCookie(event, "refresh-token");
-  deleteCookie(event, "csrf-token");
+  deleteCookie(event, "iam-access-token");
+  deleteCookie(event, "iam-refresh-token");
+  deleteCookie(event, "iam-sid");
 
   const body = await readBody(event);
 
@@ -1153,6 +1155,11 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
         statusMessage: "Logout failed.",
       });
     }
+
+    // Deactivate user sessions
+    const deactivateSessionsError = await deactivateUserSessions(user.id);
+    if (deactivateSessionsError instanceof H3Error)
+      return deactivateSessionsError;
   }
 
   // Not sure how to log out in app
@@ -1683,6 +1690,7 @@ export async function createUserSession(
     .create({
       data: {
         user_id: userId,
+        sid: makeUuid(),
         start_time: new Date(),
         access_token: accessToken,
         csrf_token: csrfToken,
@@ -1777,7 +1785,7 @@ export async function deactivateUserSessions(
 
   // Deactivate session
   await prisma.sessions
-    .update({
+    .updateMany({
       where: {
         user_id: userId,
       },
