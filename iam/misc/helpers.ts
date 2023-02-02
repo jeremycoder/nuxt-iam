@@ -547,6 +547,28 @@ export async function getUserByUuid(uuid: string): Promise<User | null> {
 }
 
 /**
+ * @desc Returns user by user id
+ * @param id User's id
+ */
+export async function getUserById(id: number): Promise<User | null> {
+  let user = null;
+  await prisma.users
+    .findFirst({
+      where: {
+        id: id,
+      },
+    })
+    .then(async (response) => {
+      user = response;
+    })
+    .catch(async (e) => {
+      console.error(e);
+    });
+
+  return user;
+}
+
+/**
  * @desc Updates user's last login value
  * @param email User's email
  */
@@ -1114,55 +1136,61 @@ export async function login(event: H3Event): Promise<H3Error | TokensSession> {
  * @param event Event from Api
  */
 export async function logout(event: H3Event): Promise<H3Error | void> {
-  // Attempt to get refresh tokens from cookies
-  let refreshToken = null;
-  refreshToken = event;
+  let sessionOrError = {} as H3Error | Session;
 
-  // Delete access and refresh cookies
-  deleteCookie(event, "iam-access-token");
-  deleteCookie(event, "iam-refresh-token");
-  deleteCookie(event, "iam-sid");
+  // Get session id and session
+  const sessionId = getCookie(event, "iam-sid");
+  if (sessionId) sessionOrError = await getUserSession(sessionId);
 
-  const body = await readBody(event);
-
-  if (body) {
-    const user = await getUserByEmail(body.email);
-
-    // Check if email is provided
-    if ("email" in body === false) {
-      console.log("Email not found in body for logging out");
-      return createError({
-        statusCode: 400,
-        statusMessage: "User email required",
-      });
-    }
-
-    // If email is provided but user not found
-    if (!user) {
-      console.log("User not found for logging out");
-      return createError({
-        statusCode: 500,
-        statusMessage: "Logout failed. User not found.",
-      });
-    }
-
-    // Deactivate all refresh tokens
-    const deactivateError = await deactivateRefreshTokens(user.id);
-    if (deactivateError) {
-      console.log(`Failed to deactivate user:${user.email}'s refresh tokens`);
-      return createError({
-        statusCode: 500,
-        statusMessage: "Logout failed.",
-      });
-    }
-
-    // Deactivate user sessions
-    const deactivateSessionsError = await deactivateUserSessions(user.id);
-    if (deactivateSessionsError instanceof H3Error)
-      return deactivateSessionsError;
+  // If error, log error but delete all cookies anyway
+  if (sessionOrError instanceof H3Error) {
+    console.log(
+      "Error with logout. Sessions might not be disabled. Security risk."
+    );
+    console.log("Proceeding with removing all cookies");
+    deleteCookie(event, "iam-access-token");
+    deleteCookie(event, "iam-refresh-token");
+    deleteCookie(event, "iam-sid");
   }
+  // Otherwise deactivate refresh tokens and all other user's sessions
+  else {
+    const session = sessionOrError as Session;
+    const userOrNull = await getUserById(session.user_id);
 
-  // Not sure how to log out in app
+    // If no user, log error, but delete all cookies anyway
+    if (userOrNull === null) {
+      console.log("Error with logout. User not found");
+      deleteCookie(event, "iam-access-token");
+      deleteCookie(event, "iam-refresh-token");
+      deleteCookie(event, "iam-sid");
+    } else {
+      // Otherwise get user
+      const user = userOrNull as User;
+      // Deactivate all refresh tokens
+      const deactivateError = await deactivateRefreshTokens(user.id);
+      if (deactivateError) {
+        console.log(`Failed to deactivate user:${user.email}'s refresh tokens`);
+        return createError({
+          statusCode: 500,
+          statusMessage: "Logout failed.",
+        });
+      }
+
+      // Deactivate user sessions
+      const deactivateSessionsError = await deactivateUserSessions(user.id);
+      if (deactivateSessionsError instanceof H3Error)
+        return deactivateSessionsError;
+
+      // End user session
+      let endUserSessionOrError = {} as H3Error | Session;
+      if (sessionId) endUserSessionOrError = await endUserSession(sessionId);
+
+      // If error, log error
+      if (endUserSessionOrError instanceof H3Error) {
+        console.log("Error ending user session in logout. Security risk");
+      }
+    }
+  }
 }
 
 /**
@@ -1728,20 +1756,20 @@ export async function createUserSession(
 
 /**
  * @Desc Returns session given session id
- * @param user_id User id
+ * @param sessionId Session id
  * @returns {Promise<H3Error|Session>} Returns error or the given uuid
  */
-export async function getSession(
-  sessionId: number
+export async function getUserSession(
+  sessionId: string
 ): Promise<H3Error | Session> {
   let error = null;
   let session = null;
 
   // Create session
   await prisma.sessions
-    .findFirst({
+    .findUnique({
       where: {
-        id: sessionId,
+        sid: sessionId,
       },
     })
     .then(async (result) => {
@@ -1804,6 +1832,141 @@ export async function deactivateUserSessions(
   // Check for database errors
   if (error) {
     console.log("Error deactivating user session");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If we have a session, return it
+  if (session) return session;
+
+  // Otherwise, return an error
+  console.log("We should not be getting this update user session error");
+  return createError({
+    statusCode: 500,
+    statusMessage: "Server error",
+  });
+}
+
+/**
+ * @Desc Records end time of a user session
+ * @param sessionId Session id
+ * @returns {Promise<H3Error|Session>} Returns error or the given uuid
+ */
+export async function endUserSession(
+  sessionId: string
+): Promise<H3Error | Session> {
+  let error = null;
+  let session = null;
+
+  // Deactivate session
+  await prisma.sessions
+    .update({
+      where: {
+        sid: sessionId,
+      },
+      data: {
+        end_time: new Date(),
+      },
+    })
+    .then(async (result) => {
+      session = result;
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // Check for database errors
+  if (error) {
+    console.log("Error ending user session");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If we have a session, return it
+  if (session) return session;
+
+  // Otherwise, return an error
+  console.log("We should not be getting this update user session error");
+  return createError({
+    statusCode: 500,
+    statusMessage: "Server error",
+  });
+}
+
+/**
+ * @desc Checks for valid csrf (prevention) token
+ * @param event H3 event
+ */
+export async function validateCsrfToken(
+  event: H3Event
+): Promise<H3Error | void> {
+  const body = await readBody(event);
+  const csrfToken = body.csrf_token;
+  const sessionId = getCookie(event, "iam-sid");
+
+  // If missing session id, should be part of validateCsrf() or validateSession() or validateTokenSession()
+  if (!sessionId) {
+    console.log("Missing session id cookie");
+    return createError({
+      statusCode: 403,
+      statusMessage: "Invalid session",
+    });
+  }
+
+  // If csrf token is missing should be part of validateCsrf() or validateSession() or validateTokenSession()
+  if (!csrfToken) {
+    console.log("Missing csrf token");
+    return createError({
+      statusCode: 403,
+      statusMessage: "Missing csrf token",
+    });
+  }
+
+  // Check if session and token are valid (check if a session with session)
+  const sessionOrError = await validateCsrfSessionToken(sessionId, csrfToken);
+
+  // If error, return error, otherwise session and csrftoken are good, we return nothing
+  if (sessionOrError instanceof H3Error) return sessionOrError;
+}
+
+/**
+ * @Desc Check if session and token are valid
+ * @param sessionId User session id
+ * @param csrfToken User's given csrf token
+ * @returns {Promise<H3Error|Session>} Returns error or the given uuid
+ */
+export async function validateCsrfSessionToken(
+  sessionId: string,
+  csrfToken: string
+): Promise<H3Error | Session> {
+  let error = null;
+  let session = null;
+
+  // Deactivate session
+  await prisma.sessions
+    .findFirst({
+      where: {
+        sid: sessionId,
+        csrf_token: csrfToken,
+        is_active: true,
+      },
+    })
+    .then(async (result) => {
+      session = result;
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // Check for database errors
+  if (error) {
+    console.log("Error validating user session");
     return createError({
       statusCode: 500,
       statusMessage: "Server error",

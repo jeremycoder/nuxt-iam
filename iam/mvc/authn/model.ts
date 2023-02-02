@@ -22,7 +22,8 @@ import {
   addOneTimeToken,
   getTokenPayload,
   updateEmailVerifiedTrue,
-  getSession,
+  getUserSession,
+  validateCsrfToken,
 } from "~~/iam/misc/helpers";
 
 /**
@@ -58,7 +59,6 @@ export async function register(event: H3Event): Promise<JSONResponse> {
  */
 export async function login(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
-  let sessionId = null;
 
   // Check client platform first
   const errorOrPlatform = getClientPlatform(event);
@@ -279,8 +279,9 @@ export async function isauthenticated(event: H3Event): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 export async function profile(event: H3Event): Promise<JSONResponse> {
-  const profileOrError = await getProfile(event);
   const response = {} as JSONResponse;
+  let sessionOrError = {} as Session | H3Error;
+  const profileOrError = await getProfile(event);
 
   if (profileOrError instanceof H3Error) {
     response.status = "fail";
@@ -290,6 +291,26 @@ export async function profile(event: H3Event): Promise<JSONResponse> {
 
   const profile = profileOrError as User;
 
+  // Get csrf token from using session id token
+
+  const sessionId = getCookie(event, "iam-sid");
+  if (sessionId) sessionOrError = await getUserSession(sessionId);
+
+  // If error, return error
+  if (sessionOrError instanceof H3Error) {
+    console.log("Error getting user session");
+    response.status = "fail";
+    response.error = response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // Otherwise get session and csrf token
+  const session = sessionOrError as Session;
+  profile.csrf_token = session.csrf_token;
+
+  // Return response
   response.status = "success";
   response.data = profile;
 
@@ -302,33 +323,20 @@ export async function profile(event: H3Event): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 export async function update(event: H3Event): Promise<JSONResponse> {
-  const body = await readBody(event);
-  const sessionId = getCookie(event, "iam-sid");
   const response = {} as JSONResponse;
 
-  // If missing session id, should be part of validateCsrf() or validateSession() or validateTokenSession()
-  if (!sessionId) {
-    console.log("Missing session id cookie");
+  // Check if csrf token is valid
+  const csrfTokenError = await validateCsrfToken(event);
+
+  if (csrfTokenError instanceof H3Error) {
+    console.log("Csrf token error");
     response.status = "fail";
     response.error = createError({
       statusCode: 403,
-      statusMessage: "Invalid session",
+      statusMessage: "Missing or invalid csrf token",
     });
     return response;
   }
-
-  // If csrf token is missing should be part of validateCsrf() or validateSession() or validateTokenSession()
-  if (!body.csrfToken) {
-    console.log("Missing csrf token");
-    response.status = "fail";
-    response.error = createError({
-      statusCode: 403,
-      statusMessage: "Missing/invalid csrf token",
-    });
-    return response;
-  }
-
-  // TODO: Check if provided session id, csrf token, and user match. Session should also be active
 
   const profileOrError = await updateProfile(event);
 

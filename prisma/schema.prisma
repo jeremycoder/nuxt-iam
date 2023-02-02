@@ -27,13 +27,14 @@ model users {
 }
 
 model sessions {
-  id           Int      @id @default(autoincrement())
-  user         users?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id           Int       @id @default(autoincrement())
+  user         users?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id      Int
-  sid          String
-  start_time   DateTime @default(now())
-  access_token String   @db.VarChar(4000)
-  csrf_token   String   @db.VarChar(255)
+  sid          String    @unique(map: "sid")
+  start_time   DateTime  @default(now())
+  end_time     DateTime?
+  access_token String    @db.VarChar(4000)
+  csrf_token   String    @db.VarChar(255)
   is_active    Boolean
   ip_address   String
 }

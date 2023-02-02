@@ -7,6 +7,7 @@ export type User = {
   password: string;
   avatar?: string | null;
   role: "SUPER_ADMIN" | "ADMIN" | "GENERAL";
+  csrf_token?: string;
   email_verified: boolean;
   is_active: boolean;
   last_login: Date | null;
@@ -63,6 +64,7 @@ export type Session = {
   user_id: number;
   sid: string;
   start_time: DateTime;
+  end_time?: DateTime;
   access_token: string;
   csrf_token: string;
   is_active: boolean;

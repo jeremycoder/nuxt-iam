@@ -102,16 +102,14 @@ const loginForm = {
 
 // Try to log user in
 async function tryLogin() {
-  const router = useRouter();
-
   const loginResponse = await login(loginForm.email, loginForm.password);
   loginStatus.value = loginResponse.status;
   loginError.value = loginResponse.error;
   loginData.value = loginResponse.data;
   console.log("loginResponse: ", loginResponse);
 
-  // If login successful, route to dashboard page
-  if (loginStatus.value === "success") router.push("/iam/dashboard");
+  // If login successful and route to login page
+  if (loginStatus.value === "success") navigateTo("/iam/dashboard");
 }
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below

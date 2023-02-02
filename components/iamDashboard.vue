@@ -245,6 +245,7 @@ const profile = {
   email: "",
   role: "",
   avatar: "",
+  csrf_token: "",
   isActive: "",
   currentPassword: "",
   newPassword: "",
@@ -293,6 +294,7 @@ async function getMyProfile() {
     profile.lastName = data.last_name;
     profile.email = data.email;
     profile.avatar = data.avatar;
+    profile.csrfToken = data.csrf_token;
     profile.isActive = data.is_active;
     profile.role = data.role;
     profile.permissions = data.permissions;
