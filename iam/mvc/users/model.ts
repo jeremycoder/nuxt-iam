@@ -1,6 +1,7 @@
 import { H3Event, H3Error } from "h3";
 import { getAllUsers, showUser, updateUser, destroyUser } from "./queries";
-import { JSONResponse, User } from "~~/iam/misc/types";
+import { JSONResponse, User, Session } from "~~/iam/misc/types";
+import { getUserSession } from "~~/iam/misc/helpers";
 
 /**
  * @desc Shows all users
@@ -10,6 +11,7 @@ import { JSONResponse, User } from "~~/iam/misc/types";
 export async function index(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
   const errorOrUsers = await getAllUsers(event);
+  let sessionOrError = {} as Session | H3Error;
 
   // If error, return error
   if (errorOrUsers instanceof H3Error) {
@@ -18,10 +20,30 @@ export async function index(event: H3Event): Promise<JSONResponse> {
     return response;
   }
 
-  // Otherwise, return users
+  // Get csrf token from using session id token
+  const sessionId = getCookie(event, "iam-sid");
+  if (sessionId) sessionOrError = await getUserSession(sessionId);
+
+  // If error, return error
+  if (sessionOrError instanceof H3Error) {
+    console.log("Error getting user session");
+    response.status = "fail";
+    response.error = response.error = createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // Otherwise get session and csrf token
+  const session = sessionOrError as Session;
+
+  // Otherwise, return users, and add token
   const users = errorOrUsers as Array<User>;
   response.status = "success";
-  response.data = users;
+  response.data = {
+    users,
+    csrf_token: session.csrf_token,
+  };
 
   return response;
 }

@@ -130,7 +130,6 @@ profile.lastName = attrs.profile.lastName;
 
 // Csrf token should be part of profile
 const csrfToken = attrs.profile.csrfToken;
-console.log("csrfToken: ", csrfToken);
 
 // Attempt to update user profile
 async function updateMyProfile() {

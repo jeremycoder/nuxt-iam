@@ -40,6 +40,7 @@ export type UsersTableEditable = {
   first_name?: string;
   last_name?: string;
   role?: string;
+  csrf_token?: string;
 };
 
 export type NewUser = {
@@ -47,6 +48,7 @@ export type NewUser = {
   last_name: string;
   email: string;
   password: string;
+  csrf_token?: string;
 };
 
 export type RefreshToken = {

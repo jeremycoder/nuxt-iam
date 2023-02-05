@@ -125,7 +125,7 @@
                 >
                 <select
                   class="form-select form-control mb-3"
-                  id="role"
+                  id="is_active"
                   aria-label="Role select"
                   style="width: 300px"
                   v-model="userTableData.isActive"
@@ -211,6 +211,15 @@
                       : 'null'
                   "
                   disabled
+                />
+
+                <input
+                  v-if="csrfToken"
+                  type="text"
+                  class="form-control mb-3"
+                  id="csrf_token"
+                  :value="csrfToken"
+                  style="width: 300px"
                 />
               </div>
 
@@ -445,9 +454,9 @@
         </table>
       </div>
     </div>
-    <!-- Refresh TokensSession -->
+    <!-- Refresh Tokens Session -->
     <div class="mt-5">
-      <h3>Refresh TokensSession</h3>
+      <h3>Refresh Tokens Session</h3>
       <button
         type="button"
         class="btn btn-danger btn-sm mb-2 mt-2"
@@ -609,13 +618,19 @@ const refreshTokensTableDeleteError = ref(null);
 const refreshTokensTableError = ref(null);
 const refreshTokensTable = ref(null);
 
+// Csrf token
+const csrfToken = ref(null);
+
 onMounted(async () => {
   // Attempt to get users table data
   const getUsersData = await getUsers();
 
   // If error, report error, otherwise get data
   if (getUsersData.error) usersTableGetError.value = getUsersData.error;
-  else usersTable.value = getUsersData.data;
+  else {
+    usersTable.value = getUsersData.data.users;
+    csrfToken.value = getUsersData.data.csrf_token;
+  }
 
   await getAllRefreshTokens();
 });
@@ -661,6 +676,9 @@ async function createThisUser() {
     return;
   }
 
+  // Add csrf token
+  createProfile.csrf_token = csrfToken.value;
+
   // Attempt to create new user
   const { error } = await createUser(createProfile);
 
@@ -681,7 +699,8 @@ async function createThisUser() {
   }
 
   // Otherwise update users table
-  usersTable.value = getUsersResult.data;
+  usersTable.value = getUsersResult.data.users;
+
   createUserSuccessful.value = true;
 }
 
@@ -706,6 +725,7 @@ async function updateThisUser() {
     role: role,
     is_active: userTableData.isActive === "true" ? true : false,
     permissions: permissions,
+    csrf_token: csrfToken.value,
   };
 
   // Update user
@@ -730,7 +750,7 @@ async function updateThisUser() {
   }
 
   // Otherwise update users table
-  usersTable.value = getUsersResult.data;
+  usersTable.value = getUsersResult.data.users;
   editUserSuccessful.value = true;
 }
 

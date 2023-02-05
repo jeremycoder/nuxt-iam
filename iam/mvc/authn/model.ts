@@ -292,7 +292,6 @@ export async function profile(event: H3Event): Promise<JSONResponse> {
   const profile = profileOrError as User;
 
   // Get csrf token from using session id token
-
   const sessionId = getCookie(event, "iam-sid");
   if (sessionId) sessionOrError = await getUserSession(sessionId);
 

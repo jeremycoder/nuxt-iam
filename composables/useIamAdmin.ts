@@ -60,8 +60,6 @@ async function updateUser(
 ): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
-  console.log("Values: ", values);
-
   const response = await $fetch(`/api/iam/users/${uuid}`, {
     method: "PUT",
     headers: {
