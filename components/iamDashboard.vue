@@ -110,10 +110,6 @@
                 </ul>
               </div>
 
-              <button class="btn btn-large" @click="getMyProfile">
-                Get my profile
-              </button>
-
               <!-- Menu toggler -->
               <button
                 class="navbar-toggler"
@@ -306,6 +302,7 @@ async function getMyProfile() {
     // Check email verification status
     emailIsVerified.value = data.email_verified;
     showProfile.value = true;
+    console.log("Got my profile");
   }
 }
 

@@ -24,6 +24,7 @@ import {
   updateEmailVerifiedTrue,
   getUserSession,
   validateCsrfToken,
+  getUserByEmail,
 } from "~~/iam/misc/helpers";
 
 /**
@@ -142,6 +143,130 @@ export async function login(event: H3Event): Promise<JSONResponse> {
   response.status = "success";
   response.data = {
     email: body.email,
+  };
+  return response;
+}
+
+/**
+ * @desc Register / login user into database after user authenticates with Google
+ * @param event H3 Event passed from api
+ * @returns {Promise<JSONResponse>} Object mentioning success or failure of authenticating user or error
+ */
+export async function loginWithGoogle(event: H3Event): Promise<JSONResponse> {
+  const response = {} as JSONResponse;
+  const body = await readBody(event);
+  let googleUserOrNull = null;
+
+  // Check client platform first
+  const errorOrPlatform = getClientPlatform(event);
+
+  // If error, return error
+  if (errorOrPlatform instanceof H3Error) {
+    // Delete tokens
+    deleteCookie(event, "iam-access-token");
+    deleteCookie(event, "iam-refresh-token");
+    deleteCookie(event, "iam-sid");
+
+    response.status = "fail";
+    response.error = errorOrPlatform;
+    return response;
+  }
+
+  // Otherwise get platform
+  const platform = errorOrPlatform as string;
+
+  // Receive token from Google and get payload
+  const googleToken = body.token;
+  googleUserOrNull = jwt.decode(googleToken);
+
+  // If error
+  if (!googleUserOrNull) {
+    console.log("Failed to decode Google token");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 401,
+      statusMessage: "Google Login Error",
+    });
+    return response;
+  }
+
+  // Get Google user payload
+  const googleUser = googleUserOrNull as jwt.JwtPayload;
+
+  // If user does not exist, create user
+  if (!(await getUserByEmail(googleUser.email))) {
+    // We need to get google user sub, and make it as user id
+  }
+  // Check if user exists in system
+  // If not, add user. What password? If Google user, no password needed?
+
+  // If user already exists, allow login without password
+
+  // const errorOrTokens = await loginUser(event);
+
+  // // If error, return error
+  // if (errorOrTokens instanceof H3Error) {
+  //   // Delete tokens
+  //   deleteCookie(event, "iam-access-token");
+  //   deleteCookie(event, "iam-refresh-token");
+  //   deleteCookie(event, "iam-sid");
+
+  //   response.status = "fail";
+  //   response.error = errorOrTokens;
+  //   return response;
+  // }
+
+  // //Otherwise get tokens
+  // const tokens = errorOrTokens as TokensSession;
+
+  // // If platform is app dev/production, set tokens in header
+  // if (platform === "app") {
+  //   setHeader(event, "iam-access-token", "Bearer " + tokens.accessToken);
+  //   setHeader(event, "iam-refresh-token", "Bearer " + tokens.refreshToken);
+  //   if (tokens.sid) setHeader(event, "iam-sid", tokens.sid);
+  // }
+
+  // // If platform is browser production, set tokens in secure, httpOnly cookies
+  // if (platform === "browser") {
+  //   setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
+  //     httpOnly: true,
+  //     secure: true,
+  //   });
+
+  //   // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
+  //   // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
+  //   setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
+  //     httpOnly: true,
+  //     secure: true,
+  //     expires: dayjs().add(14, "day").toDate(),
+  //   });
+
+  //   // Set session id in cookie
+  //   if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
+  // }
+
+  // // Development cookies are not secure. Use only in development
+  // if (platform === "browser-dev") {
+  //   setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
+  //     // Access tokens themselves expire in 15 mins
+  //     expires: dayjs().add(1, "day").toDate(),
+  //   });
+  //   setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
+  //     expires: dayjs().add(1, "day").toDate(),
+  //   });
+
+  //   // Set session id token in cookie
+  //   if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
+  // }
+
+  // Create api result
+
+  // If all is successful
+  response.status = "success";
+  response.data = {
+    email: body.email,
+    token: body.token,
+    googleUser,
   };
   return response;
 }

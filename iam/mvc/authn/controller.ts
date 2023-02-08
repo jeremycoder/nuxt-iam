@@ -9,6 +9,7 @@ import { H3Error } from "h3";
 import {
   register,
   login,
+  loginWithGoogle,
   profile,
   update,
   refresh,
@@ -61,6 +62,13 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
           return await login(event);
+        }
+
+        // log into database with Google
+        result = new route("/api/iam/authn/login-google").match(url);
+        if (result) {
+          event.context.params.fromRoute = result;
+          return await loginWithGoogle(event);
         }
 
         // refresh jwt tokens

@@ -16,7 +16,7 @@ model users {
   permissions    String?          @db.VarChar(4000)
   first_name     String           @db.VarChar(255)
   last_name      String           @db.VarChar(255)
-  role           role             @default(GENERAL)
+  role           Role             @default(GENERAL)
   email_verified Boolean          @default(false)
   is_active      Boolean          @default(true)
   last_login     DateTime?        @db.DateTime(0)
@@ -24,6 +24,15 @@ model users {
   deleted_at     DateTime?        @db.DateTime(0)
   refresh_tokens refresh_tokens[]
   sessions       sessions[]
+  provider_users provider_users[]
+}
+
+model provider_users {
+  id               Int      @id @default(autoincrement())
+  provider         Provider
+  provider_user_id String
+  user             users?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id          Int
 }
 
 model sessions {
@@ -39,10 +48,14 @@ model sessions {
   ip_address   String
 }
 
-enum role {
+enum Role {
   SUPER_ADMIN
   ADMIN
   GENERAL
+}
+
+enum Provider {
+  GOOGLE
 }
 
 model refresh_tokens {

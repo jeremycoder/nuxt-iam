@@ -23,8 +23,8 @@
       <form>
         <h2 class="text-center">Log in</h2>
         <GoogleSignInButton
-          @success="handleLoginSuccess"
-          @error="handleLoginError"
+          @success="handleGoogleLoginSuccess"
+          @error="handleGoogleLoginError"
         ></GoogleSignInButton>
         <div class="or-seperator"><i>or</i></div>
         <div class="form-group">
@@ -77,18 +77,7 @@ import {
 } from "vue3-google-signin";
 
 // Get necessary functions from useIam composable
-const { login } = useIam();
-
-// handle success event
-const handleLoginSuccess = (response: CredentialResponse) => {
-  const { credential } = response;
-  console.log("Access Token", credential);
-};
-
-// handle an error event
-const handleLoginError = () => {
-  console.error("Login failed");
-};
+const { login, loginWithGoogle } = useIam();
 
 // These variables come from response from calling Nuxt IAM api
 let loginStatus = ref();
@@ -111,6 +100,28 @@ async function tryLogin() {
   // If login successful and route to login page
   if (loginStatus.value === "success") navigateTo("/iam/dashboard");
 }
+
+// Handle Google login success
+const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
+  const { credential } = response;
+  let res = null;
+  console.log("Access Token", credential);
+  if (credential) res = await loginWithGoogle(credential);
+
+  // Check for error
+  if (res?.error) {
+    loginError = res.error;
+  }
+
+  console.log("Login with Google: ", res);
+  // send token to useIam().GetProfileByGoogle
+  // if returns success, navigate to profile
+};
+
+// Handle Google error event
+const handleGoogleLoginError = () => {
+  console.error("Login failed");
+};
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({

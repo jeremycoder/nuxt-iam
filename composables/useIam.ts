@@ -9,6 +9,7 @@ export default function useIam() {
     isAuthenticated,
     refresh,
     getProfile,
+    loginWithGoogle,
     updateProfile,
     deleteAccount,
     resetPassword,
@@ -137,6 +138,27 @@ async function logout(): Promise<JSONResponse> {
     method: "POST",
     headers: {
       "client-platform": clientPlatform,
+    },
+  });
+
+  return response;
+}
+
+/**
+ * @desc Receives user token from Google login, and signs user
+ * @param token Access token received from Google after login
+ * @returns {Promise<JSONResponse>}
+ */
+async function loginWithGoogle(token: string): Promise<JSONResponse> {
+  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+
+  const response = await $fetch("/api/iam/authn/login-google", {
+    method: "POST",
+    headers: {
+      "client-platform": clientPlatform,
+    },
+    body: {
+      token: token,
     },
   });
 
