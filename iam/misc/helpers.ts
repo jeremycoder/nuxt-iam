@@ -19,6 +19,7 @@ import {
   emailWithSendgrid,
 } from "./email";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 
 /**
  * @desc Returns a random string of 32 characters in hexadecimal
@@ -2115,6 +2116,7 @@ export async function createGoogleUser(
           first_name: payload.given_name,
           last_name: payload.family_name,
           uuid: makeUuid(),
+          avatar: payload.picture,
           email: payload.email,
           password: hashedPassword,
         },
@@ -2251,4 +2253,39 @@ export async function getTokensAfterGoogleLogin(
   tokens.sid = session.sid;
 
   return tokens;
+}
+
+/**
+ * @Desc Verifies Google access token after sign in
+ * @param token Google access token
+ * @info Code obtained from https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
+ * @returns { H3Error|jwt.JwtPayload } Returns error or the given uuid
+ */
+export async function verifyGoogleToken(
+  token: string
+): Promise<H3Error | jwt.JwtPayload> {
+  let tokenPayload = null;
+
+  const clientId = useRuntimeConfig().iamGoogleClientId;
+  const client = new OAuth2Client();
+  async function verify() {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
+      // Or, if multiple clients access the backend:
+      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+    });
+    tokenPayload = ticket.getPayload();
+
+    // if (payload) tokenPayload = payload["sub"];
+    // If request specified a G Suite domain:
+    // const domain = payload['hd'];
+  }
+  await verify().catch(console.error);
+
+  if (tokenPayload) return tokenPayload;
+  else {
+    console.log("Error verifying Google access token");
+    return createError({ statusCode: 401, statusMessage: "Unauthoerized" });
+  }
 }

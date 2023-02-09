@@ -22,10 +22,12 @@
       </div>
       <form>
         <h2 class="text-center">Log in</h2>
-        <GoogleSignInButton
-          @success="handleGoogleLoginSuccess"
-          @error="handleGoogleLoginError"
-        ></GoogleSignInButton>
+        <div class="form-group">
+          <GoogleSignInButton
+            @success="handleGoogleLoginSuccess"
+            @error="handleGoogleLoginError"
+          ></GoogleSignInButton>
+        </div>
         <div class="or-seperator"><i>or</i></div>
         <div class="form-group">
           <input
@@ -95,7 +97,6 @@ async function tryLogin() {
   loginStatus.value = loginResponse.status;
   loginError.value = loginResponse.error;
   loginData.value = loginResponse.data;
-  console.log("loginResponse: ", loginResponse);
 
   // If login successful and route to login page
   if (loginStatus.value === "success") navigateTo("/iam/dashboard");
@@ -105,7 +106,6 @@ async function tryLogin() {
 const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
   const { credential } = response;
   let res = null;
-  console.log("Access Token", credential);
   if (credential) res = await loginWithGoogle(credential);
 
   // Check for error

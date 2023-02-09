@@ -24,9 +24,9 @@ import {
   updateEmailVerifiedTrue,
   getUserSession,
   validateCsrfToken,
-  getUserByEmail,
   createGoogleUser,
   getTokensAfterGoogleLogin,
+  verifyGoogleToken,
 } from "~~/iam/misc/helpers";
 
 /**
@@ -179,30 +179,11 @@ export async function loginWithGoogle(event: H3Event): Promise<JSONResponse> {
 
   // Receive token from Google and get payload
   const googleToken = body.token;
-  googleUserOrNull = jwt.decode(googleToken);
-
-  // const clientId = useRuntimeConfig().iamGoogleClientId;
-  // console.log("CLIENT_ID: ", clientId);
-  // const client = new OAuth2Client();
-  // async function verify() {
-  //   const ticket = await client.verifyIdToken({
-  //     idToken: googleToken,
-  //     audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
-  //     // Or, if multiple clients access the backend:
-  //     //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-  //   });
-  //   const payload = ticket.getPayload();
-  //   let userid = null;
-
-  //   if (payload) userid = payload["sub"];
-  //   // If request specified a G Suite domain:
-  //   // const domain = payload['hd'];
-  // }
-  // verify().catch(console.error);
+  const googleUserOrError = await verifyGoogleToken(googleToken);
 
   // If error
-  if (!googleUserOrNull) {
-    console.log("Failed to decode Google token");
+  if (googleUserOrError instanceof H3Error) {
+    console.log("Could not verify Google token");
     response.status = "fail";
     response.error = createError({
       statusCode: 401,
@@ -212,7 +193,7 @@ export async function loginWithGoogle(event: H3Event): Promise<JSONResponse> {
   }
 
   // Get Google user payload
-  const googleUser = googleUserOrNull as jwt.JwtPayload;
+  const googleUser = googleUserOrError as jwt.JwtPayload;
 
   // If user does not exist, create user
   const userOrNull = await createGoogleUser(googleUser);

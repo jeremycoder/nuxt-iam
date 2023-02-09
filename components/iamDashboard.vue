@@ -302,7 +302,6 @@ async function getMyProfile() {
     // Check email verification status
     emailIsVerified.value = data.email_verified;
     showProfile.value = true;
-    console.log("Got my profile");
   }
 }
 

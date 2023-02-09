@@ -33,7 +33,7 @@
       @click="updateSuccessful = false"
     ></button>
   </div>
-  <form>
+  <form class="mb-5">
     <div class="mb-3">
       <label for="uuid" class="form-label">Uuid</label>
       <input
