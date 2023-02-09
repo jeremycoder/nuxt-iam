@@ -1,7 +1,13 @@
 // Helper functions for
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
-import { User, TokensSession, EmailOptions, Session } from "~~/iam/misc/types";
+import {
+  User,
+  TokensSession,
+  EmailOptions,
+  Session,
+  ProviderUser,
+} from "~~/iam/misc/types";
 import { v4 as uuidv4 } from "uuid";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Event, H3Error } from "h3";
@@ -1074,7 +1080,7 @@ export async function login(event: H3Event): Promise<H3Error | TokensSession> {
 
   if (await verifyPassword(user.password, body.password)) {
     // Update last login time
-    updateLastLogin(user.email);
+    await updateLastLogin(user.email);
 
     const publicUser = {
       uuid: user.uuid,
@@ -1701,7 +1707,7 @@ export async function createUserSession(
     });
   }
 
-  // If event notn provided
+  // If event not provided
   if (!event) {
     console.log("Event not provided for create session");
     return createError({
@@ -1982,4 +1988,267 @@ export async function validateCsrfSessionToken(
     statusCode: 500,
     statusMessage: "Server error",
   });
+}
+
+/**
+ * @Desc Check if session and token are valid
+ * @param payload Payload from Google access token
+ * @returns {Promise<H3Error|User>} Returns error or the given uuid
+ */
+export async function createGoogleUser(
+  payload: jwt.JwtPayload
+): Promise<H3Error | User> {
+  let error = null;
+  let providerUser = null;
+  let user = null;
+
+  // Check if token is Google token (simple check)
+  if (!payload.aud?.includes("googleusercontent")) {
+    console.log("Error creating Google user: token not a Google token");
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+
+  // Check if payload subject exists
+  if (!payload.sub) {
+    console.log("Missing payload subject from Google token payload");
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+
+  // Check if Google user exists (payload.sub is unique Google user id)
+  await prisma.provider_users
+    .findFirst({
+      where: {
+        provider_user_id: payload.sub,
+      },
+    })
+    .then(async (result) => {
+      providerUser = result;
+    })
+    .catch(async (e) => {
+      console.error(e);
+      error = e;
+    });
+
+  // Check for error
+  if (error) {
+    console.log("Error checking if Google user exists");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If provider user exists, get user using user_id
+  if (providerUser) {
+    await prisma.users
+      .findFirst({
+        where: {
+          id: providerUser.user_id,
+        },
+      })
+      .then(async (result) => {
+        user = result;
+      })
+      .catch(async (e) => {
+        console.log("Provider user error");
+        console.error(e);
+        error = e;
+      });
+  }
+
+  // Check for error
+  if (error) {
+    console.log("Error getting already created Google user");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If user exists, return user
+  if (user) return user;
+
+  // Generate secure password consistent with password policy
+  const password = passwordGenerator.generate({
+    length: 20,
+    numbers: true,
+    symbols: true,
+    strict: true,
+  });
+
+  // Check if password passes password policy
+  const isValidPassword = validatePassword(password);
+  if (!isValidPassword) {
+    console.log("Failed to generate valid password");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // Hash password
+  const errorOrHashedPassword = await hashPassword(password);
+  if (errorOrHashedPassword instanceof H3Error) {
+    console.log("Error hashing password");
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  const hashedPassword = errorOrHashedPassword as string;
+
+  // check if user exists
+  user = await getUserByEmail(payload.email);
+
+  // If no user, create user
+  if (!user) {
+    await prisma.users
+      .create({
+        data: {
+          first_name: payload.given_name,
+          last_name: payload.family_name,
+          uuid: makeUuid(),
+          email: payload.email,
+          password: hashedPassword,
+        },
+      })
+      .then(async (response) => {
+        user = response;
+      })
+      .catch(async (e) => {
+        console.error(e);
+        error = e;
+      });
+
+    // Check for error
+    if (error) {
+      console.log("Error creating user after Google login");
+      return createError({
+        statusCode: 500,
+        statusMessage: "Server error",
+      });
+    }
+  }
+
+  // Get user
+  let verifiedUser = {} as User;
+  if (user) verifiedUser = user as User;
+
+  // Create provider user
+  if (user) {
+    await prisma.provider_users
+      .create({
+        data: {
+          provider: "GOOGLE",
+          provider_user_id: payload.sub,
+          user_id: verifiedUser.id,
+        },
+      })
+      .then(async (result) => {
+        providerUser = result;
+      })
+      .catch(async (e) => {
+        console.log("Error creating provider user");
+        console.error(e);
+        error = e;
+      });
+  }
+
+  if (error) {
+    return createError({
+      statusCode: 500,
+      statusMessage: "Server error",
+    });
+  }
+
+  // If we have the user, return the user
+  if (verifiedUser) return verifiedUser;
+
+  // Otherwise, return an error
+  console.log("We should not be getting this create Google user error");
+  return createError({
+    statusCode: 500,
+    statusMessage: "Server error",
+  });
+}
+
+/**
+ * @Desc Get tokens after Google login
+ * @param user Get Google
+ * @param event H3 Event
+ * @returns {Promise<H3Error|User>} Returns error or the given uuid
+ */
+export async function getTokensAfterGoogleLogin(
+  user: User,
+  event: H3Event
+): Promise<H3Error | TokensSession> {
+  const tokens = {} as TokensSession;
+
+  if (user === null) {
+    return createError({
+      statusCode: 401,
+      statusMessage: "Invalid login. User not found.",
+    });
+  }
+
+  // Update last login time
+  await updateLastLogin(user.email);
+
+  const publicUser = {
+    uuid: user.uuid,
+    email: user.email,
+  };
+
+  // Create access token
+  const accessToken = jwt.sign(publicUser, config.iamAccessTokenSecret, {
+    expiresIn: "15m",
+    issuer: "NuxtIam",
+    jwtid: makeUuid(),
+  });
+
+  // Create refresh token
+  const tokenId = makeUuid();
+  const refreshToken = jwt.sign(publicUser, config.iamRefreshTokenSecret, {
+    expiresIn: "14d",
+    issuer: "NuxtIam",
+    jwtid: tokenId,
+  });
+
+  // Deactivate any other tokens
+  const deactivateTokenError = await deactivateRefreshTokens(user.id);
+  if (deactivateTokenError) return deactivateTokenError;
+
+  // Store tokens
+  const storeTokenError = await _storeRefreshToken(tokenId, user.id);
+  if (storeTokenError) return storeTokenError;
+
+  // Assign tokens
+  tokens.accessToken = accessToken;
+  tokens.refreshToken = refreshToken;
+
+  // Create user session, if error, return error
+  const sessionOrTokenError = await createUserSession(
+    user.id,
+    accessToken,
+    event
+  );
+
+  // If session error, return error
+  if (sessionOrTokenError instanceof H3Error) {
+    console.log("Trouble creating session");
+    return createError({ statusCode: 500, statusMessage: "Server error" });
+  }
+
+  // Get session and session id
+  const session = sessionOrTokenError as Session;
+  tokens.sid = session.sid;
+
+  return tokens;
 }

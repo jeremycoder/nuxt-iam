@@ -25,6 +25,8 @@ import {
   getUserSession,
   validateCsrfToken,
   getUserByEmail,
+  createGoogleUser,
+  getTokensAfterGoogleLogin,
 } from "~~/iam/misc/helpers";
 
 /**
@@ -179,6 +181,25 @@ export async function loginWithGoogle(event: H3Event): Promise<JSONResponse> {
   const googleToken = body.token;
   googleUserOrNull = jwt.decode(googleToken);
 
+  // const clientId = useRuntimeConfig().iamGoogleClientId;
+  // console.log("CLIENT_ID: ", clientId);
+  // const client = new OAuth2Client();
+  // async function verify() {
+  //   const ticket = await client.verifyIdToken({
+  //     idToken: googleToken,
+  //     audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
+  //     // Or, if multiple clients access the backend:
+  //     //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+  //   });
+  //   const payload = ticket.getPayload();
+  //   let userid = null;
+
+  //   if (payload) userid = payload["sub"];
+  //   // If request specified a G Suite domain:
+  //   // const domain = payload['hd'];
+  // }
+  // verify().catch(console.error);
+
   // If error
   if (!googleUserOrNull) {
     console.log("Failed to decode Google token");
@@ -194,70 +215,77 @@ export async function loginWithGoogle(event: H3Event): Promise<JSONResponse> {
   const googleUser = googleUserOrNull as jwt.JwtPayload;
 
   // If user does not exist, create user
-  if (!(await getUserByEmail(googleUser.email))) {
-    // We need to get google user sub, and make it as user id
+  const userOrNull = await createGoogleUser(googleUser);
+
+  // Check for error
+  if (userOrNull === null) {
+    console.log("Error getting user after Google login");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 401,
+      statusMessage: "Google Login Error",
+    });
+    return response;
   }
-  // Check if user exists in system
-  // If not, add user. What password? If Google user, no password needed?
 
-  // If user already exists, allow login without password
+  // Get user and tokens
+  const user = userOrNull as User;
+  const errorOrTokens = await getTokensAfterGoogleLogin(user, event);
 
-  // const errorOrTokens = await loginUser(event);
+  // If error, return error
+  if (errorOrTokens instanceof H3Error) {
+    // Delete tokens
+    deleteCookie(event, "iam-access-token");
+    deleteCookie(event, "iam-refresh-token");
+    deleteCookie(event, "iam-sid");
 
-  // // If error, return error
-  // if (errorOrTokens instanceof H3Error) {
-  //   // Delete tokens
-  //   deleteCookie(event, "iam-access-token");
-  //   deleteCookie(event, "iam-refresh-token");
-  //   deleteCookie(event, "iam-sid");
+    response.status = "fail";
+    response.error = errorOrTokens;
+    return response;
+  }
 
-  //   response.status = "fail";
-  //   response.error = errorOrTokens;
-  //   return response;
-  // }
+  //Otherwise get tokens
+  const tokens = errorOrTokens as TokensSession;
 
-  // //Otherwise get tokens
-  // const tokens = errorOrTokens as TokensSession;
+  // If platform is app dev/production, set tokens in header
+  if (platform === "app") {
+    setHeader(event, "iam-access-token", "Bearer " + tokens.accessToken);
+    setHeader(event, "iam-refresh-token", "Bearer " + tokens.refreshToken);
+    if (tokens.sid) setHeader(event, "iam-sid", tokens.sid);
+  }
 
-  // // If platform is app dev/production, set tokens in header
-  // if (platform === "app") {
-  //   setHeader(event, "iam-access-token", "Bearer " + tokens.accessToken);
-  //   setHeader(event, "iam-refresh-token", "Bearer " + tokens.refreshToken);
-  //   if (tokens.sid) setHeader(event, "iam-sid", tokens.sid);
-  // }
+  // If platform is browser production, set tokens in secure, httpOnly cookies
+  if (platform === "browser") {
+    setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
+      httpOnly: true,
+      secure: true,
+    });
 
-  // // If platform is browser production, set tokens in secure, httpOnly cookies
-  // if (platform === "browser") {
-  //   setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //   });
+    // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
+    // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
+    setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      expires: dayjs().add(14, "day").toDate(),
+    });
 
-  //   // Cookies containing refresh tokens expire in 14 days, unless refreshed and new tokens obtained
-  //   // Refresh tokens themselves expire in 14 days, unless new tokens are obtained
-  //   setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //     expires: dayjs().add(14, "day").toDate(),
-  //   });
+    // Set session id in cookie
+    if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
+  }
 
-  //   // Set session id in cookie
-  //   if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
-  // }
+  // Development cookies are not secure. Use only in development
+  if (platform === "browser-dev") {
+    setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
+      // Access tokens themselves expire in 15 mins
+      expires: dayjs().add(1, "day").toDate(),
+    });
+    setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
+      expires: dayjs().add(1, "day").toDate(),
+    });
 
-  // // Development cookies are not secure. Use only in development
-  // if (platform === "browser-dev") {
-  //   setCookie(event, "iam-access-token", "Bearer " + tokens.accessToken, {
-  //     // Access tokens themselves expire in 15 mins
-  //     expires: dayjs().add(1, "day").toDate(),
-  //   });
-  //   setCookie(event, "iam-refresh-token", "Bearer " + tokens.refreshToken, {
-  //     expires: dayjs().add(1, "day").toDate(),
-  //   });
-
-  //   // Set session id token in cookie
-  //   if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
-  // }
+    // Set session id token in cookie
+    if (tokens.sid) setCookie(event, "iam-sid", tokens.sid);
+  }
 
   // Create api result
 
@@ -265,8 +293,6 @@ export async function loginWithGoogle(event: H3Event): Promise<JSONResponse> {
   response.status = "success";
   response.data = {
     email: body.email,
-    token: body.token,
-    googleUser,
   };
   return response;
 }

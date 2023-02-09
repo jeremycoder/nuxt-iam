@@ -30,7 +30,7 @@ model users {
 model provider_users {
   id               Int      @id @default(autoincrement())
   provider         Provider
-  provider_user_id String
+  provider_user_id String   @unique(map: "provider_user_id")
   user             users?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id          Int
 }

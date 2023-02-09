@@ -28,6 +28,9 @@ export default defineNuxtConfig({
     iamSendGridApiKey: process.env.IAM_SENDGRID_API_KEY,
     iamSendgridSender: process.env.IAM_SENDGRID_SENDER,
 
+    // GOOGLE CLIENT ID
+    iamGoogleClientId: process.env.IAM_GOOGLE_CLIENT_ID,
+
     // Do not put secret information here
     public: {
       iamClientPlatform: process.env.IAM_CLIENT_PLATFORM,
@@ -37,8 +40,7 @@ export default defineNuxtConfig({
 
   modules: ["nuxt-vue3-google-signin"],
   googleSignIn: {
-    clientId:
-      "264332974831-9q11ieeajca9a3je42hgqk0cf3b5vj6h.apps.googleusercontent.com",
+    clientId: process.env.IAM_GOOGLE_CLIENT_ID,
   },
 
   typescript: {

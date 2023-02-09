@@ -14,6 +14,13 @@ export type User = {
   created_at: Date;
 };
 
+export type ProviderUser = {
+  id: number;
+  provider: "GOOGLE";
+  provider_user_id: string;
+  user_id: number;
+};
+
 export type JSONResponse = {
   status: "success" | "fail";
   data: any;

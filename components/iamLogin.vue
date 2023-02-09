@@ -111,11 +111,9 @@ const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
   // Check for error
   if (res?.error) {
     loginError = res.error;
+  } else {
+    navigateTo("/iam/dashboard");
   }
-
-  console.log("Login with Google: ", res);
-  // send token to useIam().GetProfileByGoogle
-  // if returns success, navigate to profile
 };
 
 // Handle Google error event
