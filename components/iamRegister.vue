@@ -9,6 +9,7 @@
       <div v-if="verifyRegistrations" class="alert alert-warning" role="alert">
         <strong>Email verification is required.</strong>
       </div>
+      <!-- Registration errors -->
       <div
         v-if="registerError"
         class="alert alert-danger alert-dismissable"
@@ -22,6 +23,21 @@
         >
           <span aria-hidden="true">&times;</span></button
         >{{ registerError.message }}
+      </div>
+      <!-- Registration success -->
+      <div
+        v-if="registerSuccess"
+        class="alert alert-success alert-dismissable"
+        role="alert"
+      >
+        <button
+          @click="registerSuccess = null"
+          type="button"
+          class="close"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span></button
+        >Registration successful
       </div>
       <form>
         <h2 class="text-center">Register</h2>
@@ -72,7 +88,7 @@
         </div>
         <div class="clearfix">
           <label class="pull-left checkbox-inline"
-            ><input type="checkbox" /> I accept the
+            ><input type="checkbox" v-model="acceptTerms" /> I accept the
             <NuxtLink to="#">Terms and Conditions</NuxtLink>
           </label>
         </div>
@@ -93,6 +109,10 @@ const verifyRegistrations =
 
 // Captures any registration errors
 let registerError = ref(null);
+let registerSuccess = ref(null);
+
+// Flag for terms and conditions
+const acceptTerms = ref(false);
 
 // Object to hold registration data
 const registerForm = {
@@ -104,6 +124,14 @@ const registerForm = {
 
 // Try to register user
 async function tryRegister() {
+  // Check terms and conditions checkbox
+  if (!acceptTerms.value) {
+    registerError.value = {
+      message: "You must accept terms and conditions",
+    };
+    return;
+  }
+
   const { status, error } = await register(
     registerForm.firstName,
     registerForm.lastName,
@@ -117,10 +145,12 @@ async function tryRegister() {
     registerError.value = error;
   }
 
-  // If successful, route to login page
+  // If successful, show success message, wait, then navigate to login page
   if (status === "success") {
-    const router = useRouter();
-    router.push("/iam/login");
+    registerSuccess.value = true;
+    setTimeout(() => {
+      navigateTo("/iam/login");
+    }, 1500);
   }
 }
 

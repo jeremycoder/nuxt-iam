@@ -57,14 +57,12 @@
           </button>
         </div>
         <div class="clearfix">
+          <NuxtLink to="/iam/register">Create an Account</NuxtLink>
           <NuxtLink to="/iam/reset" class="pull-right"
             >Forgot Password?</NuxtLink
           >
         </div>
       </form>
-      <p class="text-center">
-        <NuxtLink to="/iam/register">Create an Account</NuxtLink>
-      </p>
     </div>
   </div>
 </template>
