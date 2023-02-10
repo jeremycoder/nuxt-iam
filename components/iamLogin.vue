@@ -57,9 +57,6 @@
           </button>
         </div>
         <div class="clearfix">
-          <label class="pull-left checkbox-inline"
-            ><input type="checkbox" /> Remember me</label
-          >
           <NuxtLink to="/iam/reset" class="pull-right"
             >Forgot Password?</NuxtLink
           >

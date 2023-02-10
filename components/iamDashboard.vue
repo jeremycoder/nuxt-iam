@@ -59,6 +59,7 @@
                   class="d-block link-dark text-decoration-none dropdown-toggle"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
+                  @click="toggeleMenu"
                 >
                   <span v-if="profile.avatar">
                     <img
@@ -90,7 +91,10 @@
                     >{{ firstName }} {{ lastName }}</span
                   >
                 </a>
-                <ul class="dropdown-menu text-small">
+                <ul
+                  class="dropdown-menu text-small"
+                  :class="showMenu ? 'show' : ''"
+                >
                   <li>
                     <NuxtLink class="dropdown-item" to="/iam/dashboard/profile"
                       >Profile</NuxtLink
@@ -221,6 +225,7 @@ const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
 let profileError = ref(null);
+const showMenu = ref(false);
 
 let verificationEmailSent = ref(false);
 
@@ -313,6 +318,13 @@ async function verifyMyEmail(email) {
   console.log("Verifying my email: ", email);
   verifyEmail(email);
   verificationEmailSent.value = true;
+}
+
+/**
+ * @desc Toggles menu display on and off
+ */
+function toggeleMenu() {
+  showMenu.value = !showMenu.value;
 }
 
 useHead({

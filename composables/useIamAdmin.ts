@@ -73,15 +73,23 @@ async function updateUser(
 
 /**
  * @desc Delete a user
+ * @uuid User uuid
+ * @csrfToken Cross-site request forgery prevention token
  * @returns {Promise<JSONResponse>}
  */
-async function deleteUser(uuid: string): Promise<JSONResponse> {
+async function deleteUser(
+  uuid: string,
+  csrfToken: string
+): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
   const response = await $fetch(`/api/iam/users/${uuid}`, {
     method: "DELETE",
     headers: {
       "client-platform": clientPlatform,
+    },
+    body: {
+      csrf_token: csrfToken,
     },
   });
 

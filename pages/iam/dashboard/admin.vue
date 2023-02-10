@@ -688,7 +688,7 @@ async function createThisUser() {
     return;
   }
 
-  // If successful,  reget users from database to update ui
+  // If successful, reget users from database to update ui
   const getUsersResult = await getUsers();
 
   // If error, show error
@@ -768,7 +768,7 @@ async function deleteThisUser(record) {
   }
 
   // Attempt to delete User
-  const deleteUserResult = await deleteUser(record.uuid);
+  const deleteUserResult = await deleteUser(record.uuid, csrfToken.value);
 
   // If error, show error, and return
   if (deleteUserResult.error) {
@@ -776,8 +776,15 @@ async function deleteThisUser(record) {
     return;
   }
 
-  // Otherwise update users table
-  usersTable.value = deleteUserResult.data;
+  // Otherwise update users table data
+  const getUsersData = await getUsers();
+
+  // If error, report error, otherwise get data
+  if (getUsersData.error) usersTableGetError.value = getUsersData.error;
+  else {
+    usersTable.value = getUsersData.data.users;
+    csrfToken.value = getUsersData.data.csrf_token;
+  }
 }
 
 /**
