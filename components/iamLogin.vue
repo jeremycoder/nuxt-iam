@@ -78,7 +78,7 @@ const { login, loginWithGoogle } = useIam();
 
 // These variables come from response from calling Nuxt IAM api
 let loginStatus = ref();
-let loginError = ref(null);
+let loginError = ref(<{ message: "" } | null>null);
 let loginData = ref(null);
 
 const loginForm = {
@@ -118,7 +118,7 @@ const handleGoogleLoginError = () => {
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({
-  title: "Nuxt IAM Login Example",
+  title: "Nuxt IAM Register Example",
   link: {
     rel: "stylesheet",
     href: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",

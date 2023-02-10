@@ -276,97 +276,6 @@ export async function validateUserLogin(
 }
 
 /**
- * @desc Suite of checks to validate data before issuing refresh token
- * @param event Event from Api
- */
-export async function getNewTokens(
-  event: H3Event
-): Promise<H3Error | TokensSession> {
-  let refreshToken = null;
-
-  // Get client platform
-  const errorOrPlatform = getClientPlatform(event);
-  if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
-
-  // If app, get token from header
-  const platform = errorOrPlatform as string;
-  if (platform === "app")
-    // If browser, get token from cookies
-    refreshToken = event.node.req.headers["iam-refresh-token"] as string;
-  else if (["browser", "browser-dev"].includes(platform))
-    refreshToken = getCookie(event, "iam-refresh-token") as string;
-
-  // If no token, user is not authenticated
-  if (!refreshToken) {
-    console.log("Error: No refresh token provided");
-    return createError({
-      statusCode: 400,
-      statusMessage: "No refresh token provided",
-    });
-  }
-
-  // Get Bearer token
-  const bearerToken = refreshToken.split(" ");
-
-  // Check for word "Bearer"
-  if (bearerToken[0] !== "Bearer") {
-    console.log("Missing word 'Bearer' in token");
-    return createError({
-      statusCode: 401,
-      statusMessage: "Unauthorized",
-    });
-  }
-
-  // Check for token
-  if (!bearerToken[1]) {
-    console.log("Missing token");
-    return createError({
-      statusCode: 401,
-      statusMessage: "Unauthorized",
-    });
-  }
-
-  // Get user from token
-  const errorOrUser = await verifyRefreshToken(bearerToken[1]);
-
-  // Check if user was retrieved from token
-  if (errorOrUser instanceof H3Error) {
-    console.log("Failed to retrieve user from token");
-    return createError({
-      statusCode: 403,
-      statusMessage: "Forbidden",
-    });
-  }
-
-  const user = errorOrUser as User;
-
-  // Check if user has email attribute
-  if (!user.email)
-    return createError({
-      statusCode: 401,
-      statusMessage: "Unauthorized",
-    });
-
-  // Check if user exists in the database
-  const userInDb = await getUserByEmail(user.email);
-
-  if (userInDb === null) {
-    console.log("User not found in database");
-    return createError({
-      statusCode: 403,
-      statusMessage: "Forbidden",
-    });
-  }
-
-  // Get new tokens
-  const errorOrTokens = createNewTokensFromRefresh(bearerToken[1], event);
-  if (errorOrTokens instanceof H3Error) return errorOrTokens;
-
-  const tokens = (await errorOrTokens) as TokensSession;
-  return tokens;
-}
-
-/**
  * @desc Checks whether the body in register post request is in correct format
  * @param body Body object passed in register post request
  */
@@ -507,6 +416,97 @@ export function validatePassword(password: string): boolean {
   if (!/\W/.test(password)) return false;
 
   return true;
+}
+
+/**
+ * @desc Suite of checks to validate data before issuing refresh token
+ * @param event Event from Api
+ */
+export async function getNewTokens(
+  event: H3Event
+): Promise<H3Error | TokensSession> {
+  let refreshToken = null;
+
+  // Get client platform
+  const errorOrPlatform = getClientPlatform(event);
+  if (errorOrPlatform instanceof H3Error) return errorOrPlatform;
+
+  // If app, get token from header
+  const platform = errorOrPlatform as string;
+  if (platform === "app")
+    // If browser, get token from cookies
+    refreshToken = event.node.req.headers["iam-refresh-token"] as string;
+  else if (["browser", "browser-dev"].includes(platform))
+    refreshToken = getCookie(event, "iam-refresh-token") as string;
+
+  // If no token, user is not authenticated
+  if (!refreshToken) {
+    console.log("Error: No refresh token provided");
+    return createError({
+      statusCode: 400,
+      statusMessage: "No refresh token provided",
+    });
+  }
+
+  // Get Bearer token
+  const bearerToken = refreshToken.split(" ");
+
+  // Check for word "Bearer"
+  if (bearerToken[0] !== "Bearer") {
+    console.log("Missing word 'Bearer' in token");
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+
+  // Check for token
+  if (!bearerToken[1]) {
+    console.log("Missing token");
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+
+  // Get user from token
+  const errorOrUser = await verifyRefreshToken(bearerToken[1]);
+
+  // Check if user was retrieved from token
+  if (errorOrUser instanceof H3Error) {
+    console.log("Failed to retrieve user from token");
+    return createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+    });
+  }
+
+  const user = errorOrUser as User;
+
+  // Check if user has email attribute
+  if (!user.email)
+    return createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+
+  // Check if user exists in the database
+  const userInDb = await getUserByEmail(user.email);
+
+  if (userInDb === null) {
+    console.log("User not found in database");
+    return createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+    });
+  }
+
+  // Get new tokens
+  const errorOrTokens = createNewTokensFromRefresh(bearerToken[1], event);
+  if (errorOrTokens instanceof H3Error) return errorOrTokens;
+
+  const tokens = (await errorOrTokens) as TokensSession;
+  return tokens;
 }
 
 /**
@@ -2000,7 +2000,7 @@ export async function createGoogleUser(
   payload: jwt.JwtPayload
 ): Promise<H3Error | User> {
   let error = null;
-  let providerUser = null;
+  let providerUser = {} as ProviderUser | null;
   let user = null;
 
   // Check if token is Google token (simple check)
