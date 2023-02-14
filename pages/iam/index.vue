@@ -8,8 +8,8 @@
           <h1 class="display-4 fw-bold lh-1">Nuxt IAM</h1>
           <p class="lead">
             Revolutionize your app's security with Nuxt's new authentication and
-            authorization module. Nuxt IAM is an identity and access management
-            module for Nuxt that allows you to secure your app with industry
+            authorization package. Nuxt IAM is an identity and access management
+            package for Nuxt that allows you to secure your app with industry
             best practices.
           </p>
           <div
