@@ -20,7 +20,7 @@ To learn more about Nuxt 3, look at the [Nuxt 3 documentation](https://nuxt.com/
 
 ## How it Works
 
-Nuxt IAM adds authentication and authorization components, pages, api routes, and logic to your Nuxt app allowing your app to have authentication and authorization logic. All the components, pages, api routes, and logic is 100% customizable so you can change things any way you want.
+Nuxt IAM adds authentication and authorization components, pages, api routes, and logic to your Nuxt app allowing your app to have authentication and authorization logic. All the components, pages, api routes, and logic are 100% customizable so you can change things any way you want.
 
 ## Getting Started
 
@@ -437,7 +437,7 @@ const response = await $fetch("/api/iam/authn/profile", {
 
 ##### Response
 
-Password is shown as `[hidden]` even though it is one-way hashed using argon 2. We just don't display the hash because the has looks quite ugly :P
+Password is shown as `[hidden]` even though it is one-way hashed using argon 2. We just don't display the hash because the hash looks quite ugly :P
 
 ```
 "status": "success",
