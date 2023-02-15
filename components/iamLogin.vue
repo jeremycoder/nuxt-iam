@@ -22,13 +22,15 @@
       </div>
       <form>
         <h2 class="text-center">Log in</h2>
-        <div class="form-group">
-          <GoogleSignInButton
-            @success="handleGoogleLoginSuccess"
-            @error="handleGoogleLoginError"
-          ></GoogleSignInButton>
+        <div v-if="allowGoogleAuth">
+          <div class="form-group">
+            <GoogleSignInButton
+              @success="handleGoogleLoginSuccess"
+              @error="handleGoogleLoginError"
+            ></GoogleSignInButton>
+          </div>
+          <div class="or-seperator"><i>or</i></div>
         </div>
-        <div class="or-seperator"><i>or</i></div>
         <div class="form-group">
           <input
             v-model="loginForm.email"
@@ -75,6 +77,7 @@ import {
 
 // Get necessary functions from useIam composable
 const { login, loginWithGoogle } = useIam();
+const allowGoogleAuth = useRuntimeConfig().public.iamAllowGoogleAuth === "true";
 
 // These variables come from response from calling Nuxt IAM api
 let loginStatus = ref();
