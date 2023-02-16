@@ -215,7 +215,10 @@ async function refresh(): Promise<JSONResponse> {
  * @desc Delete user account
  * @returns {Promise<JSONResponse>}
  */
-async function deleteAccount(uuid: string): Promise<JSONResponse> {
+async function deleteAccount(
+  uuid: string,
+  csrfToken: string
+): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
   const response = await $fetch("/api/iam/authn/delete", {
@@ -225,6 +228,7 @@ async function deleteAccount(uuid: string): Promise<JSONResponse> {
     },
     body: {
       uuid: uuid,
+      csrf_token: csrfToken,
     },
   });
 

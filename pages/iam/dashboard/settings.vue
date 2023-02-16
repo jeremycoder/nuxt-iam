@@ -88,6 +88,21 @@
           <h4 class="card-header">Account</h4>
           <div class="card-body">
             <h5 class="card-title text-danger">Delete Account</h5>
+            <!-- Profile errors notification -->
+            <div
+              v-if="deleteError"
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
+              <strong>{{ deleteError.message }}</strong>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+                @click="deleteError = null"
+              ></button>
+            </div>
             <p>
               Deleting your account is a permanent action and cannot be undone.
               If you are sure you want to delete your account, click the button
@@ -111,6 +126,7 @@
 const { updateProfile, deleteAccount } = useIam();
 const updateSuccessful = ref(false);
 let profileError = ref(null);
+let deleteError = ref(null);
 
 // Some profile values with added ones
 const profile = {
@@ -120,6 +136,7 @@ const profile = {
   currentPassword: "",
   newPassword: "",
   confirmNewPassword: "",
+  csrfToken: "",
 };
 
 // Get profile passed through attributes
@@ -127,6 +144,9 @@ const attrs = useAttrs();
 profile.uuid = attrs.profile.uuid;
 profile.firstName = attrs.profile.firstName;
 profile.lastName = attrs.profile.lastName;
+
+// Csrf token should be part of profile
+const csrfToken = attrs.profile.csrfToken;
 
 // Attempt to update user profile with password
 async function updateMyProfileWithPassword() {
@@ -154,7 +174,7 @@ async function updateMyProfileWithPassword() {
     return;
   }
 
-  const { status, data, error } = await updateProfile(
+  const { error } = await updateProfile(
     profile.uuid,
     profile.firstName,
     profile.lastName,
@@ -175,11 +195,11 @@ async function updateMyProfileWithPassword() {
 
 // Attempt to delete user account
 async function deleteMyAccount() {
-  const { status, error } = await deleteAccount(profile.uuid);
+  const { error } = await deleteAccount(profile.uuid, csrfToken);
 
   // If error, show error
   if (error) {
-    profileError.value = error;
+    deleteError.value = error;
     return;
   }
 

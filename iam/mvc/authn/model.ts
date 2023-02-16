@@ -494,6 +494,19 @@ export async function destroy(event: H3Event): Promise<JSONResponse> {
   const deleteOrError = await deleteAccount(event);
   const response = {} as JSONResponse;
 
+  // Check if csrf token is valid
+  const csrfTokenError = await validateCsrfToken(event);
+
+  if (csrfTokenError instanceof H3Error) {
+    console.log("Csrf token error");
+    response.status = "fail";
+    response.error = createError({
+      statusCode: 403,
+      statusMessage: "Missing or invalid csrf token",
+    });
+    return response;
+  }
+
   // If error in deleting user account, return error
   if (deleteOrError instanceof H3Error) {
     response.status = "fail";

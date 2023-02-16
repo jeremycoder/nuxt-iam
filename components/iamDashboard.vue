@@ -8,7 +8,7 @@
       >
         <div class="container">
           <h2>Email verification is required</h2>
-          <h4 v-if="!verificationEmailSent">
+          <div v-if="!verificationEmailSent">
             <p>Please click the button below to verify your email</p>
             <button
               class="btn btn-primary"
@@ -17,17 +17,27 @@
             >
               Send email verification
             </button>
-          </h4>
-          <h4 v-else>
+            <button
+              class="btn btn-secondary ms-2"
+              type="button"
+              @click="logMeOut()"
+            >
+              Log out
+            </button>
+          </div>
+          <div v-else>
             <p>
               Please check your email. Check your spam folder too. Click the
               link in the email to verify your email. You should receive it
               within 15 minutes.
             </p>
-          </h4>
+          </div>
         </div>
       </div>
-      <div v-if="profile && profile.isActive === false" class="container my-5">
+      <div
+        v-else-if="profile && profile.isActive === false"
+        class="container my-5"
+      >
         <div class="alert alert-danger" role="alert">
           <h3 class="alert-heading">Account is not active!</h3>
           <p>
