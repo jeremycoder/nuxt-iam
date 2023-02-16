@@ -491,7 +491,6 @@ export async function update(event: H3Event): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 export async function destroy(event: H3Event): Promise<JSONResponse> {
-  const deleteOrError = await deleteAccount(event);
   const response = {} as JSONResponse;
 
   // Check if csrf token is valid
@@ -506,6 +505,9 @@ export async function destroy(event: H3Event): Promise<JSONResponse> {
     });
     return response;
   }
+
+  // Attempt to delete account
+  const deleteOrError = await deleteAccount(event);
 
   // If error in deleting user account, return error
   if (deleteOrError instanceof H3Error) {

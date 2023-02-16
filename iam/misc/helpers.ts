@@ -1212,7 +1212,6 @@ export async function updateUserProfile(
 
   // After going through validateUserProfileUpdate, supplied values should be clean
   const body = await readBody(event);
-  console.log("body", body);
 
   // Properties that user can update in their profile
   let user = {} as User;
@@ -1849,7 +1848,7 @@ export async function deactivateUserSessions(
   if (session) return session;
 
   // Otherwise, return an error
-  console.log("We should not be getting this update user session error");
+  console.log("We should not be getting this deactivate user session error");
   return createError({
     statusCode: 500,
     statusMessage: "Server error",
@@ -1984,7 +1983,9 @@ export async function validateCsrfSessionToken(
   if (session) return session;
 
   // Otherwise, return an error
-  console.log("We should not be getting this update user session error");
+  console.log(
+    "We should not be getting this validate csrf session token error"
+  );
   return createError({
     statusCode: 500,
     statusMessage: "Server error",

@@ -1,6 +1,6 @@
 <template>
   <div v-if="isLoaded">
-    <div v-if="isLoggedIn">
+    <div v-if="isLoggedIn && profile">
       <!-- Check if email is verified -->
       <div
         v-if="verifyRegistrations && !emailIsVerified"
@@ -34,15 +34,12 @@
           </div>
         </div>
       </div>
-      <div
-        v-else-if="profile && profile.isActive === false"
-        class="container my-5"
-      >
+      <!-- Check if account is active -->
+      <div v-else-if="getProfileError" class="container my-5">
         <div class="alert alert-danger" role="alert">
-          <h3 class="alert-heading">Account is not active!</h3>
+          <h3 class="alert-heading">Get profile error</h3>
           <p>
-            Your account has been deactivated, and you cannot access it. Please
-            contact an administrator to restore it.
+            {{ getProfileError.message }}
           </p>
           <hr />
           <button type="button" class="btn btn-secondary" @click="logMeOut">
@@ -234,7 +231,7 @@ const router = useRouter();
 const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
-let profileError = ref(null);
+let getProfileError = ref(null);
 const showMenu = ref(false);
 
 let verificationEmailSent = ref(false);
@@ -256,7 +253,7 @@ const profile = {
   email: "",
   role: "",
   avatar: "",
-  csrf_token: "",
+  csrfToken: "",
   isActive: "",
   currentPassword: "",
   newPassword: "",
@@ -294,7 +291,7 @@ async function getMyProfile() {
   // If error, show error
   if (error) {
     console.log("error: ", error);
-    profileError.value = error;
+    getProfileError.value = error;
   }
 
   // If successful, data will contain profile

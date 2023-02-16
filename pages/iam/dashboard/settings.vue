@@ -174,14 +174,13 @@ async function updateMyProfileWithPassword() {
     return;
   }
 
-  const { error } = await updateProfile(
-    profile.uuid,
-    profile.firstName,
-    profile.lastName,
-    profile.currentPassword,
-    profile.newPassword,
-    profile.confirmNewPassword
-  );
+  const { error } = await updateProfile({
+    uuid: profile.uuid,
+    currentPassword: profile.currentPassword,
+    newPassword: profile.newPassword,
+    confirmNewPassword: profile.confirmNewPassword,
+    csrfToken: csrfToken,
+  });
 
   // If error, display error
   if (error) {

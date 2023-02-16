@@ -71,27 +71,9 @@ export default defineEventHandler(async (event) => {
 
       case "POST":
         // add new user to database
-        result = new route("/api/iam/users/create").match(url);
+        result = new route("/api/iam/users").match(url);
         if (result) {
           event.context.params.fromRoute = result;
-
-          // Check if csrf token is valid
-          const csrfTokenError = await validateCsrfToken(event);
-
-          if (csrfTokenError instanceof H3Error) {
-            console.log("Csrf token error");
-            response.status = "fail";
-            response.error = createError({
-              statusCode: 403,
-              statusMessage: "Missing or invalid csrf token",
-            });
-            return response;
-          }
-
-          // Permissions
-          if (!isSuperAdmin(user)) return forbiddenError;
-          if (!hasVerifiedEmail(user)) return forbiddenError;
-
           return await create(event);
         }
         break;

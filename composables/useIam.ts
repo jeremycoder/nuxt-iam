@@ -1,4 +1,4 @@
-import { JSONResponse } from "~~/iam/misc/types";
+import { JSONResponse, ProfileUpdateValues } from "~~/iam/misc/types";
 
 // Composable to make authentication tasks easier
 export default function useIam() {
@@ -82,13 +82,9 @@ async function login(email: string, password: string): Promise<JSONResponse> {
  * @desc Returns user profile if successful
  * @returns {Promise<JSONResponse>}
  */
+
 async function updateProfile(
-  uuid: string,
-  firstName: string,
-  lastName: string,
-  csrfToken: string,
-  currentPassword?: string,
-  newPassword?: string
+  values: ProfileUpdateValues
 ): Promise<JSONResponse> {
   const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
 
@@ -98,12 +94,12 @@ async function updateProfile(
       "client-platform": clientPlatform,
     },
     body: {
-      uuid: uuid,
-      first_name: firstName,
-      last_name: lastName,
-      current_password: currentPassword,
-      new_password: newPassword,
-      csrf_token: csrfToken,
+      uuid: values.uuid,
+      first_name: values.firstName,
+      last_name: values.lastName,
+      csrf_token: values.csrfToken,
+      current_password: values.currentPassword,
+      new_password: values.newPassword,
     },
   });
 

@@ -212,15 +212,6 @@
                   "
                   disabled
                 />
-
-                <input
-                  v-if="csrfToken"
-                  type="text"
-                  class="form-control mb-3"
-                  id="csrf_token"
-                  :value="csrfToken"
-                  style="width: 300px"
-                />
               </div>
 
               <button

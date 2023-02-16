@@ -150,7 +150,7 @@ async function tryRegister() {
     registerSuccess.value = true;
     setTimeout(() => {
       navigateTo("/iam/login");
-    }, 1500);
+    }, 1000);
   }
 }
 

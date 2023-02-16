@@ -81,10 +81,10 @@ export type Session = {
 };
 
 export type ProfileUpdateValues = {
-  uuid: string;
-  firstName: string;
-  lastName: string;
-  csrfToken: string;
+  uuid?: string;
+  firstName?: string;
+  lastName?: string;
+  csrfToken?: string;
   currentPassword?: string;
   newPassword?: string;
 };

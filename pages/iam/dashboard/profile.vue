@@ -139,12 +139,15 @@ async function updateMyProfile() {
   )
     return;
 
-  const { error } = await updateProfile(
-    profile.uuid,
-    profile.firstName,
-    profile.lastName,
-    csrfToken
-  );
+  // Object with updatable values
+  const values = {
+    uuid: profile.uuid,
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    csrfToken: csrfToken,
+  };
+
+  const { error } = await updateProfile(values);
 
   // If error, display error
   if (error) {

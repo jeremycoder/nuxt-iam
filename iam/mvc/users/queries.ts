@@ -11,10 +11,14 @@ const rowLimit = 100;
  * @param event H3Event
  */
 export async function getAllUsers(
-  event: H3Event
+  event: H3Event,
+  take?: number,
+  skip?: number
 ): Promise<Array<User> | H3Error> {
   let users = [] as Array<User>;
   let error = null;
+
+  // Validate skip and take
 
   await prisma.users
     .findMany({

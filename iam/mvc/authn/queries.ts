@@ -355,7 +355,7 @@ export async function getProfile(event: H3Event): Promise<User | H3Error> {
       return createError({
         statusCode: 403,
         statusMessage:
-          "Forbidden. Account is has been deactivated. Please contact your administrator.",
+          "Forbidden. Account has been deactivated. Please contact your administrator.",
       });
 
     // Otherwise, hide password (password is one-way hashed and cannot be retrieved from hash anyway, it just looks nicer) return the user
