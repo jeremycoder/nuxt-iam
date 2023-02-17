@@ -18,11 +18,9 @@ export default function useIamAdmin() {
  * @returns {Promise<JSONResponse>}
  */
 async function getUsers(): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/users", {
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
   });
 
@@ -35,12 +33,10 @@ async function getUsers(): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function createUser(newUser: NewUser): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch(`/api/iam/authn/register`, {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: newUser,
   });
@@ -58,12 +54,10 @@ async function updateUser(
   uuid: string,
   values: UsersTableEditable
 ): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch(`/api/iam/users/${uuid}`, {
     method: "PUT",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: values,
   });
@@ -81,12 +75,10 @@ async function deleteUser(
   uuid: string,
   csrfToken: string
 ): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch(`/api/iam/users/${uuid}`, {
     method: "DELETE",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       csrf_token: csrfToken,
@@ -101,11 +93,9 @@ async function deleteUser(
  * @returns {Promise<JSONResponse>}
  */
 async function getNewTokens(): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/refresh-tokens", {
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
   });
 
@@ -117,12 +107,10 @@ async function getNewTokens(): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function deleteRefreshToken(id: number): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch(`/api/iam/refresh-tokens/${id}`, {
     method: "DELETE",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
   });
 
@@ -134,12 +122,10 @@ async function deleteRefreshToken(id: number): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function deleteRefreshTokens(): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch(`/api/iam/refresh-tokens/`, {
     method: "DELETE",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
   });
 

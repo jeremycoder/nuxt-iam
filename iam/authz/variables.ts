@@ -4,8 +4,6 @@ import { verifyAccessToken, getUserByUuid } from "../misc/helpers";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "~~/iam/misc/types";
 
-const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
 export default function permissionVariables(event: H3Event) {
   return {
     getAuthorizedUser,
@@ -18,10 +16,10 @@ async function getAuthorizedUser(event: H3Event): Promise<User | null> {
   let tokenPayload = null;
 
   // Client platform if not using Nuxt front end
-  const appClientPlatform = event.node.req.headers["client-platform"] as string;
+  const clientPlatform = event.node.req.headers["client-platform"] as string;
 
   // If client platform is app, get access token from headers
-  if (appClientPlatform === "app")
+  if (clientPlatform === "app")
     accessToken = event.node.req.headers["iam-access-token"] as string;
   // Otherwise, get it from cookies
   else if (["browser", "browser-dev"].includes(clientPlatform)) {

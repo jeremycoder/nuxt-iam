@@ -33,13 +33,11 @@ async function register(
   email: string,
   password: string
 ): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   // Attempt register
   const response = await $fetch("/api/iam/authn/register", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       first_name: firstName,
@@ -61,13 +59,10 @@ async function register(
  * @returns {Promise<JSONResponse>}
  */
 async function login(email: string, password: string): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
-  // Attempt login
   const response = await $fetch("/api/iam/authn/login", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       email: email,
@@ -86,12 +81,10 @@ async function login(email: string, password: string): Promise<JSONResponse> {
 async function updateProfile(
   values: ProfileUpdateValues
 ): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/authn/update", {
     method: "PUT",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       uuid: values.uuid,
@@ -111,11 +104,9 @@ async function updateProfile(
  * @returns {Promise<JSONResponse>}
  */
 async function getProfile(): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/authn/profile", {
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
   });
 
@@ -127,13 +118,10 @@ async function getProfile(): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function logout(): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
-  // Attempt logout
   const response = await $fetch("/api/iam/authn/logout", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
   });
 
@@ -146,12 +134,10 @@ async function logout(): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function loginWithGoogle(token: string): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/authn/login-google", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       token: token,
@@ -166,13 +152,12 @@ async function loginWithGoogle(token: string): Promise<JSONResponse> {
  * @returns {Promise<boolean>}
  */
 async function isAuthenticated(): Promise<boolean> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
   let isAuthenticated = false;
 
   // Api response always has status, data, or error
   const { status, error } = await $fetch("/api/iam/authn/isauthenticated", {
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
   });
 
@@ -195,12 +180,10 @@ async function isAuthenticated(): Promise<boolean> {
  * @returns {Promise<JSONResponse>}
  */
 async function refresh(): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-  // Attempt login
   const response = await $fetch("/api/iam/authn/refresh", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
   });
 
@@ -215,12 +198,10 @@ async function deleteAccount(
   uuid: string,
   csrfToken: string
 ): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/authn/delete", {
     method: "DELETE",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       uuid: uuid,
@@ -236,12 +217,10 @@ async function deleteAccount(
  * @returns {Promise<JSONResponse>}
  */
 async function resetPassword(email: string): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/authn/reset", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       email: email,
@@ -256,12 +235,10 @@ async function resetPassword(email: string): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function verifyReset(token: string): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/authn/verifyreset", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       token: token,
@@ -276,12 +253,10 @@ async function verifyReset(token: string): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function verifyEmail(email: string): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/authn/verifyemail", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       email: email,
@@ -296,12 +271,10 @@ async function verifyEmail(email: string): Promise<JSONResponse> {
  * @returns {Promise<JSONResponse>}
  */
 async function verifyEmailToken(token: string): Promise<JSONResponse> {
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   const response = await $fetch("/api/iam/authn/verifyemailtoken", {
     method: "POST",
     headers: {
-      "client-platform": clientPlatform,
+      "client-platform": "browser",
     },
     body: {
       token: token,

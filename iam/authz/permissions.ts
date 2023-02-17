@@ -11,6 +11,8 @@ import { User } from "~~/iam/misc/types";
  * @param user User object
  */
 export function isSuperAdmin(user: User): boolean {
+  if ("role" in user === false) return false;
+
   if (user.role !== "SUPER_ADMIN") {
     console.log("Authorization failed. User is not a SUPER_ADMIN");
     return false;
@@ -56,7 +58,9 @@ export async function getUserFromAccessToken(
   let tokenPayload = null;
 
   // Get client platform
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
+  const clientPlatform = getHeader(event, "client-platform");
+
+  console.log("CLIENT PLATFORM: " + clientPlatform);
 
   // Client platform if not using Nuxt front end
   const appClientPlatform = event.node.req.headers["client-platform"] as string;
@@ -116,14 +120,11 @@ export function getUserUuidFromAccessToken(event: H3Event): string | null {
   let accessToken = null;
   let tokenPayload = null;
 
-  // Get client platform
-  const clientPlatform = useRuntimeConfig().public.iamClientPlatform;
-
   // Client platform if not using Nuxt front end
-  const appClientPlatform = event.node.req.headers["client-platform"] as string;
+  const clientPlatform = event.node.req.headers["client-platform"] as string;
 
   // If client platform is app, get access token from headers
-  if (appClientPlatform === "app")
+  if (clientPlatform === "app")
     accessToken = event.node.req.headers["iam-access-token"] as string;
   // Otherwise, get it from cookies
   else if (["browser", "browser-dev"].includes(clientPlatform)) {

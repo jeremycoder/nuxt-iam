@@ -6,10 +6,8 @@ import {
 } from "~~/iam/misc/helpers";
 import { User } from "~~/iam/misc/types";
 import { H3Event, H3Error } from "h3";
-import queryString from "query-string";
 
 const prisma = new PrismaClient();
-const rowLimit = 100;
 
 /**
  * @desc Gets all users

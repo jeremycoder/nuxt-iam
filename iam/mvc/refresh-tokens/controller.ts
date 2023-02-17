@@ -8,7 +8,6 @@ import { index, destroy, destroyAll } from "./model";
 import {
   isSuperAdmin,
   hasVerifiedEmail,
-  isOwner,
   getUserFromAccessToken,
   getUserUuidFromAccessToken,
 } from "~~/iam/authz/permissions";
@@ -20,7 +19,7 @@ export default defineEventHandler(async (event) => {
   let url = event.node.req.url;
 
   // Remove query parameters because url pattern does not understand them
-  if (url) url = url.substring(0, url.indexOf("?"));
+  if (url && url.includes("?")) url = url.substring(0, url.indexOf("?"));
 
   const method = event.node.req.method;
   let result = null;

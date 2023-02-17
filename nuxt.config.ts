@@ -33,7 +33,6 @@ export default defineNuxtConfig({
 
     // Do not put secret information here
     public: {
-      iamClientPlatform: process.env.IAM_CLIENT_PLATFORM,
       iamVerifyRegistrations: process.env.IAM_VERIFY_REGISTRATIONS,
       iamAllowGoogleAuth: process.env.IAM_ALLOW_GOOGLE_AUTH,
     },

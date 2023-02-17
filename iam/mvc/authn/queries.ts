@@ -243,7 +243,6 @@ export async function isAuthenticated(
  * @returns {Promise<User | H3Error>} Returns user profile or returns error
  */
 export async function getProfile(event: H3Event): Promise<User | H3Error> {
-  // Check client platform
   let accessToken = null;
 
   // Get client platform
