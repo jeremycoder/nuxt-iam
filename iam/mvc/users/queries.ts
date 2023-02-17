@@ -1,7 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import { validateUserUpdate, validateUserDelete } from "~~/iam/misc/helpers";
+import {
+  validateUserUpdate,
+  validateUserDelete,
+  getQueryParams,
+} from "~~/iam/misc/helpers";
 import { User } from "~~/iam/misc/types";
 import { H3Event, H3Error } from "h3";
+import queryString from "query-string";
 
 const prisma = new PrismaClient();
 const rowLimit = 100;
@@ -11,18 +16,32 @@ const rowLimit = 100;
  * @param event H3Event
  */
 export async function getAllUsers(
-  event: H3Event,
-  take?: number,
-  skip?: number
+  event: H3Event
 ): Promise<Array<User> | H3Error> {
   let users = [] as Array<User>;
   let error = null;
 
-  // Validate skip and take
+  // Pagination variables
+  let skip = null;
+  let take = null;
+
+  // Get params string so we can parse params
+  const params = getQueryParams(event);
+
+  // Get skip and take from query params
+  if (params) {
+    if (params.skip) skip = params.skip as string;
+    if (params.take) take = params.take as string;
+  }
+
+  // skip and take as strings
+  const skipStr = skip as string;
+  const takeStr = take as string;
 
   await prisma.users
     .findMany({
-      take: rowLimit,
+      skip: parseInt(skipStr) ? parseInt(skipStr) : 0,
+      take: parseInt(takeStr) ? parseInt(takeStr) : 100,
     })
     .then(async (result) => {
       users = result;

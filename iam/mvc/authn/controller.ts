@@ -24,7 +24,13 @@ import {
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
-  const url = event.node.req.url;
+
+  // Get url with query parameters
+  let url = event.node.req.url;
+
+  // Remove query parameters because url pattern does not understand them
+  if (url) url = url.substring(0, url.indexOf("?"));
+
   const method = event.node.req.method;
   let result = null;
 

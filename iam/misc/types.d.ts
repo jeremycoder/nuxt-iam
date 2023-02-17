@@ -48,6 +48,8 @@ export type UsersTableEditable = {
   last_name?: string;
   role?: string;
   csrf_token?: string;
+  is_active?: boolean;
+  permissions?: string;
 };
 
 export type NewUser = {

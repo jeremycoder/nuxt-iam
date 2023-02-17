@@ -38,6 +38,7 @@
     "nodemailer": "^6.8.0",
     "nuxt-vue3-google-signin": "^0.0.8",
     "prisma": "^4.8.1",
+    "query-string": "^8.1.0",
     "save-dev": "^0.0.1-security",
     "url-pattern": "^1.0.3",
     "uuid": "^9.0.0"
