@@ -11,6 +11,9 @@ import {
   getUserFromAccessToken,
   getUserUuidFromAccessToken,
 } from "~~/iam/authz/permissions";
+import { H3Error } from "h3";
+import { isAuthenticated } from "~~/iam/mvc/authn/queries";
+import { validateCsrfToken } from "~~/iam/misc/helpers";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -32,6 +35,20 @@ export default defineEventHandler(async (event) => {
     statusCode: 403,
     statusMessage: "Forbidden",
   });
+
+  // Check if user is authenticated
+  const authenticated = await isAuthenticated(event);
+
+  if (authenticated instanceof H3Error) {
+    response.status = "fail";
+    response.error = authenticated;
+    return response;
+  }
+
+  if (authenticated === false) {
+    response.status = "fail";
+    return forbiddenError;
+  }
 
   // Get user to prepare for permission checks
   const userOrNull = await getUserFromAccessToken(event);
@@ -65,6 +82,19 @@ export default defineEventHandler(async (event) => {
         if (result) {
           event.context.params.fromRoute = result;
 
+          // Check if csrf token is valid
+          const csrfTokenError = await validateCsrfToken(event);
+
+          if (csrfTokenError instanceof H3Error) {
+            console.log("Csrf token error");
+            response.status = "fail";
+            response.error = createError({
+              statusCode: 403,
+              statusMessage: "Missing or invalid csrf token",
+            });
+            return response;
+          }
+
           // Permissions
           if (!isSuperAdmin(user)) return forbiddenError;
           if (!hasVerifiedEmail(user)) return forbiddenError;
@@ -76,6 +106,19 @@ export default defineEventHandler(async (event) => {
         result = new route("/api/iam/refresh-tokens/").match(url);
         if (result) {
           event.context.params.fromRoute = result;
+
+          // Check if csrf token is valid
+          const csrfTokenError = await validateCsrfToken(event);
+
+          if (csrfTokenError instanceof H3Error) {
+            console.log("Csrf token error");
+            response.status = "fail";
+            response.error = createError({
+              statusCode: 403,
+              statusMessage: "Missing or invalid csrf token",
+            });
+            return response;
+          }
 
           // Permissions
           if (!isSuperAdmin(user)) return forbiddenError;

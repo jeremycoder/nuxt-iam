@@ -7,7 +7,7 @@ export default function useIamAdmin() {
     createUser,
     updateUser,
     deleteUser,
-    getNewTokens,
+    getRefreshTokens,
     deleteRefreshToken,
     deleteRefreshTokens,
   };
@@ -92,7 +92,7 @@ async function deleteUser(
  * @desc Get all refresh tokens
  * @returns {Promise<JSONResponse>}
  */
-async function getNewTokens(): Promise<JSONResponse> {
+async function getRefreshTokens(): Promise<JSONResponse> {
   const response = await $fetch("/api/iam/refresh-tokens", {
     headers: {
       "client-platform": "browser",
@@ -106,11 +106,17 @@ async function getNewTokens(): Promise<JSONResponse> {
  * @desc Delete a refresh token
  * @returns {Promise<JSONResponse>}
  */
-async function deleteRefreshToken(id: number): Promise<JSONResponse> {
+async function deleteRefreshToken(
+  id: number,
+  csrfToken: string
+): Promise<JSONResponse> {
   const response = await $fetch(`/api/iam/refresh-tokens/${id}`, {
     method: "DELETE",
     headers: {
       "client-platform": "browser",
+    },
+    body: {
+      csrf_token: csrfToken,
     },
   });
 
@@ -121,11 +127,14 @@ async function deleteRefreshToken(id: number): Promise<JSONResponse> {
  * @desc Deletes all refresh token
  * @returns {Promise<JSONResponse>}
  */
-async function deleteRefreshTokens(): Promise<JSONResponse> {
+async function deleteRefreshTokens(csrfToken: string): Promise<JSONResponse> {
   const response = await $fetch(`/api/iam/refresh-tokens/`, {
     method: "DELETE",
     headers: {
       "client-platform": "browser",
+    },
+    body: {
+      csrf_token: csrfToken,
     },
   });
 

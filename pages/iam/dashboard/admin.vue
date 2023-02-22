@@ -451,7 +451,7 @@
       <button
         type="button"
         class="btn btn-danger btn-sm mb-2 mt-2"
-        @click="deleteAllTokens"
+        @click="deleteAllTokens(csrfToken)"
       >
         Delete All
       </button>
@@ -528,7 +528,7 @@
                 @click="
                   () => {
                     refreshTokenRecord = row;
-                    deleteThisToken(row);
+                    deleteThisToken(row, csrfToken);
                   }
                 "
               >
@@ -556,7 +556,7 @@ const {
   createUser,
   updateUser,
   deleteUser,
-  getNewTokens,
+  getRefreshTokens,
   deleteRefreshToken,
   deleteRefreshTokens,
 } = useIamAdmin();
@@ -783,21 +783,21 @@ async function deleteThisUser(record) {
  */
 async function getAllRefreshTokens() {
   // Attempt to get refresh tokens
-  const getNewTokensData = await getNewTokens();
+  const getRefreshTokensData = await getRefreshTokens();
 
   // If error, report error, otherwise get data
-  if (getNewTokensData.error)
-    refreshTokensTableError.value = getNewTokensData.error;
-  else refreshTokensTable.value = getNewTokensData.data;
+  if (getRefreshTokensData.error)
+    refreshTokensTableError.value = getRefreshTokensData.error;
+  else refreshTokensTable.value = getRefreshTokensData.data;
 }
 
 /**
  * @desc Deletes a single refresh token
  * @param record The record of the token to delete
  */
-async function deleteThisToken(record) {
+async function deleteThisToken(record, csrfToken) {
   // Attempt to delete User
-  const deleteTokenResult = await deleteRefreshToken(record.id);
+  const deleteTokenResult = await deleteRefreshToken(record.id, csrfToken);
 
   // If error, show error, and return
   if (deleteTokenResult.error) {
@@ -811,11 +811,11 @@ async function deleteThisToken(record) {
 
 /**
  * @desc Deletes all refresh token
- * @param record The record of the token to delete
+ * @param csrfToken Csrf token
  */
-async function deleteAllTokens() {
+async function deleteAllTokens(csrfToken) {
   // Attempt to delete User
-  const deleteTokenResult = await deleteRefreshTokens();
+  const deleteTokenResult = await deleteRefreshTokens(csrfToken);
 
   // If error, show error, and return
   if (deleteTokenResult.error) {

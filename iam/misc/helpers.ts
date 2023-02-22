@@ -2120,6 +2120,7 @@ export async function createGoogleUser(
           uuid: makeUuid(),
           avatar: payload.picture,
           email: payload.email,
+          email_verified: true,
           password: hashedPassword,
         },
       })

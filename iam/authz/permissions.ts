@@ -51,22 +51,18 @@ export function isOwner(userUuid: string, routeUuid: string): boolean {
  * @desc Gets user from access token
  * @param event Event from api
  */
+
 export async function getUserFromAccessToken(
   event: H3Event
 ): Promise<User | null> {
   let accessToken = null;
   let tokenPayload = null;
 
-  // Get client platform
-  const clientPlatform = getHeader(event, "client-platform");
-
-  console.log("CLIENT PLATFORM: " + clientPlatform);
-
   // Client platform if not using Nuxt front end
-  const appClientPlatform = event.node.req.headers["client-platform"] as string;
+  const clientPlatform = event.node.req.headers["client-platform"] as string;
 
   // If client platform is app, get access token from headers
-  if (appClientPlatform === "app")
+  if (clientPlatform === "app")
     accessToken = event.node.req.headers["iam-access-token"] as string;
   // Otherwise, get it from cookies
   else if (["browser", "browser-dev"].includes(clientPlatform)) {

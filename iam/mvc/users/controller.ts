@@ -14,6 +14,7 @@ import {
 } from "~~/iam/authz/permissions";
 import { H3Error } from "h3";
 import { validateCsrfToken } from "~~/iam/misc/helpers";
+import { isAuthenticated } from "~~/iam/mvc/authn/queries";
 
 export default defineEventHandler(async (event) => {
   const route = UrlPattern;
@@ -35,6 +36,20 @@ export default defineEventHandler(async (event) => {
     statusCode: 403,
     statusMessage: "Forbidden",
   });
+
+  // Check if user is authenticated
+  const authenticated = await isAuthenticated(event);
+
+  if (authenticated instanceof H3Error) {
+    response.status = "fail";
+    response.error = authenticated;
+    return response;
+  }
+
+  if (authenticated === false) {
+    response.status = "fail";
+    return forbiddenError;
+  }
 
   // Get user to prepare for permission checks
   const userOrNull = await getUserFromAccessToken(event);
