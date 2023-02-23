@@ -211,8 +211,7 @@
         </header>
         <!-- Main content -->
         <main style="margin-top: 86px">
-          <div class="container">
-            <!-- Some child pages need profile data and some don't -->
+          <div class="container">            
             <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
           </div>
         </main>
