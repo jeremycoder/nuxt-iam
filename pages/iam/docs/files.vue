@@ -33,6 +33,7 @@
 <p>The <code>mvc</code> directory stands for model, view, and controller. It only houses the models and controllers because Nuxt IAM is an API (application program interface) authentication framework and APIs have no views. Nevertheless, we have kept the &#39;v&#39; for convention.</p>
 <p>The <code>mvc</code> contains the controllers (functions that handle requests from users and return responses), and models (functions that handle data). Because the amount of data and logic that is required for authentication and authorization to work properly is quite extensive, the mvc directories also contain files called <code>queries</code>. Queries deal with database access.</p>
 <p>The <code>mvc</code> directory&#39;s main directories are <code>authn</code>, which handles authentication, <code>refresh-tokens</code>, which handle refresh token logic, and <code>users</code>, which handles users data logic. Each of these directories contains a controller file, a model file, and a queries file.</p>
+<p>The <code>doodads</code> directory is an example directory to help you get started. It can be deleted. If you delete it, make sure you delete the <code>doodads</code> directory in <code>server/api/iam/doodads</code> as well.</p>
 <p>We worked hard to make the code readable and easy to understand and so we do not have many long functions, but we do have many small functions.</p>
 <p>In general, the data flow in Nuxt IAM is:</p>
 <ul>
@@ -72,6 +73,8 @@
 <li><code>authn</code> - the global Nuxt IAM authentication endpoint. All queries that begin with <code>api/iam/authn</code> hit this endpoint, and are sent to the controller in the file <code>iam/mvc/authn/controller.ts</code>, which routes them to the appropriate destination.</li>
 <li><code>refresh-tokens</code> - the global Nuxt IAM refresh-tokens endpoint. All queries that begin with <code>api/iam/refresh-tokens</code> hit this endpoint, and are sent to the controller in the file <code>iam/mvc/refresh-tokens/controller.ts</code>, which routes them to the appropriate destination.</li>
 <li><code>users</code> - the global Nuxt IAM users endpoint. All queries that begin with <code>api/iam/users</code> hit this endpoint, and are sent to the controller in the file <code>iam/mvc/users/controller.ts</code>, which routes them to the appropriate destination.</li>
+<li><code>doodads</code> - an example endpoint. All queries that begin with <code>api/iam/doodads</code> hit this endpoint, and are sent to the controller in the file <code>iam/mvc/doodads/controller.ts</code>, which routes them to the appropriate destination. This is for examples to help you get started quickly. You can
+delete it. If you delete this directory, make sure you delete the <code>doodads</code> directory in <code>api/iam/mvc/doodads</code> as well.</li>
 </ul>
 <p>You can probably see that the <code>iam/mvc</code> directory and the <code>server/api/iam</code> mirror each other. This is by design and Nuxt IAM would like to keep it that way.</p>
 

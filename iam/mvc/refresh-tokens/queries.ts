@@ -1,10 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { validateUserUpdate, validateUserDelete } from "~~/iam/misc/helpers";
-import { User, RefreshTokens } from "~~/iam/misc/types";
+import { getQueryParams, } from "~~/iam/misc/helpers";
+import { RefreshTokens } from "~~/iam/misc/types";
 import { H3Event, H3Error } from "h3";
 
 const prisma = new PrismaClient();
-const rowLimit = 100;
 
 /**
  * @desc Gets all users
@@ -16,9 +15,27 @@ export async function getAllRefreshTokens(
   let refreshTokens = [] as RefreshTokens;
   let error = null;
 
+  // Pagination variables
+  let skip = null;
+  let take = null;
+
+  // Get params string so we can parse params
+  const params = getQueryParams(event);
+
+  // Get skip and take from query params
+  if (params) {
+    if (params.skip) skip = params.skip as string;
+    if (params.take) take = params.take as string;
+  }
+
+  // skip and take as strings
+  const skipStr = skip as string;
+  const takeStr = take as string;
+
   await prisma.refresh_tokens
     .findMany({
-      take: rowLimit,
+      skip: parseInt(skipStr) ? parseInt(skipStr) : 0,
+      take: parseInt(takeStr) ? parseInt(takeStr) : 100,
     })
     .then(async (result) => {
       refreshTokens = result;
