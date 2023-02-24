@@ -1,20 +1,32 @@
 # nuxt-iam - Nuxt authentication framework
 
-Nuxt IAM (identity and access management) adds powerful authentication and authorization to your Nuxt app to help you get up and running with authentication and authorization best practices quickly.
+Nuxt IAM, which stands for **Nuxt Identity and Access Management**, is an authentication and authorization framework which adds authentication and authorization logic to your Nuxt app.
 
-- ✔️ user registration
-- ✔️ user login
+See a fully functional [example app](https://nuxt-iam.vercel.app/iam/).
+
+[[add video]]
+
+Nuxt IAM adds the following features to your application:
+
+- ✔️ user registration with email and password
+- ✔️ user login with email and password
+- ✔️ user login/registration with Google
 - ✔️ user password reset
-- ✔️ user profile
-- ✔️ user profile update
-- ✔️ user profile delete
+- ✔️ user dashboard
+- ✔️ user password change
+- ✔️ user profile/account delete
+- ✔️ admin user management
+- ✔️ admin token management
+
 
 https://user-images.githubusercontent.com/7818102/215188979-fe272b3f-ef3a-4b8d-9cfc-0dedd6edb911.mp4
 
+
 It is a full featured Nuxt 3 app.
+
 Sample app: https://nuxt-rest-api.vercel.app/iam/
 
-To learn more about Nuxt 3, look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+For full documentations, go to [Nuxt IAM documentation](https://nuxt-iam.vercel.app/iam/)
 
 ## How it Works
 
@@ -24,13 +36,15 @@ Nuxt IAM adds authentication and authorization components, pages, api routes, an
 
 Follow the steps below to get started.
 
-### Starting from Scratch
+### Starting from Scratch (with nothing)
 
-Add content here...
+To get started with nothing, just clone the repository.
 
 ### Adding Nuxt IAM to an existing Nuxt app
 
 Add content here...
+
+For full documentations, go to [Nuxt IAM documentation](https://nuxt-iam.vercel.app/iam/)
 
 ## FRONTEND
 
@@ -52,13 +66,16 @@ Nuxt IAM adds several pages to your apps frontend. The pages are wrappers around
 - **iam/verifyfailed**: Displays email or password verification failure.
 - **iam/verifysuccessful**: Displays password verification success and a temporary password.
 
+For full documentations, go to [Nuxt IAM documentation](https://nuxt-iam.vercel.app/iam/)
+
 ## Configuration
 
 The following are runtime configuration options for Nuxt IAM. Please add the code below to your **nuxt.config** file.
 
 ```
+// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-//...
+  //...
   runtimeConfig: {
     // IAM token secrets. Please rotate every 2 - 4 weeks
     iamAccessTokenSecret: process.env.IAM_ACCESS_TOKEN_SECRET,
@@ -68,6 +85,7 @@ export default defineNuxtConfig({
 
     // Public Url
     iamPublicUrl: process.env.IAM_PUBLIC_URL,
+
     // IAM Emailer
     iamEmailer: process.env.IAM_EMAILER,
 
@@ -86,19 +104,30 @@ export default defineNuxtConfig({
     iamSendGridApiKey: process.env.IAM_SENDGRID_API_KEY,
     iamSendgridSender: process.env.IAM_SENDGRID_SENDER,
 
+    // GOOGLE CLIENT ID
+    iamGoogleClientId: process.env.IAM_GOOGLE_CLIENT_ID,
+
     // Do not put secret information here
     public: {
+      iamClientPlatform: process.env.IAM_CLIENT_PLATFORM,
       iamVerifyRegistrations: process.env.IAM_VERIFY_REGISTRATIONS,
+      iamAllowGoogleAuth: process.env.IAM_ALLOW_GOOGLE_AUTH,
     },
   },
-//...
 
+  modules: ["nuxt-vue3-google-signin"],
+  googleSignIn: {
+    clientId: process.env.IAM_GOOGLE_CLIENT_ID,
+  },
+  //...
 });
 ```
 
+For full documentations, go to [Nuxt IAM documentation](https://nuxt-iam.vercel.app/iam/)
+
 ### Example .env file
 
-Your nuxt.config file links to your .env file. Here's an example of your **.env** file:
+Below is an example of a .env file that contains the necessary variables for Nuxt IAM to work properly. Please add the following variables to your **.env** file.
 
 ```
 # Environment variables declared in this file are automatically made available to Prisma.
@@ -125,7 +154,7 @@ IAM_CLIENT_PLATFORM = "browser"
 
 IAM_PUBLIC_URL="http://localhost:3000"
 
-# NUXT IAM RESET EMAIL
+# NUXT IAM EMAIL
 # nodemailer-service, nodemailer-smtp, sendgrid
 IAM_EMAILER="nodemailer-smtp"
 
@@ -140,15 +169,17 @@ IAM_NODEMAILER_SMTP_PORT="465"
 IAM_NODEMAILER_SMTP_SENDER="myname@mydomain.com"
 IAM_NODEMAILER_SMTP_PASSWORD="myAmazingPassword753$"
 
-# NUXT IAM VERIFY REGISTRATIONS
-IAM_VERIFY_REGISTRATIONS="false"
-
 # SENDGRID API KEY
 IAM_SENDGRID_API_KEY="12345678901234567890"
 IAM_SENDGRID_SENDER="myname@mysendgridaccount.com"
+
+# NUXT IAM VERIFY REGISTRATIONS
+IAM_VERIFY_REGISTRATIONS="false"
 
 # IAM GOOGLE CLIENT ID
 IAM_ALLOW_GOOGLE-AUTH="true"
 IAM_GOOGLE_CLIENT_ID="123...com"
 ```
+
+For full documentations, go to [Nuxt IAM documentation](https://nuxt-iam.vercel.app/iam/)
 
