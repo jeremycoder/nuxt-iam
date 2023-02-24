@@ -1,7 +1,7 @@
 {
-  "name": "nuxt-auth-iam",
+  "name": "nuxt-iam",
   "version": "0.0.1",
-  "description": "Provides powerful authentication, authorization, and user management for your Nuxt application.",
+  "description": "Nuxt authentication and authorization framework providing identity and access management.",
   "keywords": [
     "nuxt auth",
     "auth",
@@ -22,7 +22,7 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "nuxt": "3.1.1"
+    "nuxt": "3.2.2"
   },
   "dependencies": {
     "@prisma/client": "^4.7.1",
