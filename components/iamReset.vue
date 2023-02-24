@@ -4,7 +4,7 @@
     <div class="login-form">
       <div style="margin-left: 64px">
         <img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 200px" />
-      </div>
+      </div>      
       <div v-if="formSent === false">
         <form>
           <h2 class="text-center">Password Reset</h2>
@@ -35,7 +35,7 @@
             <NuxtLink to="/iam/login" class="pull-right">Login</NuxtLink>
           </div>
         </form>
-      </div>
+      </div>      
       <div v-else>
         <p>Please check your email for reset instructions</p>
       </div>

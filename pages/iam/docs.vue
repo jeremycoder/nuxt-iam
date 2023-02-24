@@ -9,9 +9,9 @@
           <h1 class="display-5 fw-bold">Nuxt IAM Documentation</h1>
           <div class="col-lg-6 mx-auto">
             <p class="lead mb-4">The first Nuxt authentication framework.</p>
-            <ul class="nav justify-content-center">
+            <ul class="nav justify-content-center">              
               <li class="nav-item">                
-                <NuxtLink to="/iam/" class="nav-link">Home</NuxtLink>
+                <NuxtLink to="/iam/" class="nav-link">IAM</NuxtLink>
               </li>
               <li class="nav-item">                
                 <NuxtLink to="/iam/docs" class="nav-link">Docs</NuxtLink>
