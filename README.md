@@ -177,9 +177,9 @@ IAM_SENDGRID_SENDER="myname@mysendgridaccount.com"
 IAM_VERIFY_REGISTRATIONS="false"
 
 # IAM GOOGLE CLIENT ID
-IAM_ALLOW_GOOGLE-AUTH="true"
+IAM_ALLOW_GOOGLE_AUTH="true"
 IAM_GOOGLE_CLIENT_ID="123...com"
 ```
 
-For full documentations, go to [Nuxt IAM documentation](https://nuxt-iam.vercel.app/iam/)
+For full documentation, go to [Nuxt IAM documentation](https://nuxt-iam.vercel.app/iam/)
 
