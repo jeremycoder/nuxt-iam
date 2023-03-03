@@ -66,7 +66,7 @@
                   class="d-block link-dark text-decoration-none dropdown-toggle"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
-                  @click="toggeleMenu"
+                  @click="toggleMenu"
                 >
                   <span v-if="profile.avatar">
                     <img
@@ -97,11 +97,8 @@
                   <span class="mx-1 profile-name"
                     >{{ firstName }} {{ lastName }}</span
                   >
-                </a>
-                <ul
-                  class="dropdown-menu text-small"
-                  :class="showMenu ? 'show' : ''"
-                >
+                </a>               
+                <ul v-if="showMenu" class="dropdown-menu text-small show">
                   <li>
                     <NuxtLink class="dropdown-item" to="/iam/dashboard/profile"
                       >Profile</NuxtLink
@@ -329,7 +326,8 @@ async function verifyMyEmail(email) {
 /**
  * @desc Toggles menu display on and off
  */
-function toggeleMenu() {
+function toggleMenu() { 
+  console.log('show menu: ', showMenu.value);
   showMenu.value = !showMenu.value;
 }
 
