@@ -1165,12 +1165,14 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
     const session = sessionOrError as Session;
     const userOrNull = await getUserById(session.user_id);
 
+    console.log("Cookies and session id removed.");
+    deleteCookie(event, "iam-access-token");
+    deleteCookie(event, "iam-refresh-token");
+    deleteCookie(event, "iam-sid");
+
     // If no user, log error, but delete all cookies anyway
     if (userOrNull === null) {
-      console.log("Error with logout. User not found");
-      deleteCookie(event, "iam-access-token");
-      deleteCookie(event, "iam-refresh-token");
-      deleteCookie(event, "iam-sid");
+      console.log("Error with logout. User not found");      
     } else {
       // Otherwise get user
       const user = userOrNull as User;
@@ -1180,7 +1182,7 @@ export async function logout(event: H3Event): Promise<H3Error | void> {
         console.log(`Failed to deactivate user:${user.email}'s refresh tokens`);
         return createError({
           statusCode: 500,
-          statusMessage: "Logout failed.",
+          statusMessage: "Logout error.",
         });
       }
 

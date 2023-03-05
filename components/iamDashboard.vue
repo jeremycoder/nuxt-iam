@@ -49,11 +49,9 @@
       </div>
       <div v-else>
         <header>
-          <nav
-            class="navbar bg-body-tertiary bg-white fixed-top p-3 mb-3 border-bottom border-{#FF0}"
-          >
+          <nav class="navbar bg-body-tertiary bg-white fixed-top p-3 mb-3 border-bottom border-{#FF0}">
             <div class="container-fluid">
-              <NuxtLink class="navbar-brand" to="/iam/dashboard"
+              <NuxtLink class="navbar-brand" style="margin-right: -80px" to="/iam/dashboard"
                 ><img
                   src="~~/iam/ui/img/nuxt-iam-logo-symbol.png"
                   style="width: 17%; display: inline"
@@ -326,8 +324,7 @@ async function verifyMyEmail(email) {
 /**
  * @desc Toggles menu display on and off
  */
-function toggleMenu() { 
-  console.log('show menu: ', showMenu.value);
+function toggleMenu() {   
   showMenu.value = !showMenu.value;
 }
 
