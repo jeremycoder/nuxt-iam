@@ -30,7 +30,7 @@
         </div>       
         <button class="w-100 btn btn-lg btn-primary" @click.prevent="tryLogin">Log in</button>        
         <div class="row my-2">
-          <div class="col"><NuxtLink class="text-decoration-none" to="/iam/register">Create an Account</NuxtLink></div>
+          <div class="col"><NuxtLink class="text-decoration-none" to="/iam/register">Register</NuxtLink></div>
           <div class="col"><NuxtLink class="text-decoration-none" to="/iam/reset">Forgot Password?</NuxtLink></div>          
         </div>       
       </form>      
@@ -105,7 +105,6 @@ useHead({
 </script>
 
 <style scoped>
-
 .form-signin {
   max-width: 330px;
   padding: 15px;

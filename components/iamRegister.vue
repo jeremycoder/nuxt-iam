@@ -1,113 +1,56 @@
 <template>
   <div class="container">
-    <div class="register-form" style="margin-bottom: 40px">
-      <div style="margin-left: 64px">
-        <NuxtLink to="/iam/"
-          ><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 200px"
-        /></NuxtLink>
-      </div>
-      <div v-if="verifyRegistrations" class="alert alert-warning" role="alert">
-        <strong>Email verification is required.</strong>
-      </div>
-      <!-- Registration errors -->
-      <div
-        v-if="registerError"
-        class="alert alert-danger alert-dismissable"
-        role="alert"
-      >
-        <button
-          @click="registerError = null"
-          type="button"
-          class="close"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span></button
-        >{{ registerError.message }}
-      </div>
-      <!-- Registration success -->
-      <div
-        v-if="registerSuccess"
-        class="alert alert-success alert-dismissable"
-        role="alert"
-      >
-        <button
-          @click="registerSuccess = null"
-          type="button"
-          class="close"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span></button
-        >Registration successful
-      </div>
+    <main class="form-signin w-100 m-auto">         
       <form>
-        <h2 class="text-center">Register</h2>
-        <div class="form-group">
-          <input
-            v-model="registerForm.firstName"
-            type="text"
-            class="form-control"
-            placeholder="First name"
-            required
-          />
+        <div style="margin-left: 64px">
+        <NuxtLink to="/iam/"><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 150px"/></NuxtLink>
+      </div>
+        <!-- Email verification -->
+        <div v-if="verifyRegistrations" class="alert alert-warning" role="alert">
+          <strong>Email verification is required.</strong>
+        </div>  
+        <h1 class="h3 mb-3 fw-normal">Register</h1>
+        <!-- Error message -->
+        <div v-if="registerError" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <strong>Error: {{ registerError.message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="registerError = null"></button>
         </div>
-        <div class="form-group">
-          <input
-            v-model="registerForm.lastName"
-            type="email"
-            class="form-control"
-            placeholder="Last name"
-            required
-          />
+        <!-- Register Success -->
+        <div v-if="registerSuccess" class="alert alert-success alert-dismissible fade show" role="alert">
+          <strong>Registeration successful</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="registerSuccess = null"></button>
+        </div>              
+        <div class="form-floating">
+          <input v-model="registerForm.firstName" type="text" class="form-control" id="floatingFirstName" placeholder="Jeremy">
+          <label for="floatingFirstName">First name</label>
         </div>
-        <div class="form-group">
-          <input
-            v-model="registerForm.email"
-            type="email"
-            class="form-control"
-            placeholder="Email"
-            required
-          />
+        <div class="form-floating">
+          <input v-model="registerForm.lastName" type="text" class="form-control" id="floatingLastName" placeholder="Mwangelwa">
+          <label for="floatingLastName">Last name</label>
         </div>
-        <div class="form-group">
-          <input
-            v-model="registerForm.password"
-            type="password"
-            class="form-control"
-            placeholder="Password"
-            required
-          />
+        <div class="form-floating">
+          <input v-model="registerForm.email" type="email" class="form-control" id="floatingEmail" placeholder="name@example.com">
+          <label for="floatingEmail">Email address</label>
         </div>
-        <div class="form-group">
-          <button
-            type="submit"
-            class="btn btn-primary btn-block"
-            @click.prevent="tryRegister"
-          >
-            Register
-          </button>
-        </div>
-        <div class="clearfix">
-          <label class="pull-left checkbox-inline"
-            ><input type="checkbox" v-model="acceptTerms" /> I accept the
-            <NuxtLink to="#">Terms and Conditions</NuxtLink>
-          </label>
-        </div>
-      </form>
-      <p class="text-center">
-        Already have an account?
-        <NuxtLink to="/iam/login">Log in here</NuxtLink>
-      </p>
-    </div>
+        <div class="form-floating">
+          <input v-model="registerForm.password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+          <label for="floatingPassword">Password</label>
+        </div>       
+        <button class="w-100 btn btn-lg btn-primary" @click.prevent="tryRegister">Register</button>
+        <p class="mt-2"><input type="checkbox" v-model="acceptTerms" /> I accept the 
+          <NuxtLink class="text-decoration-none" to="/iam/register">Terms and Conditions</NuxtLink></p>         
+         <p class="my-2">Already have an account? <NuxtLink class="text-decoration-none" to="/iam/login">Log in here</NuxtLink></p>              
+      </form>      
+    </main>
   </div>
 </template>
 
 <script setup>
-// Get necessary functions from useIam composable
 const { register } = useIam();
 const verifyRegistrations =
   useRuntimeConfig().public.iamVerifyRegistrations === "true";
 
-// Captures any registration errors
+// Error and success flags
 let registerError = ref(null);
 let registerSuccess = ref(null);
 
@@ -122,7 +65,7 @@ const registerForm = {
   password: "",
 };
 
-// Try to register user
+// Attempt to register user
 async function tryRegister() {
   // Check terms and conditions checkbox
   if (!acceptTerms.value) {
@@ -132,6 +75,7 @@ async function tryRegister() {
     return;
   }
 
+  // Send registration data
   const { status, error } = await register(
     registerForm.firstName,
     registerForm.lastName,
@@ -148,50 +92,55 @@ async function tryRegister() {
   // If successful, show success message, wait, then navigate to login page
   if (status === "success") {
     registerSuccess.value = true;
-    setTimeout(() => {
-      navigateTo("/iam/login");
-    }, 1000);
+    setTimeout(() => { navigateTo("/iam/login"); }, 1000);
   }
 }
 
-// If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({
-  title: "Nuxt IAM Register Example",
+  title: "Nuxt IAM Register",
   link: {
     rel: "stylesheet",
-    href: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",
+    href: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css",
     type: "text/css",
   },
   script: {
-    src: "https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js",
-  },
-  script: {
-    src: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js",
+    src: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js",
   },
 });
 </script>
 
 <style scoped>
-.register-form {
-  width: 340px;
-  margin: 0 auto;
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
 }
-.register-form form {
-  margin-bottom: 15px;
-  background: #f7f7f7;
-  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-  padding: 30px;
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
 }
-.register-form h2 {
-  margin: 0 0 15px;
+
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
-.form-control,
-.btn {
-  min-height: 38px;
-  border-radius: 2px;
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
-.btn {
-  font-size: 15px;
+.or-seperator {
+  margin: 20px 0 10px;
+  text-align: center;
+  border-top: 1px solid #ccc;
   font-weight: bold;
+}
+.or-seperator i {
+  padding: 0 10px;
+  background: #f7f7f7;
+  position: relative;
+  top: -11px;
+  z-index: 1;
 }
 </style>

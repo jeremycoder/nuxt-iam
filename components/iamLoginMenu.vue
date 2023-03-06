@@ -2,7 +2,7 @@
   <div v-if="!iAmLoggedIn">   
       <ul class="nav">      
         <li><NuxtLink to="/iam/login" class="nav-link px-2 link-dark">Login</NuxtLink></li> 
-        <li><NuxtLink to="/iam/register" class="nav-link px-2 link-dark">Register</NuxtLink></li>      
+        <li><NuxtLink to="/iam/register" class="nav-link px-2 link-dark">Register</NuxtLink></li>           
       </ul>      
   </div>
   <div v-else>   
