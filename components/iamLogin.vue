@@ -1,27 +1,16 @@
 <template>
   <div class="container">
-    <div class="login-form" style="margin-bottom: 40px">
-      <div style="margin-left: 64px">
-        <NuxtLink to="/iam/"
-          ><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 200px"
-        /></NuxtLink>
-      </div>
-      <div
-        v-if="loginError"
-        class="alert alert-danger alert-dismissable"
-        role="alert"
-      >
-        <button
-          @click="loginError = null"
-          type="button"
-          class="close"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span></button
-        >{{ loginError.message }}
-      </div>
+    <main class="form-signin w-100 m-auto">      
       <form>
-        <h2 class="text-center">Log in</h2>
+        <div style="margin-left: 64px">
+        <NuxtLink to="/iam/"><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 150px"/></NuxtLink>
+      </div>
+        <h1 class="h3 mb-3 fw-normal">Login</h1>
+        <!-- Error message -->
+        <div v-if="loginError" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <strong>Error: {{ loginError.message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="loginError = null"></button>
+        </div>
         <div v-if="allowGoogleAuth">
           <div class="form-group">
             <GoogleSignInButton
@@ -31,41 +20,21 @@
           </div>
           <div class="or-seperator"><i>or</i></div>
         </div>
-        <div class="form-group">
-          <input
-            v-model="loginForm.email"
-            type="email"
-            class="form-control"
-            placeholder="Email"
-            required
-          />
+        <div class="form-floating">
+          <input v-model="loginForm.email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+          <label for="floatingInput">Email address</label>
         </div>
-        <div class="form-group">
-          <input
-            v-model="loginForm.password"
-            type="password"
-            class="form-control"
-            placeholder="Password"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <button
-            type="submit"
-            class="btn btn-primary btn-block"
-            @click.prevent="tryLogin"
-          >
-            Log in
-          </button>
-        </div>
-        <div class="clearfix">
-          <NuxtLink to="/iam/register">Create an Account</NuxtLink>
-          <NuxtLink to="/iam/reset" class="pull-right"
-            >Forgot Password?</NuxtLink
-          >
-        </div>
-      </form>
-    </div>
+        <div class="form-floating">
+          <input v-model="loginForm.password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+          <label for="floatingPassword">Password</label>
+        </div>       
+        <button class="w-100 btn btn-lg btn-primary" @click.prevent="tryLogin">Log in</button>        
+        <div class="row my-2">
+          <div class="col"><NuxtLink class="text-decoration-none" to="/iam/register">Create an Account</NuxtLink></div>
+          <div class="col"><NuxtLink class="text-decoration-none" to="/iam/reset">Forgot Password?</NuxtLink></div>          
+        </div>       
+      </form>      
+    </main>
   </div>
 </template>
 
@@ -80,9 +49,7 @@ const { login, loginWithGoogle } = useIam();
 const allowGoogleAuth = useRuntimeConfig().public.iamAllowGoogleAuth === "true";
 
 // These variables come from response from calling Nuxt IAM api
-let loginStatus = ref();
 let loginError = ref(<{ message: "" } | null>null);
-let loginData = ref(null);
 
 const loginForm = {
   email: "",
@@ -91,13 +58,17 @@ const loginForm = {
 
 // Try to log user in
 async function tryLogin() {
-  const loginResponse = await login(loginForm.email, loginForm.password);
-  loginStatus.value = loginResponse.status;
-  loginError.value = loginResponse.error;
-  loginData.value = loginResponse.data;
+  const { status, error } = await login(loginForm.email, loginForm.password); 
 
-  // If login successful and route to login page
-  if (loginStatus.value === "success") navigateTo("/iam/dashboard");
+  // If error, log error and return
+  if (status === 'fail'){
+    loginError.value = error
+    console.error(error); 
+    return
+  }
+  
+  // If successful, navigate to dashboard
+  if (status === "success") navigateTo("/iam/dashboard");
 }
 
 // Handle Google login success
@@ -108,7 +79,7 @@ const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
 
   // Check for error
   if (res?.error) {
-    loginError = res.error;
+    loginError.value = res.error;
   } else {
     navigateTo("/iam/dashboard");
   }
@@ -121,33 +92,45 @@ const handleGoogleLoginError = () => {
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({
-  title: "Nuxt IAM Register Example",
+  title: "Nuxt IAM Login",
   link: {
     rel: "stylesheet",
-    href: "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",
+    href: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css",
     type: "text/css",
+  },
+  script: {
+    src: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js",
   },
 });
 </script>
 
 <style scoped>
-.login-form {
-  width: 340px;
-  margin: 0 auto;
+
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
 }
-.login-form form {
-  margin-bottom: 15px;
-  background: #f7f7f7;
-  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-  padding: 30px;
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
 }
-.login-form h2 {
-  margin: 0 0 15px;
+
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 .or-seperator {
   margin: 20px 0 10px;
   text-align: center;
   border-top: 1px solid #ccc;
+  font-weight: bold;
 }
 .or-seperator i {
   padding: 0 10px;
@@ -155,28 +138,5 @@ useHead({
   position: relative;
   top: -11px;
   z-index: 1;
-}
-.social-btn .btn {
-  margin: 10px 0;
-  font-size: 15px;
-  text-align: left;
-  line-height: 24px;
-}
-.social-btn .btn i {
-  float: left;
-  margin: 4px 15px 0 5px;
-  min-width: 15px;
-}
-.input-group-addon .fa {
-  font-size: 18px;
-}
-.form-control,
-.btn {
-  min-height: 38px;
-  border-radius: 2px;
-}
-.btn {
-  font-size: 15px;
-  font-weight: bold;
 }
 </style>

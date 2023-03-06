@@ -1,36 +1,5 @@
 <template>
   <div>
-    <div class="container my-5">      
-      <div
-        class="row p-4 pb-0 pe-lg-0 align-items-center rounded-3 border shadow-lg"
-      >           
-        <div class="px-4 mb-5 text-center">
-          <NuxtLink to="/iam/"><img class="d-block mx-auto" src="~~/iam/ui/img/nuxt-iam-logo.png/" alt="Nuxt IAM logo" width="200px" /></NuxtLink>
-          <h1 class="display-5 fw-bold">Nuxt IAM</h1>
-          <div class="col-lg-6 mx-auto">
-            <p class="lead mb-4">The first Nuxt authentication framework.</p>
-            <ul class="nav justify-content-center">              
-              <li class="nav-item">                
-                <NuxtLink to="/iam/" class="nav-link">IAM</NuxtLink>
-              </li>
-              <li class="nav-item">                
-                <NuxtLink to="/iam/docs" class="nav-link">Docs</NuxtLink>
-              </li>
-              <li class="nav-item">                
-                <NuxtLink to="/iam/register" class="nav-link"><strong>Register</strong></NuxtLink>
-              </li>
-              <li class="nav-item">                
-                <NuxtLink to="/iam/login" class="nav-link"><strong>Login</strong></NuxtLink>
-              </li>
-              <li class="nav-item">                
-                <NuxtLink to="/iam/" class="nav-link">Sample app</NuxtLink>
-              </li>              
-            </ul>        
-          </div>
-        </div>            
-      </div>
-    </div>
-
     <div class="container px-4 my-5 py-5 border shadow-lg" id="icon-grid">
       <h2 class="pb-2 border-bottom">What is Nuxt IAM?</h2>
       <p>Nuxt IAM, which stands for <strong>Nuxt Identity and Access Management,</strong> is an authentication and authorization framework for Nuxt 
