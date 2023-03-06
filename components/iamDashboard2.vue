@@ -1,0 +1,173 @@
+<template>
+  <div v-if="isLoaded">
+    <header v-if="isLoggedIn && profile" class="mb-3 border-bottom">
+      <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+          <NuxtLink class="navbar-brand" to="/iam/dashboard">
+            <img src="~~/iam/ui/img/nuxt-iam-logo-symbol.png" style="width: 17%; display: inline" />
+              <span style="color: #184b81">Nuxt<b>IAM</b></span>
+            </NuxtLink>
+
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+              <li><a href="#" class="nav-link px-2 link-secondary">Dashboard</a></li>
+              <li><a href="#" class="nav-link px-2 link-dark">Admin</a></li>
+              <li><a href="#" class="nav-link px-2 link-dark">Profile</a></li>
+              <li><a href="#" class="nav-link px-2 link-dark">Settings</a></li>
+              <li><a href="#" class="nav-link px-2 link-dark">Products</a></li>          
+            </ul>
+          <div>
+            
+            <button class="btn btn-small btn-primary my-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Menu</button>
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+              <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasRightLabel">Offcanvas right</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              </div>
+              <div class="offcanvas-body">
+                ...
+              </div>
+            </div>          
+          </div>        
+          
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <NuxtPage />
+    </div>
+  </div>
+  <div v-else class="container-xl px-4 mt-4">
+    <div class="spinner-border" role="status"></div>
+  </div>
+</template>
+
+<script setup>
+const { isAuthenticated, getProfile, logout, verifyEmail } = useIam();
+
+const router = useRouter();
+const isLoaded = ref(false);
+const iAmLoggedIn = ref(false);
+const showProfile = ref(false);
+let getProfileError = ref(null);
+const showMenu = ref(false);
+
+let verificationEmailSent = ref(false);
+
+// Profile variables
+const firstName = ref("");
+const lastName = ref("");
+
+// Check email verification
+const verifyRegistrations =
+  useRuntimeConfig().public.iamVerifyRegistrations === "true";
+const emailIsVerified = ref(false);
+
+// User profile
+const profile = {
+  uuid: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  role: "",
+  avatar: "",
+  csrfToken: "",
+  isActive: "",
+  currentPassword: "",
+  newPassword: "",
+  confirmNewPassword: "",
+  permissions: "",
+};
+
+onMounted(async () => {
+  await isLoggedIn();
+  await getMyProfile();
+  isLoaded.value = true;
+});
+
+async function isLoggedIn() {
+  iAmLoggedIn.value = await isAuthenticated();
+
+  // If user is not authenticated, push to login page
+  if (!iAmLoggedIn.value) router.push("/iam/login");
+
+  // If user is logged in, get csrf token
+}
+
+// Log user out
+async function logMeOut() {
+  const { status } = await logout();
+  if (status === "success") {
+    router.push("/iam/login");
+  }
+}
+
+// Attempt to get user profile
+async function getMyProfile() {
+  const { status, error, data } = await getProfile();
+
+  // If error, show error
+  if (error) {
+    console.log("error: ", error);
+    getProfileError.value = error;
+  }
+
+  // If successful, data will contain profile
+  if (status === "success") {
+    profile.id = data.id;
+    profile.uuid = data.uuid;
+    profile.firstName = data.first_name;
+    profile.lastName = data.last_name;
+    profile.email = data.email;
+    profile.avatar = data.avatar;
+    profile.csrfToken = data.csrf_token;
+    profile.isActive = data.is_active;
+    profile.role = data.role;
+    profile.permissions = data.permissions;
+
+    // Assign to local reactive variables
+    firstName.value = profile.firstName;
+    lastName.value = profile.lastName;
+
+    // Check email verification status
+    emailIsVerified.value = data.email_verified;
+    showProfile.value = true;
+  }
+}
+
+/**
+ * @desc Sends API request to verify email
+ * @param email User email
+ */
+async function verifyMyEmail(email) {
+  console.log("Verifying my email: ", email);
+  verifyEmail(email);
+  verificationEmailSent.value = true;
+}
+
+/**
+ * @desc Toggles menu display on and off
+ */
+function toggleMenu() {   
+  showMenu.value = !showMenu.value;
+}
+
+useHead({
+  title: "Nuxt IAM Dashboard",
+  link: {
+    rel: "stylesheet",
+    href: "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+    type: "text/css",
+  },
+  script: {
+    src: "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js",
+  },
+});
+</script>
+
+<style scoped>
+@media only screen and (max-width: 515px) {
+  .profile-name {
+    display: none;
+  }
+}
+</style>
