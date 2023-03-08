@@ -47,171 +47,45 @@
           </button>
         </div>
       </div>
+      <!-- Header -->
       <div v-else>
-        <header>
-          <nav class="navbar bg-body-tertiary bg-white fixed-top p-3 mb-3 border-bottom border-{#FF0}">
-            <div class="container-fluid">
-              <NuxtLink class="navbar-brand" style="margin-right: -80px" to="/iam/dashboard"
-                ><img
-                  src="~~/iam/ui/img/nuxt-iam-logo-symbol.png"
-                  style="width: 17%; display: inline"
-                /><span style="color: #184b81">Nuxt<b>IAM</b></span></NuxtLink
-              >
-              <!-- Profile icon -->
-              <div v-if="profile" class="dropdown text-end">
-                <a
-                  href="#"
-                  class="d-block link-dark text-decoration-none dropdown-toggle"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                  @click="toggleMenu"
-                >
-                  <span v-if="profile.avatar">
-                    <img
-                      :src="profile.avatar"
-                      alt="mdo"
-                      width="32"
-                      height="32"
-                      class="rounded-circle"
-                    />
-                  </span>
-                  <span v-else>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      fill="currentColor"
-                      class="bi bi-person-circle"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                      <path
-                        fill-rule="evenodd"
-                        d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
-                      />
-                    </svg>
-                  </span>
+        <header class="mb-3 border-bottom">
+          <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+              <NuxtLink class="navbar-brand" to="/iam/dashboard">
+                <img src="~~/iam/ui/img/nuxt-iam-logo-symbol.png" style="width: 17%; display: inline" />
+                  <span style="color: #184b81">Nuxt<b>IAM</b></span>
+                </NuxtLink>
 
-                  <span class="mx-1 profile-name"
-                    >{{ firstName }} {{ lastName }}</span
-                  >
-                </a>               
-                <ul v-if="showMenu" class="dropdown-menu text-small show">
-                  <li>
-                    <NuxtLink class="dropdown-item" to="/iam/dashboard/profile"
-                      >Profile</NuxtLink
-                    >
-                  </li>
-                  <li>
-                    <NuxtLink class="dropdown-item" to="/iam/dashboard/settings"
-                      >Settings</NuxtLink
-                    >
-                  </li>
-                  <li><hr class="dropdown-divider" /></li>
-                  <li>
-                    <a class="dropdown-item" href="#" @click="logMeOut"
-                      >Logout</a
-                    >
-                  </li>
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                  <li><NuxtLink class="nav-link px-2 link-secondary" to="/iam/dashboard">Dashboard</NuxtLink></li>                  
+                  <li><NuxtLink class="nav-link px-2 link-dark" to="/iam/dashboard/admin">Admin</NuxtLink></li>                          
                 </ul>
-              </div>
+              <div>
 
-              <!-- Menu toggler -->
-              <button
-                class="navbar-toggler"
-                type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasNavbar"
-                aria-controls="offcanvasNavbar"
-              >
-                <span class="navbar-toggler-icon"></span>
-              </button>
-
-              <div
-                class="offcanvas offcanvas-end"
-                tabindex="-1"
-                id="offcanvasNavbar"
-                aria-labelledby="offcanvasNavbarLabel"
-              >
+              <button class="btn btn-small btn-primary my-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Menu</button>
+              <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
                 <div class="offcanvas-header">
-                  <h5 class="offcanvas-title" id="offcanvasNavbarLabel">
-                    Menu
-                  </h5>
-                  <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="offcanvas"
-                    aria-label="Close"
-                  ></button>
+                  <h5 class="offcanvas-title" id="offcanvasRightLabel">Offcanvas right</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
-                  <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-                    <li class="nav-item">
-                      <NuxtLink class="nav-link active" to="/iam/dashboard/"
-                        >Home</NuxtLink
-                      >
-                    </li>
-                    <li
-                      v-if="
-                        profile.permissions &&
-                        profile.permissions.includes('canAccessAdmin')
-                      "
-                      class="nav-item"
-                    >
-                      <NuxtLink class="nav-link" to="/iam/dashboard/admin"
-                        >Admin</NuxtLink
-                      >
-                    </li>
-                    <li class="nav-item dropdown">
-                      <a
-                        class="nav-link dropdown-toggle"
-                        href="#"
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                        Sample Dropdown
-                      </a>
-                      <ul
-                        class="dropdown-menu gap-1 p-2 rounded-3 mx-0 shadow w-220px"
-                      >
-                        <li>
-                          <a class="dropdown-item rounded-2 active" href="#"
-                            >Action</a
-                          >
-                        </li>
-                        <li>
-                          <a class="dropdown-item rounded-2" href="#"
-                            >Another action</a
-                          >
-                        </li>
-                        <li>
-                          <a class="dropdown-item rounded-2" href="#"
-                            >Something else here</a
-                          >
-                        </li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li>
-                          <a class="dropdown-item rounded-2" href="#"
-                            >Separated link</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
+                  ...
                 </div>
-              </div>
+              </div>          
+              </div>        
+              
             </div>
-          </nav>
-        </header>
-        <!-- Main content -->
-        <main style="margin-top: 86px">
-          <div class="container">            
-            <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
           </div>
-        </main>
-      </div>
-    </div>
+      </header>
+      <!-- Main content -->
+      <main>
+        <div class="container">
+          <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
+        </div>
+      </main>      
+    </div>    
+    </div>    
   </div>
   <div v-else class="container-xl px-4 mt-4">
     <div class="spinner-border" role="status"></div>
@@ -219,6 +93,9 @@
 </template>
 
 <script setup>
+import { useIamProfileStore } from '@/stores/useIamProfileStore'
+
+const iamStore = useIamProfileStore()
 const { isAuthenticated, getProfile, logout, verifyEmail } = useIam();
 
 const router = useRouter();
@@ -226,8 +103,6 @@ const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
 let getProfileError = ref(null);
-const showMenu = ref(false);
-
 let verificationEmailSent = ref(false);
 
 // Profile variables
@@ -265,9 +140,7 @@ async function isLoggedIn() {
   iAmLoggedIn.value = await isAuthenticated();
 
   // If user is not authenticated, push to login page
-  if (!iAmLoggedIn.value) router.push("/iam/login");
-
-  // If user is logged in, get csrf token
+  if (!iAmLoggedIn.value) router.push("/iam/login");  
 }
 
 // Log user out
@@ -308,24 +181,26 @@ async function getMyProfile() {
     // Check email verification status
     emailIsVerified.value = data.email_verified;
     showProfile.value = true;
-  }
+
+    // Store some profile data in store
+    iamStore.setProfile({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      avatar: profile.avatar,
+    })
+    
+    // Set log in true in store
+    iamStore.setIsLoggedIn(true)
+  }  
 }
 
 /**
  * @desc Sends API request to verify email
  * @param email User email
  */
-async function verifyMyEmail(email) {
-  console.log("Verifying my email: ", email);
+async function verifyMyEmail(email) {  
   verifyEmail(email);
   verificationEmailSent.value = true;
-}
-
-/**
- * @desc Toggles menu display on and off
- */
-function toggleMenu() {   
-  showMenu.value = !showMenu.value;
 }
 
 useHead({

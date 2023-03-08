@@ -58,24 +58,21 @@
                 </NuxtLink>
 
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                  <li><NuxtLink class="nav-link px-2 link-secondary" to="/iam/dashboard">Dashboard</NuxtLink></li>
-                  <li><a href="#" class="nav-link px-2 link-dark">Admin</a></li>
-                  <li><NuxtLink class="nav-link px-2 link-dark" to="/iam/dashboard/profile">Profile</NuxtLink></li>
-                  <li><NuxtLink class="nav-link px-2 link-dark" to="/iam/dashboard/settings">Settings</NuxtLink></li>                  
-                  <li><a href="#" class="nav-link px-2 link-dark">Products</a></li>          
+                  <li><NuxtLink class="nav-link px-2 link-secondary" to="/iam/dashboard">Dashboard</NuxtLink></li>                  
+                  <li><NuxtLink class="nav-link px-2 link-dark" to="/iam/dashboard/admin">Admin</NuxtLink></li>                          
                 </ul>
               <div>
-                
-                <button class="btn btn-small btn-primary my-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Menu</button>
-                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-                  <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasRightLabel">Offcanvas right</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                  </div>
-                  <div class="offcanvas-body">
-                    ...
-                  </div>
-                </div>          
+
+              <button class="btn btn-small btn-primary my-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Menu</button>
+              <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                <div class="offcanvas-header">
+                  <h5 class="offcanvas-title" id="offcanvasRightLabel">Offcanvas right</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                  ...
+                </div>
+              </div>          
               </div>        
               
             </div>
@@ -96,6 +93,9 @@
 </template>
 
 <script setup>
+import { useIamProfileStore } from '@/stores/useIamProfileStore'
+
+const iamStore = useIamProfileStore()
 const { isAuthenticated, getProfile, logout, verifyEmail } = useIam();
 
 const router = useRouter();
@@ -103,8 +103,6 @@ const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
 let getProfileError = ref(null);
-const showMenu = ref(false);
-
 let verificationEmailSent = ref(false);
 
 // Profile variables
@@ -142,9 +140,7 @@ async function isLoggedIn() {
   iAmLoggedIn.value = await isAuthenticated();
 
   // If user is not authenticated, push to login page
-  if (!iAmLoggedIn.value) router.push("/iam/login");
-
-  // If user is logged in, get csrf token
+  if (!iAmLoggedIn.value) router.push("/iam/login");  
 }
 
 // Log user out
@@ -185,24 +181,26 @@ async function getMyProfile() {
     // Check email verification status
     emailIsVerified.value = data.email_verified;
     showProfile.value = true;
-  }
+
+    // Store some profile data in store
+    iamStore.setProfile({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      avatar: profile.avatar,
+    })
+    
+    // Set log in true in store
+    iamStore.setIsLoggedIn(true)
+  }  
 }
 
 /**
  * @desc Sends API request to verify email
  * @param email User email
  */
-async function verifyMyEmail(email) {
-  console.log("Verifying my email: ", email);
+async function verifyMyEmail(email) {  
   verifyEmail(email);
   verificationEmailSent.value = true;
-}
-
-/**
- * @desc Toggles menu display on and off
- */
-function toggleMenu() {   
-  showMenu.value = !showMenu.value;
 }
 
 useHead({
