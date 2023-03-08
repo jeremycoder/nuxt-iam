@@ -39,6 +39,9 @@
 </template>
 
 <script setup>
+const showMenu = ref(false);
+
+
 useHead({  
   link: {
     rel: "stylesheet",
