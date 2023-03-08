@@ -52,8 +52,8 @@
         <header class="mb-3 border-bottom">
           <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-              <NuxtLink class="navbar-brand" to="/iam/dashboard">
-                <img src="~~/iam/ui/img/nuxt-iam-logo-symbol.png" style="width: 17%; display: inline" />
+              <NuxtLink class="text-decoration-none text-center" to="/iam/dashboard">
+                <img src="~~/iam/ui/img/nuxt-iam-logo-symbol.png" style="width: 14%; display: inline" />
                   <span style="color: #184b81">Nuxt<b>IAM</b></span>
               </NuxtLink>
 
@@ -131,7 +131,7 @@ async function isLoggedIn() {
   if (!iAmLoggedIn.value) router.push("/iam/login");  
 }
 
-// Check is user is admin
+// Check is user is admin 
 const isAdmin = computed(() => {
   if (profile && profile.permissions) return profile.permissions.includes('canAccessAdmin')
   else return false
@@ -210,10 +210,3 @@ useHead({
 });
 </script>
 
-<style scoped>
-@media only screen and (max-width: 515px) {
-  .profile-name {
-    display: none;
-  }
-}
-</style>

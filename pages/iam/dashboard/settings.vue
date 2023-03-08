@@ -48,8 +48,7 @@
                   v-model="profile.currentPassword"
                   type="password"
                   class="form-control mb-3"
-                  id="current_password"
-                  style="width: 300px"
+                  id="current_password"                  
                 />
                 <label for="new_password" class="form-label"
                   >New Password</label
@@ -58,8 +57,7 @@
                   v-model="profile.newPassword"
                   type="password"
                   class="form-control mb-3"
-                  id="new_password"
-                  style="width: 300px"
+                  id="new_password"                  
                 />
                 <label for="confirm_password" class="form-label"
                   >Confirm New Password</label
@@ -68,8 +66,7 @@
                   v-model="profile.confirmNewPassword"
                   type="password"
                   class="form-control mb-3"
-                  id="confirm_password"
-                  style="width: 300px"
+                  id="confirm_password"                  
                 />
               </div>
               <button

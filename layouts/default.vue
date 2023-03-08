@@ -6,8 +6,8 @@
           <li><NuxtLink to="/" class="nav-link px-2 link-dark" aria-current="page"><strong>LOGO</strong></NuxtLink></li>
           <li><NuxtLink to="/" class="nav-link px-2 link-dark active" aria-current="page">Home</NuxtLink></li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Nuxt IAM</a>
-            <ul class="dropdown-menu">
+            <a class="nav-link dropdown-toggle" :class="showMenu ? 'show' : ''" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" @click="toggleDocsMenu">Nuxt IAM</a>
+            <ul class="dropdown-menu" :class="showMenu ? 'show' : ''">
               <li><NuxtLink to="/iam/" class="dropdown-item">What is it?</NuxtLink></li>
               <li><NuxtLink to="/iam/docs/" class="dropdown-item">Introduction</NuxtLink></li>
               <li><NuxtLink to="/iam/docs/getting-started" class="dropdown-item">Getting Started</NuxtLink></li>
@@ -16,9 +16,7 @@
               <li><NuxtLink to="/iam/docs/frontend" class="dropdown-item">Front end</NuxtLink></li>
               <li><NuxtLink to="/iam/docs/configuration" class="dropdown-item">Configuration</NuxtLink></li>
               <li><NuxtLink to="/iam/docs/backend" class="dropdown-item">Back end</NuxtLink></li>
-              <li><NuxtLink to="/iam/docs/backend" class="dropdown-item">Files</NuxtLink></li>              
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Separated link</a></li>
+              <li><NuxtLink to="/iam/docs/backend" class="dropdown-item">Files</NuxtLink></li>             
             </ul>
           </li>  
           <li><NuxtLink to="/sample-page" class="nav-link px-2 link-dark">Sample Page</NuxtLink></li>  
@@ -41,6 +39,12 @@
 <script setup>
 const showMenu = ref(false);
 
+/**
+ * @Desc Toggle Nuxt IAM docs menu
+ */
+ async function toggleDocsMenu() {
+  showMenu.value = !showMenu.value;   
+}
 
 useHead({  
   link: {

@@ -22,7 +22,7 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "nuxt": "3.2.2"
+    "nuxt": "3.2.3"
   },
   "dependencies": {
     "@pinia/nuxt": "^0.4.7",

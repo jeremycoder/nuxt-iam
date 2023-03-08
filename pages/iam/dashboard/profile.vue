@@ -33,79 +33,84 @@
       @click="updateSuccessful = false"
     ></button>
   </div>
-  <form class="mb-5">
-    <div class="mb-3">
-      <label for="uuid" class="form-label">Uuid</label>
-      <input
-        type="text"
-        class="form-control mb-3"
-        id="uuid"
-        style="width: 415px"
-        :value="$attrs.profile.uuid"
-        disabled
-      />
-      <label for="is_active" class="form-label">Is Active</label>
-      <input
-        type="text"
-        class="form-control mb-3"
-        id="is_active"
-        style="width: 415px"
-        :value="$attrs.profile.isActive"
-        disabled
-      />
-      <label for="permissions" class="form-label">Permissions</label>
-      <textarea
-        type="text"
-        class="form-control mb-3"
-        id="permissions"
-        style="width: 415px"
-        :value="$attrs.profile.permissions"
-        disabled
-      />
-      <label for="email" class="form-label">Email address</label>
-      <input
-        type="email"
-        class="form-control mb-3"
-        id="email"
-        style="width: 415px"
-        :value="$attrs.profile.email"
-        disabled
-      />
-      <label for="role" class="form-label">Role</label>
-      <input
-        type="text"
-        class="form-control mb-3"
-        id="role"
-        style="width: 415px"
-        :value="$attrs.profile.role"
-        disabled
-      />
-      <label for="first_name" class="form-label">First name</label>
-      <input
-        v-model="profile.firstName"
-        type="text"
-        class="form-control mb-3"
-        id="first_name"
-        style="width: 315px"
-      />
-      <label for="last_name" class="form-label">Last name</label>
-      <input
-        v-model="profile.lastName"
-        type="text"
-        class="form-control mb-3"
-        id="last_name"
-        style="width: 315px"
-      />
-    </div>
 
-    <button
-      type="submit"
-      class="btn btn-primary"
-      @click.prevent="updateMyProfile()"
-    >
-      Update My Profile
-    </button>
-  </form>
+  <div class="row">
+      <div class="col">
+        <div class="card mb-3 mx-10" style="max-width: 25rem">
+          <h4 class="card-header">Profile</h4>
+          <div class="card-body">
+            <h5 class="card-title">Update Profile</h5>
+            <p>Update your profile below.</p>
+            <!-- Data here-->
+            <form class="mb-5">
+              <div class="mb-3">
+                <label for="uuid" class="form-label">Uuid</label>
+                <input
+                  type="text"
+                  class="form-control mb-3"
+                  id="uuid"                
+                  :value="$attrs.profile.uuid"
+                  disabled
+                />
+                <label for="is_active" class="form-label">Is Active</label>
+                <input
+                  type="text"
+                  class="form-control mb-3"
+                  id="is_active"                  
+                  :value="$attrs.profile.isActive"
+                  disabled
+                />
+                <label for="permissions" class="form-label">Permissions</label>
+                <textarea
+                  type="text"
+                  class="form-control mb-3"
+                  id="permissions"                  
+                  :value="$attrs.profile.permissions"
+                  disabled
+                />
+                <label for="email" class="form-label">Email address</label>
+                <input
+                  type="email"
+                  class="form-control mb-3"
+                  id="email"                  
+                  :value="$attrs.profile.email"
+                  disabled
+                />
+                <label for="role" class="form-label">Role</label>
+                <input
+                  type="text"
+                  class="form-control mb-3"
+                  id="role"                  
+                  :value="$attrs.profile.role"
+                  disabled
+                />
+                <label for="first_name" class="form-label">First name</label>
+                <input
+                  v-model="profile.firstName"
+                  type="text"
+                  class="form-control mb-3"
+                  id="first_name"                  
+                />
+                <label for="last_name" class="form-label">Last name</label>
+                <input
+                  v-model="profile.lastName"
+                  type="text"
+                  class="form-control mb-3"
+                  id="last_name"                  
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                @click.prevent="updateMyProfile()"
+              >
+                Update My Profile
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>  
 </template>
 
 <script setup>
