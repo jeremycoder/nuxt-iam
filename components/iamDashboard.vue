@@ -141,6 +141,7 @@ const isAdmin = computed(() => {
 async function logMeOut() {
   const { status } = await logout();
   if (status === "success") {
+    iamStore.setIsLoggedIn(false)
     router.push("/iam/login");
   }
 }
