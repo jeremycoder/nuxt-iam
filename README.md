@@ -4,7 +4,7 @@ Nuxt IAM, which stands for Nuxt Identity and Access Management, is an authentica
 
 See a fully functional [example app](https://nuxt-iam.vercel.app/iam/).
 
-https://user-images.githubusercontent.com/7818102/215188979-fe272b3f-ef3a-4b8d-9cfc-0dedd6edb911.mp4
+https://user-images.githubusercontent.com/7818102/224216154-9b8672e0-f195-4d41-aa15-3b268d65b214.mp4
 
 Nuxt IAM is a Nuxt app that contains the following authentication and authorization features:
 
@@ -28,6 +28,24 @@ Simple clone the [Github repo](https://github.com/jeremycoder/nuxt-iam), fork it
 
 ## Getting Started
 
+Nuxt IAM is a Nuxt application and comes ready to run. All you need to add is a database.
+
+1.  Please install [Node](https://nodejs.org) if you don't already have it
+2.  Please install [Yarn package manager](https://yarnpkg.com/). (You can also use npm if you like, but we prefer Yarn)
+3.  Clone, fork, or download the repo from `https://github.com/jeremycoder/nuxt-iam`, and navigate to the root directory.
+4.  Copy the `.env.example` file and create a `.env` file
+5.  Run `yarn` or `yarn install`.
+6.  Add your database information to your `.env` file. Nuxt IAM curently supports MySQL, but can be modified to support other databases. See [Prisma](https://www.prisma.io/docs/reference/database-reference/connection-urls) for more information.
+7.  Connect your app to your database by running `npx prisma migrate dev`. Name your migration `initial_migration` or something similar
+8.  Run `yarn dev`, and you're good to go!
+
+More [configuration](https://nuxt-iam.vercel.app/iam/docs/configuration) is required if you need to send emails and use Google authentication.
+
+Learn more about how Nuxt IAM works by looking at the [concepts](https://nuxt-iam.vercel.app/iam/docs/concepts).
+
 Check out the sample app here: https://nuxt-iam.vercel.app/iam/
 
 For documentation: https://nuxt-iam.vercel.app/iam/docs
+
+
+
