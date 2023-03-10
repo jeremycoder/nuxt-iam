@@ -86,7 +86,6 @@ import { useIamProfileStore } from '@/stores/useIamProfileStore'
 const iamStore = useIamProfileStore()
 const { isAuthenticated, getProfile, logout, verifyEmail } = useIam();
 
-const router = useRouter();
 const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
@@ -128,7 +127,7 @@ async function isLoggedIn() {
   iAmLoggedIn.value = await isAuthenticated();
 
   // If user is not authenticated, push to login page
-  if (!iAmLoggedIn.value) router.push("/iam/login");  
+  if (!iAmLoggedIn.value) navigateTo("/iam/login");  
 }
 
 // Check is user is admin 
@@ -141,14 +140,18 @@ const isAdmin = computed(() => {
 async function logMeOut() {
   const { status } = await logout();
   if (status === "success") {
+    
+    // Clear store variables
     iamStore.setIsLoggedIn(false)
-    router.push("/iam/login");
+    iamStore.clearProfile()
+
+    navigateTo("/iam/login");
   }
 }
 
 // Attempt to get user profile
 async function getMyProfile() {
-  const { status, error, data } = await getProfile();
+  const { status, error, data } = await getProfile();  
 
   // If error, show error
   if (error) {
@@ -175,7 +178,7 @@ async function getMyProfile() {
 
     // Check email verification status
     emailIsVerified.value = data.email_verified;
-    showProfile.value = true;
+    showProfile.value = true;    
 
     // Store some profile data in store
     iamStore.setProfile({
@@ -186,6 +189,9 @@ async function getMyProfile() {
     
     // Set log in true in store
     iamStore.setIsLoggedIn(true)
+    iamStore.setUpdateCount()
+
+    
   }  
 }
 
@@ -199,15 +205,7 @@ async function verifyMyEmail(email) {
 }
 
 useHead({
-  title: "Nuxt IAM Dashboard",
-  link: {
-    rel: "stylesheet",
-    href: "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
-    type: "text/css",
-  },
-  script: {
-    src: "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js",
-  },
+  title: "Nuxt IAM Dashboard",  
 });
 </script>
 

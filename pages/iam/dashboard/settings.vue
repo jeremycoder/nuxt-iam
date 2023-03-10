@@ -120,7 +120,11 @@
 </template>
 
 <script setup>
+import { useIamProfileStore } from '@/stores/useIamProfileStore'
+
+const iamStore = useIamProfileStore()
 const { updateProfile, deleteAccount } = useIam();
+
 const updateSuccessful = ref(false);
 let profileError = ref(null);
 let deleteError = ref(null);
@@ -198,10 +202,13 @@ async function deleteMyAccount() {
     deleteError.value = error;
     return;
   }
+  
+  // Clear store variables
+  iamStore.setIsLoggedIn(false)
+  iamStore.clearProfile()
 
-  // Otherwise, delete was successful, navigate to register
-  const router = useRouter();
-  router.push("/iam/register");
+  // Navigate to register
+  navigateTo("/iam/register");
 }
 </script>
 

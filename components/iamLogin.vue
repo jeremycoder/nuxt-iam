@@ -92,15 +92,7 @@ const handleGoogleLoginError = () => {
 
 // If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({
-  title: "Nuxt IAM Login",
-  link: {
-    rel: "stylesheet",
-    href: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css",
-    type: "text/css",
-  },
-  script: {
-    src: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js",
-  },
+  title: "Nuxt IAM Login",  
 });
 </script>
 

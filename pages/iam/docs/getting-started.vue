@@ -1,11 +1,20 @@
 <template>
     <div class="container px-4 my-5 py-5 border shadow-lg" id="icon-grid">
       <h1 id="getting-started border-bottom">Getting Started</h1>
-        <p>At a minimum all you need to run Nuxt IAM is a database. Nuxt IAM is a Nuxt application and comes ready to run. All you need to add is a database.</p>
-        <p>More configuration is required if you need to send emails and use Google authentication.</p>
-        <h2 id="starting-from-scratch">Starting from Scratch (with nothing)</h2>
-        <p>The fastest way to get started is to clone the repo or use the npm <code>npm i nuxt-iam</code> or <code>yarn add nuxt-iam</code> or <code>npx nuxt-iam</code> command. This will add a fresh Nuxt 3 installation with the authentication and authorization logic already there. Nuxt IAM works with <strong>Nuxt 3</strong> and is not supported in Nuxt 2.</p>
-        <h2 id="add-to-an-existing-app">Add to an Existing App</h2>
-        <p>Add content</p>
+        <p>Nuxt IAM is a Nuxt application and comes ready to run. All you need to add is a database.</p>
+        <ol>
+          <li>Please install <a href="https://nodejs.org">Node</a> if you don't already have it</li>
+          <li>Please install <a href="https://yarnpkg.com/">Yarn package manager</a>. (You can also use npm if you like, but we prefer Yarn)</li>
+          <li>Clone, fork, or download the repo from <code>https://github.com/jeremycoder/nuxt-iam</code>, and navigate to the root directory.</li>
+          <li>Copy the <code>.env.example</code> file and create a <code>.env</code> file</li>
+          <li>Run <code>yarn</code> or <code>yarn install</code>.</li>
+          <li>Add your database information to your <code>.env</code> file. Nuxt IAM curently supports MySQL, but can be modified to support other databases. See <a href="https://www.prisma.io/docs/reference/database-reference/connection-urls">Prisma</a> for more information.</li>
+          <li>Connect your app to your database by running <code>npx prisma migrate dev</code>. Name your migration <code>initial_migration</code> or something similar</li>
+          <li>Run <code>yarn dev</code>, and you're good to go!</li>
+        </ol>
+        
+        <p>More <NuxtLink to="/iam/docs/configuration">configuration</NuxtLink> is required if you need to send emails and use Google authentication.</p>
+        
+        <p>Learn more about how Nuxt IAM works by looking at the <NuxtLink to="/iam/docs/concepts">concepts.</NuxtLink></p>
     </div> 
 </template>

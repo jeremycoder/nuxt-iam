@@ -7,7 +7,7 @@
         Nuxt app.
       </p> 
       <p>See a fully functional <a href="https://nuxt-iam.vercel.app/iam/">example app</a>.</p>
-      <p>[[add video]]</p>
+      
       <p>Nuxt IAM adds the following features to your application:</p>
       <ul>
         <li>✔️ user registration with email and password</li>

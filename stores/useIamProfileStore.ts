@@ -11,7 +11,8 @@ interface SmallProfile {
 
 export const useIamProfileStore = defineStore('iamProfile', () => {
   const myProfile = ref(<SmallProfile|null>(null))  
-  const isLoggedIn = ref(false)  
+  const isLoggedIn = ref(false)
+  const updateCount = ref(0)  
   
   // Returns the profile
   const getProfile = computed(() => myProfile.value)
@@ -38,5 +39,13 @@ export const useIamProfileStore = defineStore('iamProfile', () => {
     myProfile.value = null
   }
 
-  return { setProfile, getProfile, clearProfile, setIsLoggedIn, isLoggedIn }
+  /**
+   * @desc Increases updateCount whenever an update is made
+   */
+  function setUpdateCount() {
+    updateCount.value++
+  }
+
+
+  return { setProfile, getProfile, clearProfile, setIsLoggedIn, isLoggedIn, setUpdateCount, updateCount }
 })

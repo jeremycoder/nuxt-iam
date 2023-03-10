@@ -52,21 +52,19 @@
                   :value="$attrs.profile.uuid"
                   disabled
                 />
-                <label for="is_active" class="form-label">Is Active</label>
+                <label for="first_name" class="form-label">First name</label>
                 <input
+                  v-model="profile.firstName"
                   type="text"
                   class="form-control mb-3"
-                  id="is_active"                  
-                  :value="$attrs.profile.isActive"
-                  disabled
+                  id="first_name"                  
                 />
-                <label for="permissions" class="form-label">Permissions</label>
-                <textarea
+                <label for="last_name" class="form-label">Last name</label>
+                <input
+                  v-model="profile.lastName"
                   type="text"
                   class="form-control mb-3"
-                  id="permissions"                  
-                  :value="$attrs.profile.permissions"
-                  disabled
+                  id="last_name"                  
                 />
                 <label for="email" class="form-label">Email address</label>
                 <input
@@ -84,20 +82,22 @@
                   :value="$attrs.profile.role"
                   disabled
                 />
-                <label for="first_name" class="form-label">First name</label>
+                <label for="is_active" class="form-label">Is Active</label>
                 <input
-                  v-model="profile.firstName"
                   type="text"
                   class="form-control mb-3"
-                  id="first_name"                  
+                  id="is_active"                  
+                  :value="$attrs.profile.isActive"
+                  disabled
                 />
-                <label for="last_name" class="form-label">Last name</label>
-                <input
-                  v-model="profile.lastName"
+                <label for="permissions" class="form-label">Permissions</label>
+                <textarea
                   type="text"
                   class="form-control mb-3"
-                  id="last_name"                  
-                />
+                  id="permissions"                  
+                  :value="$attrs.profile.permissions"
+                  disabled
+                ></textarea>               
               </div>
               <button
                 type="submit"
@@ -152,7 +152,7 @@ async function updateMyProfile() {
     csrfToken: csrfToken,
   };
 
-  const { error } = await updateProfile(values);
+  const { error, data } = await updateProfile(values);
 
   // If error, display error
   if (error) {
@@ -162,6 +162,7 @@ async function updateMyProfile() {
   }
 
   updateSuccessful.value = true;
+
   emit("profileUpdate");
 }
 </script>

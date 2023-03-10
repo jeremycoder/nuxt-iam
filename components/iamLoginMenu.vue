@@ -63,7 +63,7 @@ const avatar = ref(<string|undefined>(undefined))
 // Watch the iamProfile store
 iamStore.$subscribe((mutation, state) => { 
   iAmLoggedIn.value = state.isLoggedIn
-  
+ 
   // If profile values
   if (iAmLoggedIn.value) {
     const temp = iamStore.getProfile
@@ -88,7 +88,11 @@ iamStore.$subscribe((mutation, state) => {
 async function logMeOut() {
   const { status } = await logout();
   if (status === "success") {
+    
+    // Clear store variables
     iamStore.setIsLoggedIn(false)
+    iamStore.clearProfile()
+
     navigateTo("/iam/login");
   }
 }

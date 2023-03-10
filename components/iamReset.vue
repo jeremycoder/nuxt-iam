@@ -50,15 +50,7 @@ async function resetMyPassword() {
 }
 
 useHead({
-  title: "Nuxt IAM Register",
-  link: {
-    rel: "stylesheet",
-    href: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css",
-    type: "text/css",
-  },
-  script: {
-    src: "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js",
-  },
+  title: "Nuxt IAM Register", 
 });
 </script>
 

@@ -14,3 +14,9 @@
   
   </div>
 </template>
+
+<script setup>
+  useHead({
+    title: 'Home Page - Nuxt IAM Sample app'
+  })
+</script>
