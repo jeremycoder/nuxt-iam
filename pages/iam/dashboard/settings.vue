@@ -47,7 +47,7 @@
                 <input
                   v-model="profile.currentPassword"
                   type="password"
-                  class="form-control mb-3"
+                  class="form-control mb-3 iam-password-input"                  
                   id="current_password"                  
                 />
                 <label for="new_password" class="form-label"
@@ -204,3 +204,9 @@ async function deleteMyAccount() {
   router.push("/iam/register");
 }
 </script>
+
+<style scoped>
+.iam-password-input {
+  min-width: 180px;
+}
+</style>

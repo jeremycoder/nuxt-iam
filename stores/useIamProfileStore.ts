@@ -1,4 +1,5 @@
 // Store to store part of user profile for Nuxt IAM
+//! Do not store sensitive data in here. Only store data that can be made public.
 
 import { defineStore } from 'pinia'
 

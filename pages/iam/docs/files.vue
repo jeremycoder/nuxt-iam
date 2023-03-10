@@ -40,6 +40,12 @@
 <li>request: server api --&gt; controller --&gt; model --&gt; query --&gt; helper</li>
 <li>response: server api &lt;-- controller &lt;-- model &lt;-- query &lt;-- helper</li>
 </ul>
+<h2 id="stores">stores</h2>
+<p>The <code>stores</code> directory stores Pinia store.</p>
+<ul>
+<li><strong>useIamProfileStore</strong>: Pinia store that stores profile data after login.</li>
+</ul>
+
 <p>To modify Nuxt IAM to your liking, you need to understand the <code>mvc</code> directory.</p>
 <h3 id="ui">ui</h3>
 <p>The <code>ui</code> directory contains user interface items such as the Nuxt IAM logo.</p>
