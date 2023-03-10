@@ -3,7 +3,7 @@
       <h1 id="getting-started border-bottom">Getting Started</h1>
         <p>Nuxt IAM is a Nuxt application and comes ready to run. All you need to add is a database.</p>
         <ol>
-          <li>Please install <a href="https://nodejs.org">Node</a> if you don't already have it</li>
+          <li>Please install <a href="https://nodejs.org">Node</a> if you don't already have it. The recommended Node version is <strong>Node 16.16 or greater.</strong></li>
           <li>Please install <a href="https://yarnpkg.com/">Yarn package manager</a>. (You can also use npm if you like, but we prefer Yarn)</li>
           <li>Clone, fork, or download the repo from <code>https://github.com/jeremycoder/nuxt-iam</code>, and navigate to the root directory.</li>
           <li>Copy the <code>.env.example</code> file and create a <code>.env</code> file</li>
