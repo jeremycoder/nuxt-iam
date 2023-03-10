@@ -17,7 +17,7 @@
         </div>
         <!-- Register Success -->
         <div v-if="registerSuccess" class="alert alert-success alert-dismissible fade show" role="alert">
-          <strong>Registeration successful</strong>
+          <strong>Registration successful</strong>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="registerSuccess = null"></button>
         </div>              
         <div class="form-floating">

@@ -30,7 +30,7 @@ Simple clone the [Github repo](https://github.com/jeremycoder/nuxt-iam), fork it
 
 Nuxt IAM is a Nuxt application and comes ready to run. All you need to add is a database.
 
-1.  Please install [Node](https://nodejs.org) if you don't already have it
+1.  Please install [Node](https://nodejs.org) if you don't already have it. The recommended Node version is **16.16 or greater**
 2.  Please install [Yarn package manager](https://yarnpkg.com/). (You can also use npm if you like, but we prefer Yarn)
 3.  Clone, fork, or download the repo from `https://github.com/jeremycoder/nuxt-iam`, and navigate to the root directory.
 4.  Copy the `.env.example` file and create a `.env` file
