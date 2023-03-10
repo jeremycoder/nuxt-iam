@@ -44,14 +44,14 @@ export default defineEventHandler(async (event) => {
         // get authenticated user's profile
         result = new route("/api/iam/authn/profile").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await profile(event);
         }
 
         // determine if user is authenticated
         result = new route("/api/iam/authn/isauthenticated").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await isauthenticated(event);
         }
         break;
@@ -59,63 +59,63 @@ export default defineEventHandler(async (event) => {
         // add new user to database
         result = new route("/api/iam/authn/register").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await register(event);
         }
 
         // log into database
         result = new route("/api/iam/authn/login").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await login(event);
         }
 
         // log into database with Google
         result = new route("/api/iam/authn/login-google").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await loginWithGoogle(event);
         }
 
         // refresh jwt tokens
         result = new route("/api/iam/authn/refresh").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await refresh(event);
         }
 
         // reset user password
         result = new route("/api/iam/authn/reset").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await reset(event);
         }
 
         // verifies token sent from reset email
         result = new route("/api/iam/authn/verifyreset(/:token)").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await verifyReset(event);
         }
 
         // send email to verify user email
         result = new route("/api/iam/authn/verifyemail").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await verifyEmail(event);
         }
 
         // verify token sent from user's email verification link
         result = new route("/api/iam/authn/verifyemailtoken").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await verifyEmailToken(event);
         }
 
         // log user out
         result = new route("/api/iam/authn/logout").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await logout(event);
         }
         break;
@@ -123,7 +123,7 @@ export default defineEventHandler(async (event) => {
         // update user profile
         result = new route("/api/iam/authn/update").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await update(event);
         }
         break;
@@ -131,7 +131,7 @@ export default defineEventHandler(async (event) => {
         // delete user account
         result = new route("/api/iam/authn/delete").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await destroy(event);
         }
         break;

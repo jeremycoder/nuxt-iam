@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
         // show all users
         result = new route("/api/iam/users").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
 
           // Permissions
           if (!isSuperAdmin(user)) return forbiddenError;
@@ -80,7 +80,7 @@ export default defineEventHandler(async (event) => {
         // show a particular user
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
 
           // Permissions
           if (!isSuperAdmin(user) && !isOwner(userUuid, result.uuid))
@@ -94,7 +94,7 @@ export default defineEventHandler(async (event) => {
         // add new user to database
         result = new route("/api/iam/users").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
           return await create(event);
         }
         break;
@@ -103,7 +103,7 @@ export default defineEventHandler(async (event) => {
         // update particular user then redirect
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
 
           // Check if csrf token is valid
           const csrfTokenError = await validateCsrfToken(event);
@@ -130,7 +130,7 @@ export default defineEventHandler(async (event) => {
         // delete particular user
         result = new route("/api/iam/users(/:uuid)").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
 
           // Check if csrf token is valid
           const csrfTokenError = await validateCsrfToken(event);

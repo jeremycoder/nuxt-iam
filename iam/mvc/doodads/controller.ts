@@ -26,14 +26,14 @@ export default defineEventHandler(async (event) => {
         // show all doodads
         result = new route("/api/iam/doodads").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result;
           return await index(event);
         }
 
         // show a particular doodad
-        result = new route("/api/iam/doodads(/:uuid)").match(url);
+        result = new route("/api/iam/doodads(/:id)").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result;
           return await show(event);
         }
         break;
@@ -42,25 +42,25 @@ export default defineEventHandler(async (event) => {
         // add new user to database
         result = new route("/api/iam/doodads").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result;
           return await create(event);
         }
         break;
 
       case "PUT":
         // update particular user then redirect
-        result = new route("/api/iam/doodads(/:uuid)").match(url);
+        result = new route("/api/iam/doodads(/:id)").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result;
           return await update(event);
         }
         break;
 
       case "DELETE":
         // delete particular doodad
-        result = new route("/api/iam/doodads(/:uuid)").match(url);
+        result = new route("/api/iam/doodads(/:id)").match(url);
         if (result) {
-          event.context.params.fromRoute = result;          
+          if (event.context.params) event.context.params.fromRoute = result;          
           return await destroy(event);
         }
         break;

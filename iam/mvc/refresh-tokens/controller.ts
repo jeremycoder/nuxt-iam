@@ -67,7 +67,7 @@ export default defineEventHandler(async (event) => {
         // get all refresh tokens
         result = new route("/api/iam/refresh-tokens").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
 
           // Permissions
           if (!isSuperAdmin(user)) return forbiddenError;
@@ -80,7 +80,7 @@ export default defineEventHandler(async (event) => {
         // delete a particular refresh token
         result = new route("/api/iam/refresh-tokens(/:id)").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
 
           // Check if csrf token is valid
           const csrfTokenError = await validateCsrfToken(event);
@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
         // delete all refresh tokens
         result = new route("/api/iam/refresh-tokens/").match(url);
         if (result) {
-          event.context.params.fromRoute = result;
+          if (event.context.params) event.context.params.fromRoute = result; 
 
           // Check if csrf token is valid
           const csrfTokenError = await validateCsrfToken(event);
