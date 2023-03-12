@@ -40,15 +40,6 @@
       <p>Nuxt IAM keeps track of expired refresh tokens. Let&#39;s say you you have a one refresh token in the database. If you refresh your tokens, you get a new set of tokens, and the old refresh token will be deactivated. If you or someone else steals the old refresh token and attempts to get a new set of tokens using that refresh token, all your refresh tokens will be deactivated, and you will have to login after your access token expires. This feature protects your account against stolen tokens.</p>
       <h2 id="sessions">Sessions</h2>
       <p>Nuxt IAM uses sessions to manage user sessions. Every user can only have one session at a time.</p>
-
-    </div>    
-    <div class="container px-4 my-5 py-5 border shadow-lg" id="icon-grid">
-      <h3 class="pb-2 border-bottom">Starting with Nothing</h3>
-      <p>The fastest way to get started is to clone the repo or use the npm <code>npm i nuxt-iam</code> or <code>yarn add nuxt-iam</code> or <code>npx nuxt-iam</code> command. This will add a fresh Nuxt 3 installation with the authentication and authorization logic already there. Nuxt IAM works with <strong>Nuxt 3</strong> and is not supported in Nuxt 2.</p>
-    </div> 
-    <div class="container px-4 my-5 py-5 border shadow-lg" id="icon-grid">
-      <h3 class="pb-2 border-bottom">Add to an Existing App</h3>
-      <p>Add to an existing app</p>
-    </div>         
+    </div>   
   </div>  
 </template>
