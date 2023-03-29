@@ -101,18 +101,18 @@ export async function validateUserRegistration(
 export async function validateUserUpdate(
   event: H3Event
 ): Promise<H3Error | void> {
-  const { fromRoute } = event.context.params;
+  const uuid = event.context.params?.uuid;
   const body = await readBody(event);
 
   // If no uuid given
-  if (!fromRoute.uuid)
+  if (!uuid)
     return createError({
       statusCode: 400,
       statusMessage: "Uuid not supplied",
     });
 
   // If uuid exists, but user does not exist
-  if (!(await userExists(fromRoute.uuid)))
+  if (!(await userExists(uuid)))
     return createError({
       statusCode: 400,
       statusMessage: "User not found",
@@ -240,7 +240,8 @@ export async function validateUserProfileUpdate(
 export async function validateUserDelete(
   event: H3Event
 ): Promise<H3Error | void> {
-  const { uuid } = event.context.params.fromRoute;
+  const uuid = event.context.params?.fromRoute;
+  
   if (!uuid)
     return createError({
       statusCode: 400,

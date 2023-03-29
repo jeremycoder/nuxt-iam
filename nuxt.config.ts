@@ -41,7 +41,7 @@ export default defineNuxtConfig({
   // Modules
   modules: [
     "nuxt-vue3-google-signin", 
-    "@pinia/nuxt"
+    "@pinia/nuxt",
   ],
 
   // Google sign in

@@ -66,7 +66,16 @@ export async function getAllUsers(
  * @param event H3Event
  */
 export async function showUser(event: H3Event): Promise<User | H3Error> {
-  const { uuid } = event.context.params.fromRoute;
+  const uuid  = event.context.params?.uuid;
+
+  if (!uuid) {
+    console.log('Missing user uuid')
+    return createError({
+      statusCode: 400,
+      statusMessage: "Missing user uuid",
+    });
+  }
+
   let error = null;
   let user = {} as User | null;
 
@@ -122,14 +131,23 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
   // Get parameters
   const body = await readBody(event);
 
-  const { fromRoute } = event.context.params;
+  const uuid  = event.context.params?.uuid;
+
+  if (!uuid) {
+    console.log('Missing user uuid')
+    return createError({
+      statusCode: 400,
+      statusMessage: "Missing user uuid",
+    });
+  }
+
   let user = {} as User;
   let error = null;
 
   await prisma.users
     .update({
       where: {
-        uuid: fromRoute.uuid,
+        uuid: uuid,
       },
       data: {
         first_name: body.first_name,
@@ -165,8 +183,15 @@ export async function destroyUser(event: H3Event): Promise<boolean | H3Error> {
   const errorOrVoid = await validateUserDelete(event);
   if (errorOrVoid instanceof H3Error) return errorOrVoid;
 
-  // Get uuid from route
-  const { uuid } = event.context.params.fromRoute;
+  const uuid  = event.context.params?.uuid;
+
+  if (!uuid) {
+    console.log('Missing user uuid')
+    return createError({
+      statusCode: 400,
+      statusMessage: "Missing user uuid",
+    });
+  }
 
   let user = {} as User;
   let error = null;

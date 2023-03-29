@@ -2,76 +2,47 @@
  * Routes all doodad requests
  */
 
-import UrlPattern from "url-pattern";
-import { JSONResponse } from "~~/iam/misc/types";
+// Definitely much cleaner and neater
+
 import { index, create, show, update, destroy } from "./model";
+import { createRouter, defineEventHandler, useBase } from 'h3';
 
-export default defineEventHandler(async (event) => {
-  const route = UrlPattern;
+const router = createRouter();
 
-  // Get url with query parameters
-  let url = event.node.req.url;
+// Routes /api/iam/doodads
 
-  // Remove query parameters because url pattern does not understand them
-  if (url && url.includes("?")) url = url.substring(0, url.indexOf("?"));
+// Get all doodads
+router.get('/', defineEventHandler(async (event) => { 
+  return await index(event) 
+}));
 
-  const method = event.node.req.method;
-  let result = null;
-  const response = {} as JSONResponse;
+// Create a doodad
+router.post('/', defineEventHandler(async (event) => { 
+  return await create(event) 
+}));
 
-  // Routes
-  if (method && url)
-    switch (method) {
-      case "GET":
-        // show all doodads
-        result = new route("/api/iam/doodads").match(url);
-        if (result) {
-          if (event.context.params) event.context.params.fromRoute = result;
-          return await index(event);
-        }
+// Get a single doodad
+router.get('/:id', defineEventHandler(async (event) => { 
+  return await show(event) 
+}));
 
-        // show a particular doodad
-        result = new route("/api/iam/doodads(/:id)").match(url);
-        if (result) {
-          if (event.context.params) event.context.params.fromRoute = result;
-          return await show(event);
-        }
-        break;
+// Edit a doodad
+router.put('/:id', defineEventHandler(async (event) => { 
+  return await update(event) 
+}));
 
-      case "POST":
-        // add new user to database
-        result = new route("/api/iam/doodads").match(url);
-        if (result) {
-          if (event.context.params) event.context.params.fromRoute = result;
-          return await create(event);
-        }
-        break;
+// Delete a doodad
+router.delete('/:id', defineEventHandler(async (event) => { 
+  return await destroy(event) 
+}));
 
-      case "PUT":
-        // update particular user then redirect
-        result = new route("/api/iam/doodads(/:id)").match(url);
-        if (result) {
-          if (event.context.params) event.context.params.fromRoute = result;
-          return await update(event);
-        }
-        break;
+// Example complex route
+router.get('/:id/abc/:author-id', defineEventHandler((event) => { 
+  const headers = getHeaders(event);
+  return {
+    params: event.context.params,
+    headers: headers,
+  }
+}));
 
-      case "DELETE":
-        // delete particular doodad
-        result = new route("/api/iam/doodads(/:id)").match(url);
-        if (result) {
-          if (event.context.params) event.context.params.fromRoute = result;          
-          return await destroy(event);
-        }
-        break;
-    }
-
-  // Return method not allowed error
-  response.status = "fail";
-  response.error = createError({
-    statusCode: 405,
-    statusMessage: "Method not allowed",
-  });
-
-  return response;
-});
+export default useBase('/api/iam/doodads', router.handler);

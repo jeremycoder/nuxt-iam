@@ -12,12 +12,12 @@ import { JSONResponse } from "~~/iam/misc/types";
  * @returns {Promise<JSONResponse>} Returns doodads or error
  */
 export async function index(event: H3Event): Promise<JSONResponse> {
-  const response = {} as JSONResponse;
+  const response = {} as JSONResponse;  
   
   const info = "get all doodads"  
   response.status = "success";
   response.data = {
-    info
+    info,
   };
 
   return response;
