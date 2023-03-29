@@ -20,6 +20,6 @@ export default defineEventHandler(async (event) => {
 
     if (authenticated === false) 
       throw forbiddenError
-  }  
+  } 
   
 })
