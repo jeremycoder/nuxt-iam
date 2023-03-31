@@ -39,7 +39,7 @@
         <li><NuxtLink class="dropdown-item" to="/iam/dashboard/profile">Profile</NuxtLink></li>
         <li><NuxtLink class="dropdown-item" to="/iam/dashboard/settings">Settings</NuxtLink></li>        
         <li><hr class="dropdown-divider"></li>
-        <li @click="logMeOut"><span class="dropdown-item">Logout</span></li>
+        <li @click="logMeOut" role="button"><span class="dropdown-item">Logout</span></li>
       </ul>
     </div>            
   </div>        

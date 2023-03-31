@@ -23,7 +23,7 @@ export type ProviderUser = {
 
 export type JSONResponse = {
   status: "success" | "fail";
-  data: any;
+  data?: any;
   error?: any;
 };
 

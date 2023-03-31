@@ -58,6 +58,8 @@ export async function getUserFromAccessToken(
   let accessToken = null;
   let tokenPayload = null;
 
+  console.log('Attempt to get user from access token')
+
   // Client platform if not using Nuxt front end
   const clientPlatform = event.node.req.headers["client-platform"] as string;
 
@@ -76,7 +78,7 @@ export async function getUserFromAccessToken(
 
   // If no token, display error and return false
   if (!accessToken) {
-    console.log("No access token provided. Cannot verify user is SUPER_ADMIN");
+    console.log("No access token provided. Cannot get user from access token");
     return null;
   }
 

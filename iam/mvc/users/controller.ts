@@ -4,38 +4,27 @@
 
 import { index, create, show, update, destroy } from "./model";
 import { createRouter, defineEventHandler, useBase, H3Error } from 'h3';
-
-// TODO: Probably only need getUserFromAccessToken and not getUuidFromAccessToken
-// TODO: In server/middleware add user from access token to context, if no user, throw error
-// TODO: Move front end authentication to front end middleware like here: 
-
-import { User } from "~~/iam/misc/types";
-import {
-  isSuperAdmin,
-  hasVerifiedEmail,
-  isOwner,
-  getUserFromAccessToken,
-  getUserUuidFromAccessToken,
-} from "~~/iam/authz/permissions";
+import { isSuperAdmin, hasVerifiedEmail, isOwner } from "~~/iam/authz/permissions";
 import { validateCsrfToken } from "~~/iam/misc/helpers";
 
-  // User not found error
-  const userNotFoundError = createError({
-    statusCode: 401,
-    statusMessage: "Unauthorized. User not found.",
-  });
+// TODO: Move front end authentication to front end middleware like here: 
+// User not found error
+const userNotFoundError = createError({
+  statusCode: 401,
+  statusMessage: "Unauthorized. User not found.",
+});
 
-  // Forbidden error
-  const forbiddenError = createError({
-    statusCode: 403,
-    statusMessage: "Forbidden",
-  });
+// Forbidden error
+const forbiddenError = createError({
+  statusCode: 403,
+  statusMessage: "Forbidden",
+});
 
-  // Missing csrf token error
-  const csrfTokenError = createError({
-    statusCode: 403,
-    statusMessage: "Missing or invalid csrf token",
-  });
+// Missing csrf token error
+const csrfTokenError = createError({
+  statusCode: 403,
+  statusMessage: "Missing or invalid csrf token",
+});
 
 const router = createRouter();
 
@@ -70,8 +59,8 @@ router.get('/:uuid', defineEventHandler(async (event) => {
 // Edit a user
 router.put('/:uuid', defineEventHandler(async (event) => { 
   // Check if csrf token is valid
-  const csrfTokenError = await validateCsrfToken(event);
-  if (csrfTokenError instanceof H3Error) throw csrfTokenError;
+  const tokenOrError = await validateCsrfToken(event);
+  if (tokenOrError instanceof H3Error) throw csrfTokenError;
 
   // Get user uuid from request
   if (!event.context.user) throw userNotFoundError  
@@ -88,8 +77,8 @@ router.put('/:uuid', defineEventHandler(async (event) => {
 // Delete a user
 router.delete('/:uuid', defineEventHandler(async (event) => { 
   // Check if csrf token is valid
-  const csrfTokenError = await validateCsrfToken(event);
-  if (csrfTokenError instanceof H3Error) throw csrfTokenError;
+  const tokenOrError = await validateCsrfToken(event);
+  if (tokenOrError instanceof H3Error) throw csrfTokenError;
 
   // Get user uuid from request
   if (!event.context.user) throw userNotFoundError  

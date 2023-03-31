@@ -46,30 +46,12 @@
             Log out
           </button>
         </div>
-      </div>
-      <!-- Header -->
-      <div v-else>
-        <header class="mb-3 border-bottom">
-          <div class="container">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-              <NuxtLink class="text-decoration-none text-center" to="/iam/dashboard">
-                <img src="~~/iam/ui/img/nuxt-iam-logo-symbol.png" style="width: 14%; display: inline" />
-                  <span style="color: #184b81">Nuxt<b>IAM</b></span>
-              </NuxtLink>
-
-              <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                <li><NuxtLink class="nav-link px-2 link-secondary" to="/iam/dashboard">Dashboard</NuxtLink></li>                  
-                <li v-if="isAdmin"><NuxtLink class="nav-link px-2 link-dark" to="/iam/dashboard/admin">Admin</NuxtLink></li>                          
-              </ul>
-            <div>                     
-          </div>
-          </div>
-          </div>
-        </header>
+      </div>      
+      <div v-else>        
         <!-- Main content -->
         <main>
           <div class="container">
-            <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
+            <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />            
           </div>
         </main>      
       </div>    
@@ -102,20 +84,21 @@ const verifyRegistrations =
 const emailIsVerified = ref(false);
 
 // User profile
-const profile = {
-  uuid: "",
-  firstName: "",
-  lastName: "",
-  email: "",
-  role: "",
-  avatar: "",
-  csrfToken: "",
-  isActive: "",
-  currentPassword: "",
-  newPassword: "",
-  confirmNewPassword: "",
-  permissions: "",
-};
+ const profile = {
+    id: "",
+    uuid: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+    avatar: "",
+    csrfToken: "",
+    isActive: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+    permissions: "",
+  };
 
 onMounted(async () => {
   await isLoggedIn();
@@ -129,12 +112,6 @@ async function isLoggedIn() {
   // If user is not authenticated, push to login page
   if (!iAmLoggedIn.value) navigateTo("/iam/login");  
 }
-
-// Check is user is admin 
-const isAdmin = computed(() => {
-  if (profile && profile.permissions) return profile.permissions.includes('canAccessAdmin')
-  else return false
-})
 
 // Log user out
 async function logMeOut() {
@@ -160,7 +137,7 @@ async function getMyProfile() {
   }
 
   // If successful, data will contain profile
-  if (status === "success") {
+  if (status === "success" && data) {
     profile.id = data.id;
     profile.uuid = data.uuid;
     profile.firstName = data.first_name;
@@ -189,9 +166,7 @@ async function getMyProfile() {
     
     // Set log in true in store
     iamStore.setIsLoggedIn(true)
-    iamStore.setUpdateCount()
-
-    
+    iamStore.setUpdateCount()    
   }  
 }
 

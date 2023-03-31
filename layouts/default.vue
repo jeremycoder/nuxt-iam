@@ -20,11 +20,13 @@
             </ul>
           </li>  
           <li><NuxtLink to="/sample-page" class="nav-link px-2 link-dark">Sample Page</NuxtLink></li>  
+          <li><NuxtLink to="/protected-page" class="nav-link px-2 link-dark" title="You must be logged in to view this page">Protected Page</NuxtLink></li>  
           <li><NuxtLink to="/contact" class="nav-link px-2 link-dark">Contact</NuxtLink></li>         
         </ul>
         <iamLoginMenu />    
       </div>
-    </nav>        
+    </nav>      
+      <iamLoggedInHeader />
       <slot />
     <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
     <p class="col-md-4 mb-0 text-muted">&copy; 2023 My Company, Inc</p>

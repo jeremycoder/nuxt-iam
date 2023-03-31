@@ -152,27 +152,15 @@ async function loginWithGoogle(token: string): Promise<JSONResponse> {
  * @returns {Promise<boolean>}
  */
 async function isAuthenticated(): Promise<boolean> {
-  let isAuthenticated = false;
-
   // Api response always has status, data, or error
-  const { status, error } = await $fetch("/api/iam/authn/isauthenticated", {
+  const { status } = await $fetch("/api/iam/authn/isauthenticated", {
     headers: {
       "client-platform": "browser",
     },
-  });
+  }); 
 
-  // If status is 'fail', not authenticated
-  if (status === "fail") {
-    if (error) console.log("error: ", error);
-    isAuthenticated = false;
-  }
-
-  // If status is 'success', not authenticated
-  if (status === "success") {
-    isAuthenticated = true;
-  }
-
-  return isAuthenticated;
+  // If status is success, then user is authenticated, and return true, otherwise return false
+  return status === "success"
 }
 
 /**

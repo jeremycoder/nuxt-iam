@@ -22,7 +22,7 @@ async function getUsers(): Promise<JSONResponse> {
     headers: {
       "client-platform": "browser",
     },
-  });
+  }); 
 
   return response;
 }

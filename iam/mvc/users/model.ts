@@ -121,7 +121,7 @@ export async function update(event: H3Event): Promise<JSONResponse> {
 export async function destroy(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
   const errorOrBoolean = await destroyUser(event);
-
+  
   // If error, return error
   if (errorOrBoolean instanceof H3Error) {
     response.status = "fail";

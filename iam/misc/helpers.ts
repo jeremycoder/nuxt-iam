@@ -240,7 +240,7 @@ export async function validateUserProfileUpdate(
 export async function validateUserDelete(
   event: H3Event
 ): Promise<H3Error | void> {
-  const uuid = event.context.params?.fromRoute;
+  const uuid = event.context.params?.uuid;
   
   if (!uuid)
     return createError({

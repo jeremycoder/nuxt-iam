@@ -10,4 +10,5 @@
 // plugins folder
 const nuxtApp = useNuxtApp();
 const today = nuxtApp.today;
+
 </script>

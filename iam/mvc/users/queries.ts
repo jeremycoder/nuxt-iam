@@ -180,6 +180,7 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
  * @param event H3Event
  */
 export async function destroyUser(event: H3Event): Promise<boolean | H3Error> {
+  console.log('Got in destroyUser')
   const errorOrVoid = await validateUserDelete(event);
   if (errorOrVoid instanceof H3Error) return errorOrVoid;
 
