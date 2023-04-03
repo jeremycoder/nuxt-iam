@@ -43,7 +43,7 @@ export type EmailOptions = {
   html?: string;
 };
 
-export type UsersTableEditable = {
+export type UserEditable = {
   first_name?: string;
   last_name?: string;
   role?: string;
@@ -90,3 +90,9 @@ export type ProfileUpdateValues = {
   currentPassword?: string;
   newPassword?: string;
 };
+
+export enum Roles {
+  'SUPER_ADMIN',
+  'ADMIN',
+  'GENERAL'
+}

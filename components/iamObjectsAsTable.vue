@@ -59,8 +59,14 @@
     data: Array<Object>,      
   }) 
 
+  // Array of all table cells
   const input = ref(Array<HTMLTableCellElement>())
 
+  /**
+   * Extracts row from table and emits data
+   * @param rowIndex The number of the row (1,2,3...)
+   * @param row Object containing a row of data
+   */
   function updateRow(rowIndex: number, row: Object) {
     let keyLength = 0    
     

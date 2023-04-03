@@ -66,7 +66,7 @@ router.put('/:uuid', defineEventHandler(async (event) => {
   if (!event.context.user) throw userNotFoundError  
   const uuid = event.context.params?.uuid      
 
-  // To edit record, user must be either superadmin or be the owner
+  // To edit record, user must be either super admin or be the owner
   if (uuid)
     if (event.context.user.uuid && !isSuperAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
         throw forbiddenError;

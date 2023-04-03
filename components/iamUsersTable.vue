@@ -3,102 +3,47 @@
     <h3>Users Table</h3>
     <button
       type="button"
-      class="btn btn-success btn-sm mb-2 mt-2"
-      data-bs-toggle="modal"
-      data-bs-target="#createUserTableModal"      
+      class="btn btn-success btn-sm mb-2 mt-2"            
         >
           Create User
+    </button> 
+    
+    <!-- Error alert -->
+    <div 
+      v-if="usersError" 
+      class="alert alert-danger alert-dismissible fade show" 
+      role="alert">
+      <strong>{{ usersError }}</strong>
+      <button 
+        type="button" 
+        class="btn-close" 
+        data-bs-dismiss="alert" 
+        aria-label="Close" 
+        @close="usersError = null">
       </button>
-      <!-- Create users table modal -->
-      <div class="modal fade" id="createUserTableModal" tabindex="-1" aria-labelledby="createUserTableModal" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Edit User</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <div class="row">
-                <div class="col">
-                  <div class="card mb-3 mx-10" style="max-width: 25rem">
-                    <h4 class="card-header">Profile</h4>
-                    <div class="card-body">
-                      <h5 class="card-title">Update Profile</h5>
-                      <p>Update your profile below.</p>
-                        <!-- Data here-->                        
-                        <form class="mb-5">
-                          <div class="mb-3">
-                            <label for="key" class="form-label">Value</label>
-                            <input
-                              type="text"
-                              class="form-control mb-3"
-                              id="key"                
-                              value="value"
-                              disabled
-                            />
-                          </div>                  
-                          <button
-                            type="submit"
-                            class="btn btn-primary"
-                            @click.prevent="updateThisUser()"
-                          >
-                            Update My Profile
-                          </button>
-                        </form>
-                    </div>
-                  </div>
-                </div>
-              </div>  
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
-          </div>
-        </div>
-      </div>   
-
-       <!-- Update users table modal -->
-      <div v-if="updateUserNow" class="card mb-3 mx-10" style="max-width: 25rem">
-        <h4 class="card-header">Update User</h4>
-        <div class="card-body">                      
-          <p>Update the User below</p>
-            <!-- Data here--> 
-            {{ userToUpdate }}                       
-            <form class="mb-5">
-              <div class="mb-3">
-                <label for="key" class="form-label">Value</label>
-                <input
-                  type="text"
-                  class="form-control mb-3"
-                  id="key"                
-                  value="value"
-                  disabled
-                />
-              </div>                  
-              <button
-                type="submit"
-                class="btn btn-primary"
-                @click.prevent="updateThisUser()"
-              >
-                Update My Profile
-              </button>
-              <button
-                type="submit"
-                class="btn btn-secondary ms-2"
-                @click.prevent="updateUserNow = false"
-              >
-                Close
-              </button>
-            </form>
-        </div>
-      </div>   
+    </div>
       
-    <iamTable v-if="users" 
-      :data=displayedUsers       
-      @update="getUserToUpdate($event)" 
-      @delete="deleteThisUser($event)" 
-    />
+    <!-- Input form to update users -->
+    <div v-if="updateUserNow">
+      <iamObjectAsInputFormModal 
+        :title="'Update User'"
+        :description="'Update user below.'"
+        :object="userToUpdate" 
+        :disabled="disabled"
+        :asSelect1="'role'"
+        :selectOptions1="roles"
+        :asBoolean1="'is_active'"
+        @update="updateThisUser($event)"
+        @close="updateUserNow = false" 
+      />
+    </div>        
+      
+      <!-- Display users object as an HTML table -->
+      <iamObjectsAsTable v-if="users" 
+        :data=displayedUsers       
+        @update="getUserToUpdate($event)" 
+        @delete="deleteThisUser($event)" 
+      />
   </div>
 </template>
 
@@ -112,13 +57,6 @@ const {
   deleteUser,  
 } = useIamAdmin();
 
-const { status, data } = await getUsers()
-const displayedUsers = ref([])
-const users = ref([])
-let userToUpdate = {} as User
-let updateUserNow = ref(false)
-let allUsers = [] as Array<User>
-
 // The only columns to show
 const show = [
   'id',
@@ -128,23 +66,82 @@ const show = [
   'last_name',
 ]
 
-if (status === 'success') {
-  // Get all users
-  users.value = structuredClone(data.users)
-  allUsers = structuredClone(data.users);  
+// Disabled input
+const disabled = [
+  'id',
+  'uuid',
+  'email',
+  'password',
+  'email_verified',
+  'role',
+  'is_active',
+  'last_login',
+  'created_at',
+  'deleted_at',
+  'updated_at',
+]
 
-  // Remove keys from objects to display in table
-  users.value.forEach((user) => {
-    Object.keys(user).forEach((key) => {
-      if (!show.includes(key)) delete user[key]
-    })
+// Properties to remove before sending to backend
+// Any items that cannot be edited except the uuid which is required
+const removeBeforeSending = [
+  'id',
+  'email',
+  'password',
+  'email_verified',
+  'last_login',
+  'created_at',
+  'deleted_at',
+  'updated_at',
+]
+
+// User roles
+const roles = [
+  'SUPER_ADMIN',
+  'ADMIN',
+  'GENERAL'
+]
+
+const usersError = ref(<string|null|unknown>(null))
+
+const displayedUsers = ref([])
+const users = ref([])
+let userToUpdate = {} as User
+let updateUserNow = ref(false)
+let allUsers = [] as Array<User>
+let csrfToken = ''
+
+// Result of calling getUsers()
+onMounted(async () => {
+  await getAllUsers();  
+});
+
+
+/**
+ * @desc Get all users
+ */
+async function getAllUsers() {
+  const { status, data } = await getUsers()
+  if (status === 'success') {
+    // Get all users    
+    users.value = structuredClone(data.users)
+    allUsers = structuredClone(data.users);
     
-    // Users displayed in table
-    displayedUsers.value.push(user)
-  })  
-  
-}
+    // Get csrf token
+    csrfToken = data.csrf_token  
 
+    // Remove keys from objects to display in table
+    displayedUsers.value = []
+    users.value.forEach((user) => {
+      Object.keys(user).forEach((key) => {
+        if (!show.includes(key)) delete user[key]
+      })
+      
+      // Users displayed in table
+      displayedUsers.value.push(user)
+    })  
+    
+  }
+}
 
 /**
  * @desc Receive user data from table and finds corresponding user in local variable
@@ -153,21 +150,49 @@ if (status === 'success') {
 function getUserToUpdate(user: User){  
   const findUser = allUsers.filter(oneUser => oneUser.id == user.id)  
   userToUpdate = findUser[0]
-  updateUserNow.value = true
+  updateUserNow.value = true    
 }
 
 /**
  * @desc Send data to update user
  */
-function updateThisUser(){
-  console.log('Send data to composable ---> api')
+async function updateThisUser(user: User){   
+  console.log('usersError: ', usersError.value) 
+  // Remove object properties that should not be updated
+  removeBeforeSending.forEach((property) => {
+    //@ts-ignore
+    if (property in user) delete user[property]
+  })
+
+  // Add csrf token and send user to backend
+  user.csrf_token = ''  
+
+  // Attempt to update user
+  try {
+    await updateUser(user.uuid, user)
+    await getAllUsers()   
+  } catch (error) {
+    usersError.value = error
+    console.log('error: ', error)
+  }    
 }
 
-function deleteThisUser(event: Event){
-  console.log('delete')
-  console.log('event: ', event)
+/**
+ * @desc Send user data for deletion to api
+ * @param event Event from emit
+ */
+async function deleteThisUser(user: User){
+
+  // Add csrf token and send user to backend
+  user.csrf_token = csrfToken
+
+  // Attempt to delete user
+  try {
+    await deleteUser(user.uuid, user.csrf_token)
+    await getAllUsers()   
+  } catch (error) {
+    usersError.value = error
+    console.log('error: ', error)
+  }
 }
-
-
-
 </script>

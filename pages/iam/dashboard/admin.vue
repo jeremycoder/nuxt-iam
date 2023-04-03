@@ -679,7 +679,7 @@ async function createThisUser() {
     return;
   }
 
-  // If successful, reget users from database to update ui
+  // If successful, get users again from database to update ui
   const getUsersResult = await getUsers();
 
   // If error, show error

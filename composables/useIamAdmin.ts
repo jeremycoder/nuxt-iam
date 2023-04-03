@@ -1,4 +1,4 @@
-import { JSONResponse, UsersTableEditable, NewUser } from "~~/iam/misc/types";
+import { JSONResponse, UserEditable, NewUser } from "~~/iam/misc/types";
 
 // Composable to make user management tasks easier
 export default function useIamAdmin() {
@@ -52,7 +52,7 @@ async function createUser(newUser: NewUser): Promise<JSONResponse> {
  */
 async function updateUser(
   uuid: string,
-  values: UsersTableEditable
+  values: UserEditable
 ): Promise<JSONResponse> {
   const response = await $fetch(`/api/iam/users/${uuid}`, {
     method: "PUT",
