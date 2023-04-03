@@ -13,11 +13,12 @@
                 <label :for="key" class="form-label"><strong>{{ key }}</strong></label>
                 <input
                   ref="inputs"
-                  type="text"
+                  :type="getType(key)"
                   class="form-control mb-3"
                   :id="key"                
                   :value="value"
-                  :disabled="props.disabled && props.disabled.includes(key)"               
+                  :disabled="props.disabled && props.disabled.includes(key)"
+                  @change="hasChanged = true"               
                 />
                   <!-- Show these elements as select elements -->                  
                   <select 
@@ -66,6 +67,7 @@
             <button
               type="submit"
               class="btn btn-primary"
+              :disabled="hasChanged === false"
               @click.prevent="update"
             >
               Submit
@@ -114,6 +116,24 @@ const updatedObject = {}
 // Object to hold values from select elements
 const updatedSelectObject = {}
 
+// Flag to detect changes
+const hasChanged = ref(false)
+
+/**
+ * @desc Return the type of input HTML element to be used based on the object key
+ * @param inputType Type of input such as "text", "email", or "password" 
+ */
+function getType(inputType: string): string {
+  switch (inputType) {
+    case "password":
+      return "password"
+    case "email":
+      return "email"
+    default:
+      return "text"    
+  }
+}
+
 /**
  * @ Create object from all inputs and emit the object
  */
@@ -149,7 +169,8 @@ const updatedSelectObject = {}
  * @param key Key from updated choice in select element
  * @param element HTML select element sending choice
  */
-function updateChoice(key: string, element: HTMLSelectElement) {  
+function updateChoice(key: string, element: HTMLSelectElement) { 
+  hasChanged.value = true 
   //@ts-ignore
   updatedSelectObject[key] = element.value   
 }
@@ -161,7 +182,6 @@ function close() {
   isOpen.value = false
   emit('close')
 }
-
 </script>
 
 <style scoped>

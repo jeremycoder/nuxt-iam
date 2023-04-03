@@ -3,23 +3,50 @@
     <h3>Users Table</h3>
     <button
       type="button"
-      class="btn btn-success btn-sm mb-2 mt-2"            
+      class="btn btn-success btn-sm mb-2 mt-2"
+      @click="createUserNow = true"            
         >
           Create User
     </button> 
+
+    <!-- Input form to create a user -->
+    <div v-if="createUserNow">
+      <iamObjectAsInputFormModal 
+        :title="'Create User'"
+        :description="'Create user below.'"
+        :object="userToCreate"        
+        @update="createThisUser($event)"
+        @close="createUserNow = false" 
+      />
+    </div>   
     
     <!-- Error alert -->
     <div 
       v-if="usersError" 
       class="alert alert-danger alert-dismissible fade show" 
       role="alert">
-      <strong>{{ usersError }}</strong>
+      <strong>{{ usersError.message }}</strong>
       <button 
         type="button" 
         class="btn-close" 
         data-bs-dismiss="alert" 
         aria-label="Close" 
-        @close="usersError = null">
+        @click="usersError = null">
+      </button>
+    </div>
+
+    <!-- Success alert -->
+    <div 
+      v-if="usersSuccess" 
+      class="alert alert-success alert-dismissible fade show" 
+      role="alert">
+      <strong>Success</strong>
+      <button 
+        type="button" 
+        class="btn-close" 
+        data-bs-dismiss="alert" 
+        aria-label="Close" 
+        @click="usersSuccess = false">
       </button>
     </div>
       
@@ -101,12 +128,21 @@ const roles = [
   'GENERAL'
 ]
 
-const usersError = ref(<string|null|unknown>(null))
+// Alerts
+const usersError = ref(<Error|null>(null))
+const usersSuccess = ref(false)
 
-const displayedUsers = ref([])
+const displayedUsers = ref([] as Array<User>)
 const users = ref([])
 let userToUpdate = {} as User
+let userToCreate = {
+  first_name: '',
+  last_name: '',
+  email: '',
+  password: '',  
+} as User
 let updateUserNow = ref(false)
+let createUserNow = ref(false)
 let allUsers = [] as Array<User>
 let csrfToken = ''
 
@@ -154,26 +190,39 @@ function getUserToUpdate(user: User){
 }
 
 /**
+ * @desc Create user
+ * @param user User to create
+ */
+function createThisUser(user: User) {
+  console.log('Create user: ', user)
+}
+
+/**
  * @desc Send data to update user
  */
-async function updateThisUser(user: User){   
-  console.log('usersError: ', usersError.value) 
+async function updateThisUser(user: User){  
   // Remove object properties that should not be updated
   removeBeforeSending.forEach((property) => {
     //@ts-ignore
     if (property in user) delete user[property]
   })
 
-  // Add csrf token and send user to backend
-  user.csrf_token = ''  
+  // Add csrf token
+  user.csrf_token = csrfToken   
 
   // Attempt to update user
   try {
-    await updateUser(user.uuid, user)
-    await getAllUsers()   
-  } catch (error) {
-    usersError.value = error
-    console.log('error: ', error)
+    const { data } = await updateUser(user)    
+    
+    if (data) {
+      // Flash success message for one second
+      usersSuccess.value = true
+      setTimeout(() => { usersSuccess.value = false; }, 2000);
+      await getAllUsers()   
+    }
+  } catch (error) {    
+    const updateError = error as Error
+    usersError.value = updateError    
   }    
 }
 
@@ -191,7 +240,7 @@ async function deleteThisUser(user: User){
     await deleteUser(user.uuid, user.csrf_token)
     await getAllUsers()   
   } catch (error) {
-    usersError.value = error
+    // usersError.value = error
     console.log('error: ', error)
   }
 }
