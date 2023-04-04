@@ -1,7 +1,10 @@
 <template>
   <div>
     <h1>Admin 2</h1>
+    <p class="lead">This is your admin center.</p>
     <iamUsersTable  />
+    <hr class="my-4" />
+    <iamRefreshTokensTable  />
   </div>
 </template>
 

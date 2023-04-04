@@ -8,8 +8,8 @@
         <tr>
           <th scope="col">#</th>
           <th v-for="(objectKey) in Object.keys(props.data[0])" scope="col">{{ objectKey }}</th>
-          <th scope="col">edit</th>
-          <th scope="col">delete</th>              
+          <th v-if="!props.removeEdit" scope="col">edit</th>
+          <th v-if="!props.removeDelete" scope="col">delete</th>              
         </tr>
       </thead>
       <tbody>
@@ -22,7 +22,7 @@
           >
           {{ value }}
         </td>              
-          <td>
+          <td v-if="!props.removeEdit">
             <button
               type="button"
               class="btn btn-warning btn-sm"
@@ -31,7 +31,7 @@
               update
             </button>
           </td>
-          <td>
+          <td v-if="!props.removeDelete">
             <button
               type="button"
               class="btn btn-danger btn-sm"
@@ -57,7 +57,9 @@
 
   const props = defineProps({
     title: String,
-    data: Array<Object>,      
+    data: Array<Object>,
+    removeEdit: Boolean,      
+    removeDelete: Boolean,      
   }) 
 
   // Array of all table cells

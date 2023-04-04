@@ -827,9 +827,9 @@ async function deleteAllTokens(csrfToken) {
   refreshTokensTable.value = null;
 }
 
-definePageMeta({
-  middleware: 'iam-admin-authorized'
-})
+// definePageMeta({
+//   middleware: 'iam-admin-authorized'
+// })
 
 </script>
 
