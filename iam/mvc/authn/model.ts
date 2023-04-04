@@ -34,7 +34,7 @@ import {
  * @param event H3 Event passed from api
  * @returns {Promise<JSONResponse>} Object mentioning success or failure of registering user or error
  */
-export async function register(event: H3Event): Promise<JSONResponse> {
+export async function register(event: H3Event): Promise<JSONResponse> {  
   let response = {} as JSONResponse;
   const userOrError = await registerUser(event);
 

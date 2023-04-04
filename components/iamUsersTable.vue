@@ -5,8 +5,8 @@
       type="button"
       class="btn btn-success btn-sm mb-2 mt-2"
       @click="createUserNow = true"            
-        >
-          Create User
+    >
+      Create User
     </button> 
 
     <!-- Input form to create a user -->
@@ -114,7 +114,7 @@ const removeBeforeSending = [
   'id',
   'email',
   'password',
-  'email_verified',
+  'email_verified',  
   'last_login',
   'created_at',
   'deleted_at',
@@ -193,9 +193,22 @@ function getUserToUpdate(user: User){
  * @desc Create user
  * @param user User to create
  */
-function createThisUser(user: User) {
-  console.log('Create user: ', user)
-}
+async function createThisUser(user: User) {  
+  // Attempt to update user  
+  const { error } = await createUser(user)
+  
+  // If error, show error
+  if (error) {
+    const createError = error as Error
+    usersError.value = createError
+  } else {
+    // Flash success message 
+    usersSuccess.value = true
+    setTimeout(() => { usersSuccess.value = false; }, 2000);
+    await getAllUsers()
+  }
+}   
+
 
 /**
  * @desc Send data to update user
@@ -215,7 +228,7 @@ async function updateThisUser(user: User){
     const { data } = await updateUser(user)    
     
     if (data) {
-      // Flash success message for one second
+      // Flash success message 
       usersSuccess.value = true
       setTimeout(() => { usersSuccess.value = false; }, 2000);
       await getAllUsers()   
@@ -230,18 +243,24 @@ async function updateThisUser(user: User){
  * @desc Send user data for deletion to api
  * @param event Event from emit
  */
-async function deleteThisUser(user: User){
-
-  // Add csrf token and send user to backend
-  user.csrf_token = csrfToken
-
-  // Attempt to delete user
-  try {
-    await deleteUser(user.uuid, user.csrf_token)
-    await getAllUsers()   
-  } catch (error) {
-    // usersError.value = error
-    console.log('error: ', error)
-  }
+async function deleteThisUser(user: User){   
+  // 
+  const clone = structuredClone(user)
+  clone.csrf_token = csrfToken
+  
+ // Attempt to update user
+ try {
+    const { status } = await deleteUser(clone)     
+    
+    if (status === 'success') {
+      // Flash success message
+      usersSuccess.value = true
+      setTimeout(() => { usersSuccess.value = false; }, 2000);
+      await getAllUsers()   
+    }
+  } catch (error) {    
+    const deleteError = error as Error
+    usersError.value = deleteError    
+  }    
 }
 </script>

@@ -57,8 +57,8 @@ export default defineEventHandler(async (event) => {
         break;
       case "POST":
         // add new user to database
-        result = new route("/api/iam/authn/register").match(url);
-        if (result) {
+        result = new route("/api/iam/authn/register").match(url);        
+        if (result) {          
           if (event.context.params) event.context.params.fromRoute = result; 
           return await register(event);
         }

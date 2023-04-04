@@ -33,8 +33,8 @@ const prisma = new PrismaClient();
  * @return {Promise<string>} Returns user if successful and error if not successful
  */
 export async function registerUser(event: H3Event): Promise<User | H3Error> {
-  const validationError = await validateUserRegistration(event);
-  if (validationError) return validationError;
+  const validationError = await validateUserRegistration(event);  
+  if (validationError) return validationError; 
 
   const body = await readBody(event);
 

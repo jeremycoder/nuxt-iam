@@ -1,4 +1,4 @@
-import { JSONResponse, User, NewUser } from "~~/iam/misc/types";
+import { JSONResponse, User } from "~~/iam/misc/types";
 
 // Composable to make user management tasks easier
 export default function useIamAdmin() {
@@ -29,18 +29,18 @@ async function getUsers(): Promise<JSONResponse> {
 
 /**
  * @desc Create a user
- * @param newUser Minimum required values to create a new user
+ * @param user User to create
  * @returns {Promise<JSONResponse>}
  */
-async function createUser(newUser: NewUser): Promise<JSONResponse> {
+async function createUser(user: User): Promise<JSONResponse> {  
   const response = await $fetch(`/api/iam/authn/register`, {
     method: "POST",
     headers: {
       "client-platform": "browser",
     },
-    body: newUser,
+    body: user,
   });
-
+  
   return response;
 }
 
@@ -68,17 +68,14 @@ async function updateUser(user: User): Promise<JSONResponse> {
  * @csrfToken Cross-site request forgery prevention token
  * @returns {Promise<JSONResponse>}
  */
-async function deleteUser(
-  uuid: string,
-  csrfToken: string
-): Promise<JSONResponse> {
-  const response = await $fetch(`/api/iam/users/${uuid}`, {
+async function deleteUser(user: User): Promise<JSONResponse> {
+  const response = await $fetch(`/api/iam/users/${user.uuid}`, {
     method: "DELETE",
     headers: {
       "client-platform": "browser",
     },
     body: {
-      csrf_token: csrfToken,
+      csrf_token: user.csrf_token,
     },
   });
 

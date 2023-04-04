@@ -283,7 +283,8 @@ export async function validateUserLogin(
  */
 export async function validateRegisterBody(event: H3Event) {
   const body = await readBody(event);
-  if ("first_name" in body === false || body.first_name.trim() == "") {
+  console.log('BODY: ', body);
+  if ("first_name" in body === false || body.first_name.trim() === "") {
     return "'first_name' is required";
   }
 

@@ -3,7 +3,7 @@
   <div>
     <h3>{{ props.title }}</h3>    
     <div v-if="props.data && props.data.length">
-      <table class="table table-sm table-striped">
+      <table class="table table-sm table-striped" style="font-size: 90%;">
       <thead>
         <tr>
           <th scope="col">#</th>
@@ -19,7 +19,9 @@
             :data-col="Object.keys(props.data[0])[colIndex]" 
             scope="col"             
             ref="input"
-          >{{ value }}</td>              
+          >
+          {{ value }}
+        </td>              
           <td>
             <button
               type="button"
@@ -33,7 +35,7 @@
             <button
               type="button"
               class="btn btn-danger btn-sm"
-              @click="$emit('delete', row)"                  
+              @click="deleteRow(row)"                  
             >
               delete
             </button>
@@ -41,8 +43,7 @@
         </tr>
       </tbody>
       </table>
-    </div>
-    
+    </div>    
     <div v-else>
       <h3>Table data not found</h3>
     </div>
@@ -88,6 +89,21 @@
     
     emit('update', row)
     
+  }
+
+  /**
+   * @desc Gets row, creates a non-window object, and emits it
+   * @param row Data values from a row
+   */
+  function deleteRow(row: Object) {
+    // Copy all values to temporary object
+    const temp = {}
+    for (const key in row) {
+      //@ts-ignore
+      temp[key] = row[key]
+    }   
+
+    emit('delete', temp)
   }
 
 </script>
