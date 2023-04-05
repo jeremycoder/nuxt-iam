@@ -30,7 +30,8 @@ const router = createRouter();
 
 // Get all users
 router.get('/', defineEventHandler(async (event) => {  
-  // Permissions: to see all users, user must be superadmin and have their email verified
+  // Permissions: to see all users, user must be super admin and have their email verified
+  // TODO: Change this to one permission like isAdminAuthorized
   if (!event.context.user) throw userNotFoundError
   if (!isSuperAdmin(event.context.user)) throw forbiddenError
   if (!hasVerifiedEmail(event.context.user)) throw forbiddenError
@@ -48,7 +49,7 @@ router.get('/:uuid', defineEventHandler(async (event) => {
   if (!event.context.user) throw userNotFoundError  
   const uuid = event.context.params?.uuid
 
-  // Permissions: to see record, user must be either superadmin or be the owner
+  // Permissions: to see record, user must be either super admin or be the owner
   if (uuid)
     if (event.context.user.uuid && !isSuperAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
         throw forbiddenError;
@@ -84,7 +85,7 @@ router.delete('/:uuid', defineEventHandler(async (event) => {
   if (!event.context.user) throw userNotFoundError  
   const uuid = event.context.params?.uuid      
 
-  // To delete record, user must be either superadmin or be the owner
+  // To delete record, user must be either super admin or be the owner
   if (uuid)
     if (event.context.user.uuid && !isSuperAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
         throw forbiddenError;
