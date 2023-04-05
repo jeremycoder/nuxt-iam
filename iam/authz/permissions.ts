@@ -61,7 +61,10 @@ export async function getUserFromAccessToken(
   console.log('Attempt to get user from access token')
 
   // Client platform if not using Nuxt front end
-  const clientPlatform = event.node.req.headers["client-platform"] as string;
+  let clientPlatform = event.node.req.headers["client-platform"] as string;
+
+  // If no client platform, upgrade to browser
+  if (!clientPlatform) clientPlatform = "browser"  
 
   // If client platform is app, get access token from headers
   if (clientPlatform === "app")

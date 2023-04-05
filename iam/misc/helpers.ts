@@ -95,8 +95,7 @@ export async function validateUserRegistration(
 
 /**
  * @desc Suite of checks to validate data before updating user
- * @param event Event from Api
- * @info Expects fromRoute object in event.context.params
+ * @param event Event from Api 
  */
 export async function validateUserUpdate(
   event: H3Event
@@ -234,8 +233,7 @@ export async function validateUserProfileUpdate(
 
 /**
  * @desc Suite of checks to validate data before deleting user
- * @param event Event from Api
- * @info Expects fromRoute object in event.context.params
+ * @param event Event from Api 
  */
 export async function validateUserDelete(
   event: H3Event
@@ -2317,4 +2315,13 @@ export function getQueryParams(
   if (url && paramsString) params = queryString.parse(paramsString);
 
   return params;
+}
+
+/**
+ * @desc Returns a list of all authenticated route based that need an authenticated user
+ */
+export function getAuthenticatedRoutes(): Array<string> {
+  return [
+    '/api/iam/users',    
+  ];
 }
