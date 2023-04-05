@@ -2291,7 +2291,7 @@ export async function verifyGoogleToken(
   if (tokenPayload) return tokenPayload;
   else {
     console.log("Error verifying Google access token");
-    return createError({ statusCode: 401, statusMessage: "Unauthoerized" });
+    return createError({ statusCode: 401, statusMessage: "Unauthorized" });
   }
 }
 
@@ -2322,6 +2322,7 @@ export function getQueryParams(
  */
 export function getAuthenticatedRoutes(): Array<string> {
   return [
-    '/api/iam/users',    
+    '/api/iam/users',   
+    '/api/iam/refresh-tokens',    
   ];
 }

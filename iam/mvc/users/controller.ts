@@ -7,7 +7,6 @@ import { createRouter, defineEventHandler, useBase, H3Error } from 'h3';
 import { isSuperAdmin, hasVerifiedEmail, isOwner } from "~~/iam/authz/permissions";
 import { validateCsrfToken } from "~~/iam/misc/helpers";
 
-// TODO: Move front end authentication to front end middleware like here: 
 // User not found error
 const userNotFoundError = createError({
   statusCode: 401,

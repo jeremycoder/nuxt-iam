@@ -9,8 +9,7 @@
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
           <li><NuxtLink class="nav-link px-2 link-secondary" to="/iam/dashboard">Dashboard</NuxtLink></li>                  
-          <li v-if="isAdmin"><NuxtLink class="nav-link px-2 link-dark" to="/iam/dashboard/admin">Admin</NuxtLink></li>                          
-          <li><NuxtLink class="nav-link px-2 link-dark" to="/iam/dashboard/admin2">Admin 2</NuxtLink></li>                          
+          <li v-if="isAdmin"><NuxtLink class="nav-link px-2 link-dark" to="/iam/dashboard/admin">Admin</NuxtLink></li>                                    
         </ul>
       <div>                     
     </div>
@@ -43,6 +42,5 @@ if (response.status === 'success') {
   if (profile)
     if (profile.role === 'SUPER_ADMIN' && profile.email_verified && profile.permissions && profile.permissions.includes('canAccessAdmin'))
       isAdmin = true  
-} 
-
+}
 </script>

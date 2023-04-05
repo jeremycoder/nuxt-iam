@@ -66,7 +66,7 @@ export async function destroyRefreshToken(
 ): Promise<boolean | H3Error> {
   // Get id from route
   const id = event.context.params?.id;  
-
+  
   if (!id) {
     console.log("Refresh token id is missing for delete");
     return createError({
