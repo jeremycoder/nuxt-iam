@@ -39,14 +39,15 @@
 </template>
 
 <script setup lang="ts">
-import {
-  GoogleSignInButton,
+import { GoogleSignInButton, 
   type CredentialResponse,
 } from "vue3-google-signin";
+import { useIamProfileStore } from '@/stores/useIamProfileStore'
 
 // Get necessary functions from useIam composable
 const { login, loginWithGoogle } = useIam();
 const allowGoogleAuth = useRuntimeConfig().public.iamAllowGoogleAuth === "true";
+const iamStore = useIamProfileStore()
 
 // These variables come from response from calling Nuxt IAM api
 let loginError = ref(<{ message: "" } | null>null);
@@ -58,7 +59,8 @@ const loginForm = {
 
 // Try to log user in
 async function tryLogin() {
-  const { status, error } = await login(loginForm.email, loginForm.password); 
+  const { status, error } = await login(loginForm.email, loginForm.password);
+  
 
   // If error, log error and return
   if (status === 'fail'){
@@ -81,6 +83,7 @@ const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
   if (res?.error) {
     loginError.value = res.error;
   } else {
+    iamStore.setIsLoggedIn(true)    
     navigateTo("/iam/dashboard");
   }
 };
