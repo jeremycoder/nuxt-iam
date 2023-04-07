@@ -4,6 +4,7 @@
     <button
       type="button"
       class="btn btn-success btn-sm mb-2 mt-2"
+      :disabled="usersError !== null"
       @click="createUserNow = true"            
     >
       Create User
@@ -65,12 +66,12 @@
       />
     </div>        
       
-      <!-- Display users object as an HTML table -->
-      <iamObjectsAsTable v-if="users" 
-        :data=displayedUsers       
-        @update="getUserToUpdate($event)" 
-        @delete="deleteThisUser($event)" 
-      />
+    <!-- Display users object as an HTML table -->
+    <iamObjectsAsTable v-if="users" 
+      :data=displayedUsers       
+      @update="getUserToUpdate($event)" 
+      @delete="deleteThisUser($event)" 
+    />
   </div>
 </template>
 
@@ -156,7 +157,7 @@ onMounted(async () => {
  * @desc Get all users
  */
 async function getAllUsers() {
-  const { status, data } = await getUsers()
+  const { status, error, data } = await getUsers()
   if (status === 'success') {
     // Get all users    
     users.value = structuredClone(data.users)
@@ -176,6 +177,10 @@ async function getAllUsers() {
       displayedUsers.value.push(user)
     })  
     
+  }
+  else {
+    const createError = error as Error
+    usersError.value = createError
   }
 }
 

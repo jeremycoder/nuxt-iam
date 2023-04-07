@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { RefreshTokens, RefreshToken, User } from "~~/iam/misc/types";
+import { RefreshToken, User } from "~~/iam/misc/types";
 
 const { getRefreshTokens, deleteRefreshToken, deleteRefreshTokens, } = useIamAdmin();
 const { getProfile  } = useIam()
