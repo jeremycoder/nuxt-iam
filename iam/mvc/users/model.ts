@@ -2,11 +2,12 @@ import { H3Event, H3Error } from "h3";
 import { getAllUsers, showUser, updateUser, destroyUser } from "./queries";
 import { JSONResponse, User, Session } from "~~/iam/misc/types";
 import { getUserSession } from "~~/iam/misc/helpers";
+import { hasPermission } from "~~/iam/authz/permissions";
 
 /**
  * @desc Shows all users
  * @param event H3 Event passed from api
- * @returns {Promise<JSONResponse>} Returns users or error
+ * @returns {Promise<JSONResponse>}
  */
 export async function index(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
@@ -68,7 +69,7 @@ export async function create(event: H3Event): Promise<JSONResponse> {
 /**
  * @desc Show a particular user
  * @param event H3 Event passed from api
- * @returns {Promise<JSONResponse>} User object or error
+ * @returns {Promise<JSONResponse>} 
  */
 export async function show(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
@@ -90,9 +91,61 @@ export async function show(event: H3Event): Promise<JSONResponse> {
 }
 
 /**
+ * @desc Check if a user has a permission
+ * @param event H3 Event passed from api
+ * @returns {Promise<JSONResponse>}
+ */
+export async function permission(event: H3Event): Promise<JSONResponse> {
+  const response = {} as JSONResponse;
+
+  // Get user and permission
+  const user = event.context.user as User
+  const permission = event.context.params?.permission  
+
+  // If no user, return error
+  if (!user) {
+    console.log('Failed to get user for permission check.')
+    response.status = "fail"
+    response.error = createError({
+      statusCode: 401,
+      statusMessage: "Failed to get user.",
+    });
+    return response
+  }
+
+  // If no permission given, return error
+  if (!permission) {
+    console.log('No permission given to check if user has permission')
+    response.status = "fail"
+    response.error = createError({
+      statusCode: 400,
+      statusMessage: "No permission given",
+    });
+    return response
+  } 
+
+  const userHasPermission = hasPermission(user, permission);
+
+  // If no user, return error
+  if (!userHasPermission) {
+    console.log(`User: ${user.uuid} does NOT have permission: ${permission}`);
+    response.status = "fail"
+    response.error = createError({
+      statusCode: 401,
+      statusMessage: `User: ${user.uuid} does NOT have permission: ${permission}`,
+    });
+    return response
+  } else {
+    response.status = "success"
+    response.data = `User: ${user.uuid} has permission: ${permission}`
+    return response
+  } 
+}
+
+/**
  * @desc Update particular user
  * @param event H3 Event passed from api
- * @returns {Promise<JSONResponse | H3Error>} Object mentioning success or failure of editing user or error
+ * @returns {Promise<JSONResponse | H3Error>}
  */
 export async function update(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;
@@ -116,7 +169,7 @@ export async function update(event: H3Event): Promise<JSONResponse> {
 /**
  * @desc Delete a particular user
  * @param event H3 Event passed from api
- * @returns {Promise<JSONResponse | H3Error>} Object mentioning success or failure of deleting user or error
+ * @returns {Promise<JSONResponse | H3Error>} 
  */
 export async function destroy(event: H3Event): Promise<JSONResponse> {
   const response = {} as JSONResponse;

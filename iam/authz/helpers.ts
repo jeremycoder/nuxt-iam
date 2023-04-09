@@ -1,22 +1,42 @@
-/* Variables to help with authorization */
+// Helper functions for authorization
+
 import { H3Event, H3Error } from "h3";
 import { verifyAccessToken, getUserByUuid } from "../misc/helpers";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "~~/iam/misc/types";
 
-export default function permissionVariables(event: H3Event) {
-  return {
-    getAuthorizedUser,
-  };
+/**
+ * @desc Determines if user can read their own user record
+ * @param userUuid User uuid
+ * @param routeUuid User uuid from the route
+ */
+export function isOwner(userUuid: string, routeUuid: string): boolean {
+  if (userUuid !== routeUuid) {
+    console.log("Authorization failed. User is not owner of record.");
+    return false;
+  }
+
+  return true;
 }
 
-async function getAuthorizedUser(event: H3Event): Promise<User | null> {
-  // Get client platform
+/**
+ * @desc Gets user from access token
+ * @param event Event from api
+ */
+
+export async function getUserFromAccessToken(
+  event: H3Event
+): Promise<User | null> {
   let accessToken = null;
   let tokenPayload = null;
 
+  console.log('Attempt to get user from access token')
+
   // Client platform if not using Nuxt front end
-  const clientPlatform = event.node.req.headers["client-platform"] as string;
+  let clientPlatform = event.node.req.headers["client-platform"] as string;
+
+  // If no client platform, upgrade to browser
+  if (!clientPlatform) clientPlatform = "browser"  
 
   // If client platform is app, get access token from headers
   if (clientPlatform === "app")
@@ -33,7 +53,7 @@ async function getAuthorizedUser(event: H3Event): Promise<User | null> {
 
   // If no token, display error and return false
   if (!accessToken) {
-    console.log("No access token provided. Cannot verify user is SUPER_ADMIN");
+    console.log("No access token provided. Cannot get user from access token");
     return null;
   }
 

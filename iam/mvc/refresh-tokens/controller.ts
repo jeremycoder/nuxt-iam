@@ -4,7 +4,7 @@
 
 import { index, destroy, destroyAll } from "./model";
 import { createRouter, defineEventHandler, useBase, H3Error } from 'h3';
-import { isSuperAdmin, hasVerifiedEmail } from "~~/iam/authz/permissions";
+import { canAccessAdmin } from "~~/iam/authz/permissions";
 import { validateCsrfToken } from "~~/iam/misc/helpers";
 
 // User not found error
@@ -30,9 +30,8 @@ const router = createRouter();
 // Get all refresh tokens
 router.get('/', defineEventHandler(async (event) => {  
   // TODO: Change this to one permission like isAdminAuthorized  
-  if (!event.context.user) throw userNotFoundError
-  if (!isSuperAdmin(event.context.user)) throw forbiddenError
-  if (!hasVerifiedEmail(event.context.user)) throw forbiddenError
+  if (!event.context.user) throw userNotFoundError 
+  if (!canAccessAdmin(event.context.user)) throw forbiddenError
   return await index(event) 
 }));
 
@@ -43,11 +42,8 @@ router.delete('/:id', defineEventHandler(async (event) => {
   if (tokenOrError instanceof H3Error) throw csrfTokenError;
 
   // Get user from context
-  if (!event.context.user) throw userNotFoundError        
-
-  // To delete refresh token, user must be super admin and have email verified   
-  if (!isSuperAdmin(event.context.user)) throw forbiddenError
-  if (!hasVerifiedEmail(event.context.user)) throw forbiddenError      
+  if (!event.context.user) throw userNotFoundError
+  if (!canAccessAdmin(event.context.user)) throw forbiddenError     
 
   return await destroy(event) 
 }));
@@ -58,12 +54,9 @@ router.delete('/', defineEventHandler(async (event) => {
   const tokenOrError = await validateCsrfToken(event);
   if (tokenOrError instanceof H3Error) throw csrfTokenError;
 
-  // Get user from context
-  if (!event.context.user) throw userNotFoundError     
-
-   // To delete refresh token, user must be super admin and have email verified   
-   if (!isSuperAdmin(event.context.user)) throw forbiddenError
-   if (!hasVerifiedEmail(event.context.user)) throw forbiddenError     
+  // Get user from context  
+  if (!event.context.user) throw userNotFoundError
+  if (!canAccessAdmin(event.context.user)) throw forbiddenError     
 
   return await destroyAll(event) 
 }));

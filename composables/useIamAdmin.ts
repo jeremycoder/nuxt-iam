@@ -7,6 +7,7 @@ export default function useIamAdmin() {
     createUser,
     updateUser,
     deleteUser,
+    userHasPermission,
     getRefreshTokens,
     deleteRefreshToken,
     deleteRefreshTokens,
@@ -78,6 +79,20 @@ async function deleteUser(user: User): Promise<JSONResponse> {
       csrf_token: user.csrf_token,
     },
   });
+
+  return response;
+}
+
+/**
+ * @desc Check user permission
+ * @returns {Promise<JSONResponse>}
+ */
+async function userHasPermission(user: User, permission: string): Promise<JSONResponse> {
+  const response = await $fetch(`/api/iam/users/${user.uuid}/permission/${permission}`, {
+    headers: {
+      "client-platform": "browser",
+    },
+  }); 
 
   return response;
 }

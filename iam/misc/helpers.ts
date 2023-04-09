@@ -20,7 +20,6 @@ import {
 } from "./email";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
-import queryString from "query-string";
 
 /**
  * @desc Returns a random string of 32 characters in hexadecimal
@@ -2293,28 +2292,6 @@ export async function verifyGoogleToken(
     console.log("Error verifying Google access token");
     return createError({ statusCode: 401, statusMessage: "Unauthorized" });
   }
-}
-
-/**
- * @desc Gets query parameters from route e.g. ?a=1&b=2 etc
- * @param event H3 event
- */
-export function getQueryParams(
-  event: H3Event
-): queryString.ParsedQuery<string> | null {
-  let paramsString = null;
-  let params = null;
-
-  // Get url
-  let url = event.node.req.url;
-
-  // Get params string
-  if (url) paramsString = url.substring(url.indexOf("?"));
-
-  // Parse query params
-  if (url && paramsString) params = queryString.parse(paramsString);
-
-  return params;
 }
 
 /**

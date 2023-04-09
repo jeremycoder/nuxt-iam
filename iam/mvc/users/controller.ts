@@ -2,9 +2,10 @@
  * Routes all user requests
  */
 
-import { index, create, show, update, destroy } from "./model";
+import { index, create, show, permission, update, destroy } from "./model";
 import { createRouter, defineEventHandler, useBase, H3Error } from 'h3';
-import { isSuperAdmin, hasVerifiedEmail, isOwner } from "~~/iam/authz/permissions";
+import { canAccessAdmin } from "~~/iam/authz/permissions";
+import { isOwner } from "~~/iam/authz/helpers";
 import { validateCsrfToken } from "~~/iam/misc/helpers";
 
 // User not found error
@@ -29,11 +30,8 @@ const router = createRouter();
 
 // Get all users
 router.get('/', defineEventHandler(async (event) => {  
-  // Permissions: to see all users, user must be super admin and have their email verified
-  // TODO: Change this to one permission like isAdminAuthorized
   if (!event.context.user) throw userNotFoundError
-  if (!isSuperAdmin(event.context.user)) throw forbiddenError
-  if (!hasVerifiedEmail(event.context.user)) throw forbiddenError
+  if (!canAccessAdmin(event.context.user)) throw forbiddenError  
   return await index(event) 
 }));
 
@@ -50,10 +48,18 @@ router.get('/:uuid', defineEventHandler(async (event) => {
 
   // Permissions: to see record, user must be either super admin or be the owner
   if (uuid)
-    if (event.context.user.uuid && !isSuperAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
+    if (event.context.user.uuid && !canAccessAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
         throw forbiddenError;
 
   return await show(event) 
+}));
+
+// Check if a user has a permission
+router.get('/:uuid/permission/:permission', defineEventHandler(async (event) => { 
+  if (!event.context.user) throw userNotFoundError
+  if (!canAccessAdmin(event.context.user)) throw forbiddenError
+
+  return await permission(event) 
 }));
 
 // Edit a user
@@ -68,7 +74,7 @@ router.put('/:uuid', defineEventHandler(async (event) => {
 
   // To edit record, user must be either super admin or be the owner
   if (uuid)
-    if (event.context.user.uuid && !isSuperAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
+    if (event.context.user.uuid && !canAccessAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
         throw forbiddenError;
 
   return await update(event) 
@@ -86,7 +92,7 @@ router.delete('/:uuid', defineEventHandler(async (event) => {
 
   // To delete record, user must be either super admin or be the owner
   if (uuid)
-    if (event.context.user.uuid && !isSuperAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
+    if (event.context.user.uuid && !canAccessAdmin(event.context.user) && !isOwner(event.context.user.uuid, uuid))
         throw forbiddenError;
 
   return await destroy(event) 

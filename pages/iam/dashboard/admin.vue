@@ -12,6 +12,6 @@
 
 // This page is only viewable by people with admin authorization
 definePageMeta({
-  middleware: 'iam-admin-authorized'
+  middleware: 'iam-can-access-admin'
 })
 </script>
