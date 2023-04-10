@@ -1,27 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import {
-  hashPassword,
-  validateUserRegistration,
-  makeUuid,
-  validateUserLogin,
-  login,
-  getNewTokens,
-  logout,
-  getUserByEmail,
-  getUserByUuid,
-  updateUserProfile,
-  deactivateRefreshTokens,
-  validateEmail,
-  sendResetEmail,
-  sendVerifyEmail,
-  deactivateUserSessions,
-} from "~~/iam/misc/helpers";
-import { verifyAccessToken } from "~~/iam/misc/helpers";
 import { TokensSession, User } from "~~/iam/misc/types";
 import { getClientPlatform } from "~~/iam/middleware";
 import { H3Event, H3Error } from "h3";
 import dayjs from "dayjs";
+import { validateUserRegistration, validateUserLogin, validateEmail } from "~~/iam/misc/utils/validators";
+import { hashPassword, makeUuid } from "~~/iam/misc/utils/passwords";
+import { getUserByEmail, getUserByUuid, updateUserProfile } from "~~/iam/misc/utils/users";
+import { login, logout } from "~~/iam/misc/utils/logins";
+import { getNewTokens, deactivateRefreshTokens, verifyAccessToken } from "~~/iam/misc/utils/tokens";
+import { sendVerifyEmail, sendResetEmail } from "~~/iam/misc/utils/emails";
+import { deactivateUserSessions } from "~~/iam/misc/utils/sessions";
 
 const config = useRuntimeConfig();
 
