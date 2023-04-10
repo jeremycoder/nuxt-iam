@@ -1,11 +1,9 @@
 import argon2 from "argon2";
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-import jwt, { JwtPayload } from "jsonwebtoken";
 import { H3Error } from "h3";
 import crypto from "crypto";
-import { OAuth2Client } from "google-auth-library";
-import { validateUserProfileUpdate, validatePassword } from "./../utils/validators";
+import { validatePassword } from "./../utils/validators";
 import passwordGenerator from "generate-password";
 
 const prisma = new PrismaClient();

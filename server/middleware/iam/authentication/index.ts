@@ -4,7 +4,7 @@
  */ 
 
 import { isAuthenticated } from "~~/iam/mvc/authn/queries";
-import { getAuthenticatedRoutes} from "~~/iam/misc/helpers"
+import { getAuthenticatedRoutes} from "~~/iam/misc/utils/logins"
 import { getUserFromAccessToken } from "~~/iam/authz/helpers";
 
 import { H3Error } from "h3";
