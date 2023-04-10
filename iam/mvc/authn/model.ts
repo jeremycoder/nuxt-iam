@@ -15,19 +15,17 @@ import { getClientPlatform } from "~~/iam/middleware";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JSONResponse, User, TokensSession, Session } from "~~/iam/misc/types";
 import dayjs from "dayjs";
-import {
-  verifyPasswordResetToken,
-  verifyEmailVerificationToken,
-  generateNewPassword,
-  addOneTimeToken,
-  getTokenPayload,
-  updateEmailVerifiedTrue,
-  getUserSession,
-  validateCsrfToken,
-  createGoogleUser,
-  getTokensAfterGoogleLogin,
-  verifyGoogleToken,
-} from "~~/iam/misc/helpers";
+import { 
+  verifyPasswordResetToken, 
+  verifyEmailVerificationToken, 
+  addOneTimeToken, 
+  getTokenPayload,    
+  validateCsrfToken,  
+} from "~~/iam/misc/utils/tokens";
+import { generateNewPassword } from "~~/iam/misc/utils/passwords";
+import { getUserSession } from "~~/iam/misc/utils/sessions";
+import { createGoogleUser, updateEmailVerifiedTrue } from "~~/iam/misc/utils/users";
+import { getTokensAfterGoogleLogin, verifyGoogleToken } from "~~/iam/misc/utils/logins";
 
 /**
  * @desc Registers (creates) a new user in database

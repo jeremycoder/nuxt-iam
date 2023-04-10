@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { validateUserUpdate, validateUserDelete } from "~~/iam/misc/helpers";
+import { validateUserUpdate, validateUserDelete } from "~~/iam/misc/utils/validators";
 import { User } from "~~/iam/misc/types";
 import { H3Event, H3Error } from "h3";
 

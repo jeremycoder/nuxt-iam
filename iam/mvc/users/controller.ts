@@ -6,7 +6,7 @@ import { index, create, show, permission, update, destroy } from "./model";
 import { createRouter, defineEventHandler, useBase, H3Error } from 'h3';
 import { canAccessAdmin } from "~~/iam/authz/permissions";
 import { isOwner } from "~~/iam/authz/helpers";
-import { validateCsrfToken } from "~~/iam/misc/helpers";
+import { validateCsrfToken } from "~~/iam/misc/utils/tokens";
 
 // User not found error
 const userNotFoundError = createError({

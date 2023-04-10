@@ -1,7 +1,8 @@
 // Helper functions for authorization
 
 import { H3Event, H3Error } from "h3";
-import { verifyAccessToken, getUserByUuid } from "../misc/helpers";
+import { verifyAccessToken } from "../misc/utils/tokens";
+import { getUserByUuid } from "../misc/utils/users";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "~~/iam/misc/types";
 

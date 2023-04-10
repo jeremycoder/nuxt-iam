@@ -1,7 +1,7 @@
 import { H3Event, H3Error } from "h3";
 import { getAllUsers, showUser, updateUser, destroyUser } from "./queries";
 import { JSONResponse, User, Session } from "~~/iam/misc/types";
-import { getUserSession } from "~~/iam/misc/helpers";
+import { getUserSession } from "~~/iam/misc/utils/sessions";
 import { hasPermission } from "~~/iam/authz/permissions";
 
 /**
