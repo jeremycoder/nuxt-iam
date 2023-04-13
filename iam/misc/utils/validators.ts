@@ -354,7 +354,7 @@ export async function userExists(uuid: string): Promise<boolean> {
  */
 export function validatePassword(password: string): boolean {
   // Has at least 8 characters
-  if (password.length <= 8) return false;
+  if (password.length < 8) return false;
 
   // Has uppercase letters
   if (!/[A-Z]/.test(password)) return false;
