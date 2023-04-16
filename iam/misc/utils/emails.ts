@@ -437,7 +437,7 @@ export async function emailWithNodemailerSmtp(
   };
 
   // Sending email using nodemailer-service
-  console.log("Attempting to send mail using nodemailer-service");
+  console.log("Attempting to send mail using nodemailer-SMTP");
 
   if (!host) {
     console.log("Error: Email host not specified. Aborting email send.");
