@@ -23,8 +23,8 @@ export async function getAllRefreshTokens(
 
   await prisma.refresh_tokens
     .findMany({
-      skip: parseInt(skip) ?? 0,
-      take: parseInt(take) ?? 100,
+      skip: Number.isInteger(skip) ? parseInt(skip) : 0,
+      take: Number.isInteger(take) ? parseInt(take) : 100,
     })
     .then(async (result) => {
       refreshTokens = result;
