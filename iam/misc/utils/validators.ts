@@ -52,6 +52,16 @@ export async function validateUserRegistration(
 export async function validateUserUpdate(
   event: H3Event
 ): Promise<H3Error | void> {
+  // Properties that can be updated in user profile
+  const updatableProperties = [
+    'first_name',
+    'last_name',
+    'current_password',
+    'new_password',
+    'is_active',
+    'role',
+  ]
+  
   const uuid = event.context.params?.uuid;
   const body = await readBody(event);
 
@@ -70,12 +80,13 @@ export async function validateUserUpdate(
     });
 
   // If no updatable properties supplied
-  if (
-    "first_name" in body === false &&
-    "last_name" in body === false &&
-    "role" in body === false &&
-    "permissions" in body === false
-  )
+  let nothingToUpdate = true
+  for (let i = 0; i < updatableProperties.length; i++) {
+    if (updatableProperties[i] in body === true) 
+      nothingToUpdate = false
+  }
+
+  if (nothingToUpdate)
     return createError({
       statusCode: 400,
       statusMessage: "No updatable properties supplied",
@@ -110,6 +121,15 @@ export async function validateUserUpdate(
 export async function validateUserProfileUpdate(
   event: H3Event
 ): Promise<H3Error | void> {
+  // Properties that can be updated in user profile
+  const updatableProperties = [
+    'first_name',
+    'last_name',
+    'current_password',
+    'new_password',
+    'is_active',
+    'role',
+  ]
   const body = await readBody(event);
 
   // If uuid not provided
@@ -120,24 +140,27 @@ export async function validateUserProfileUpdate(
     });
 
   // If nothing supplied can be updated
-  if (
-    "first_name" in body === false &&
-    "last_name" in body === false &&
-    "current_password" in body === false &&
-    "new_password" in body === false
-  )
+  let nothingToUpdate = true
+  for (let i = 0; i < updatableProperties.length; i++) {
+    if (updatableProperties[i] in body === true) 
+      nothingToUpdate = false
+  }
+
+  if (nothingToUpdate)
     return createError({
       statusCode: 400,
       statusMessage: "No updatable properties supplied",
     });
 
   const user = await getUserByUuid(body.uuid);
-  // This error really shouldn't happen
-  if (!user)
+  // This error really shouldn't happen  
+  if (!user) {
+    console.log('This error should really not be happening!')
     return createError({
       statusCode: 400,
       statusMessage: "User not found",
     });
+  }  
 
   // If first name is supplied, but has no value
   if ("first_name" in body === true && body.first_name.trim() === "")
@@ -233,7 +256,6 @@ export async function validateUserLogin(
  */
 export async function validateRegisterBody(event: H3Event) {
   const body = await readBody(event);
-  console.log('BODY: ', body);
   if ("first_name" in body === false || body.first_name.trim() === "") {
     return "'first_name' is required";
   }

@@ -117,6 +117,7 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
   // Get parameters
   const body = await readBody(event);
 
+  // Get uuid from event context
   const uuid  = event.context.params?.uuid;
 
   if (!uuid) {
@@ -130,18 +131,19 @@ export async function updateUser(event: H3Event): Promise<User | H3Error> {
   let user = {} as User;
   let error = null;
 
+  // Remove uuid and id from body so they cannot be updated accidentally
+  delete body.uuid
+  delete body.id
+
+  // Remove csrf_token because it's not in user schema
+  delete body.csrf_token
+
   await prisma.users
     .update({
       where: {
         uuid: uuid,
       },
-      data: {
-        first_name: body.first_name,
-        last_name: body.last_name,
-        role: body.role,
-        permissions: body.permissions,
-        is_active: body.is_active,
-      },
+      data: body,
     })
     .then(async (response) => {
       user = response;

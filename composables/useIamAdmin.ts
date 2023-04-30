@@ -60,6 +60,7 @@ async function updateUser(user: User): Promise<JSONResponse> {
     body: user,
   });
 
+  console.log('Response: ', response)
   return response;
 }
 

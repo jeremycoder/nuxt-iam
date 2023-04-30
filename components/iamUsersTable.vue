@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>Users Table</h3>   
+    <h2>Users Table</h2>   
     <NxButton class="create-button" theme="success" @click="createUserNow = true">Create User</NxButton>    
     
     <!-- Create user modal -->
@@ -225,22 +225,32 @@ async function createThisUser(user: User) {
  */
 async function updateThisUser(user: User) {
   // Add csrf token
-  user.csrf_token = csrfToken
-  
+  user.csrf_token = csrfToken  
+
+  // Change any boolean values from boolean string to boolean data type
+  for (const key in user) {
+    /*@ts-ignore */
+    if (user[key] === 'true') user[key] = true
+    /*@ts-ignore */
+    if (user[key] === 'false') user[key] = false
+  }
+
   // Attempt to update user
-  try {
-    const { data } = await updateUser(user)    
-    
-    if (data) {
-      // Flash success message 
+  const { data, error } = await updateUser(user)
+
+  // If successful, flash success message
+  if (data) {      
       usersSuccess.value = true
       setTimeout(() => { usersSuccess.value = false; }, 2000);
       await getAllUsers()   
-    }
-  } catch (error) {    
+  }
+
+  // If error, show error
+  if (error) {  
     const updateError = error as Error
-    usersError.value = updateError    
-  }    
+    usersError.value = updateError 
+  } 
+   
 }
 
 /**
