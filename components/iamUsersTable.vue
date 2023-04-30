@@ -1,73 +1,30 @@
 <template>
   <div>
-    <h3>Users Table</h3>
-    <button
-      type="button"
-      class="btn btn-success btn-sm mb-2 mt-2"
-      :disabled="usersError !== null"
-      @click="createUserNow = true"            
-    >
-      Create User
-    </button> 
-
-    <!-- Input form to create a user -->
-    <div v-if="createUserNow">
-      <iamObjectAsInputFormModal 
-        :title="'Create User'"
-        :description="'Create user below.'"
-        :object="userToCreate"        
-        @update="createThisUser($event)"
-        @close="createUserNow = false" 
-      />
-    </div>   
+    <h3>Users Table</h3>   
+    <NxButton class="create-button" theme="success" @click="createUserNow = true">Create User</NxButton>    
+    
+    <!-- Create user modal -->
+    <NxModal v-if="createUserNow" @close="createUserNow = false">
+      <NxCard header="Create a User" theme="primary" text="Enter information to create a user.">
+        <NxForm :data="createUserInputData" @submit="createUserOutput" />
+      </NxCard>        
+    </NxModal>    
     
     <!-- Error alert -->
-    <div 
-      v-if="usersError" 
-      class="alert alert-danger alert-dismissible fade show" 
-      role="alert">
-      <strong>{{ usersError.message }}</strong>
-      <button 
-        type="button" 
-        class="btn-close" 
-        data-bs-dismiss="alert" 
-        aria-label="Close" 
-        @click="usersError = null">
-      </button>
-    </div>
-
+    <NxAlert v-if="usersError" theme="danger" @click="usersError = null"><strong>{{ usersError.message }}</strong></NxAlert>
+    
     <!-- Success alert -->
-    <div 
-      v-if="usersSuccess" 
-      class="alert alert-success alert-dismissible fade show" 
-      role="alert">
-      <strong>Success</strong>
-      <button 
-        type="button" 
-        class="btn-close" 
-        data-bs-dismiss="alert" 
-        aria-label="Close" 
-        @click="usersSuccess = false">
-      </button>
-    </div>
-      
+    <NxAlert v-if="usersSuccess" theme="success" @click="usersSuccess = false"><strong>Success</strong></NxAlert>
+
     <!-- Input form to update users -->
-    <div v-if="updateUserNow">
-      <iamObjectAsInputFormModal 
-        :title="'Update User'"
-        :description="'Update user below.'"
-        :object="userToUpdate" 
-        :disabled="disabled"
-        :asSelect1="'role'"
-        :selectOptions1="roles"
-        :asBoolean1="'is_active'"
-        @update="updateThisUser($event)"
-        @close="updateUserNow = false" 
-      />
-    </div>        
-      
-    <!-- Display users object as an HTML table -->
-    <iamObjectsAsTable v-if="users" 
+    <NxModal v-if="updateUserNow" @close="updateUserNow = false">
+      <NxCard header="Update User" :max-width="30" theme="success" text="Update user below.">
+        <NxForm :data="prepareUserToUpdate(userToUpdate)" :return-keys="returnKeys" @submit="updateThisUser" />
+      </NxCard>
+    </NxModal>
+
+    <!-- Display users object as an HTML table -->    
+    <NxObjectAsTable v-if="users" 
       :data=displayedUsers       
       @update="getUserToUpdate($event)" 
       @delete="deleteThisUser($event)" 
@@ -76,14 +33,32 @@
 </template>
 
 <script setup lang="ts">
-import { User } from "~~/iam/misc/types";
+import { User, NxFormInput } from "~~/iam/misc/types";
+const { getUsers, createUser, updateUser, deleteUser } = useIamAdmin();
 
-const {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser,  
-} = useIamAdmin();
+// Data for input form
+const createUserInputData = [
+  {
+    label: 'First Name',
+    id: 'first_name',
+    type: 'input:text',
+  },
+  {
+    label: 'Last Name',
+    id: 'last_name',
+    type: 'input:text',
+  },
+  {
+    label: 'Email',
+    id: 'email',
+    type: 'input:email',
+  },
+  {
+    label: 'Password',
+    id: 'password',
+    type: 'input:password',
+  },
+] as Array<NxFormInput>
 
 // The only columns to show
 const show = [
@@ -94,15 +69,13 @@ const show = [
   'last_name',
 ]
 
-// Disabled input
-const disabled = [
+// Disabled keys in user object
+const disabledKeys = [
   'id',
   'uuid',
   'email',
   'password',
-  'email_verified',
-  'role',
-  'is_active',
+  'email_verified',   
   'last_login',
   'created_at',
   'deleted_at',
@@ -122,6 +95,9 @@ const removeBeforeSending = [
   'updated_at',
 ]
 
+// Keys that should always be returned from user update form
+const returnKeys = ['uuid']
+
 // User roles
 const roles = [
   'SUPER_ADMIN',
@@ -136,12 +112,7 @@ const usersSuccess = ref(false)
 const displayedUsers = ref([] as Array<User>)
 const users = ref([])
 let userToUpdate = {} as User
-let userToCreate = {
-  first_name: '',
-  last_name: '',
-  email: '',
-  password: '',  
-} as User
+
 let updateUserNow = ref(false)
 let createUserNow = ref(false)
 let allUsers = [] as Array<User>
@@ -195,6 +166,41 @@ function getUserToUpdate(user: User){
 }
 
 /**
+ * @desc Get the user to edit and convert the user to NxFormInput
+ * @param user The user to edit 
+ */
+function prepareUserToUpdate(user: User): Array<NxFormInput> {
+  const form = [] as Array<NxFormInput>
+  // Iterate through user
+  for (const key in user) {
+    const temp = {} as NxFormInput
+    temp.id = key;
+    temp.label = key;
+
+    // If key is 'roles', add select
+    if (key === 'role') {
+      temp.type = 'select'
+      temp.options = roles
+    } else if (key === 'is_active') {
+      temp.type = 'select'
+      temp.options = ['true', 'false']
+    } else {
+      temp.type = 'input:text'
+    }
+    
+    /*@ts-ignore */
+    temp.value = user[key]
+
+    // Disable key if it should be disabled
+    if (disabledKeys.includes(key)) temp.disabled = true    
+
+    form.push(temp)
+  }
+  
+  return form
+}
+
+/**
  * @desc Create user
  * @param user User to create
  */
@@ -212,22 +218,15 @@ async function createThisUser(user: User) {
     setTimeout(() => { usersSuccess.value = false; }, 2000);
     await getAllUsers()
   }
-}   
-
+}
 
 /**
  * @desc Send data to update user
  */
-async function updateThisUser(user: User){  
-  // Remove object properties that should not be updated
-  removeBeforeSending.forEach((property) => {
-    //@ts-ignore
-    if (property in user) delete user[property]
-  })
-
+async function updateThisUser(user: User) {
   // Add csrf token
-  user.csrf_token = csrfToken   
-
+  user.csrf_token = csrfToken
+  
   // Attempt to update user
   try {
     const { data } = await updateUser(user)    
@@ -268,4 +267,45 @@ async function deleteThisUser(user: User){
     usersError.value = deleteError    
   }    
 }
+
+/**
+ * Receives data to create a user and calls function to create user
+ * @param userData Data to create a user
+ */
+function createUserOutput(userData: User){
+  createUserNow.value = false
+
+  // Prepare error object
+  const createError = {} as Error
+  usersError.value = createError
+
+  // Validate user input
+  if ('first_name' in userData ===  false) {       
+    usersError.value.message = 'first_name is required'    
+    return
+  }
+
+  if ('last_name' in userData ===  false) {    
+    usersError.value.message = 'last_name is required'
+    return
+  }
+
+  if ('email' in userData ===  false) {    
+    usersError.value.message = 'email is required'
+    return
+  }
+
+  if ('password' in userData ===  false) {    
+    usersError.value.message = 'password is required'
+    return
+  }
+
+  createThisUser(userData)
+}
 </script>
+
+<style scoped>
+.create-button {
+  margin-bottom: 2rem;
+}
+</style>
