@@ -1,56 +1,31 @@
 <template>
   <div>
-    <h3>Refresh Tokens Table</h3>
-    <button
-        type="button"
-        class="btn btn-danger btn-sm mb-2 mt-2"
-        @click="myProfile && myProfile.csrf_token ? deleteAllTokens(myProfile.csrf_token) : null"
-      >
-        Delete All
-      </button>
-      <p>
-        <small
-          >Deleting all will force every user to reauthenticate after their
-          access tokens expire.</small
-        >
-      </p>       
+    <h2>Refresh Tokens Table</h2>
+    <NxButton 
+      theme="danger"
+      @click="myProfile && myProfile.csrf_token ? deleteAllTokens(myProfile.csrf_token) : null"
+    >
+      Delete All
+    </NxButton>
+    
+    <p>Deleting all will force every user to reauthenticate after their access tokens expire.</p>
     
     <!-- Error alert -->
-    <div 
-      v-if="refreshTokensError" 
-      class="alert alert-danger alert-dismissible fade show" 
-      role="alert">
+    <NxAlert v-if="refreshTokensError" theme="danger" @click="refreshTokensError = null">
       <strong>{{ refreshTokensError.message }}</strong>
-      <button 
-        type="button" 
-        class="btn-close" 
-        data-bs-dismiss="alert" 
-        aria-label="Close" 
-        @click="refreshTokensError = null">
-      </button>
-    </div>
+    </NxAlert>    
 
     <!-- Success alert -->
-    <div 
-      v-if="refreshTokensSuccess" 
-      class="alert alert-success alert-dismissible fade show" 
-      role="alert">
+    <NxAlert v-if="refreshTokensSuccess" theme="success" @click="refreshTokensSuccess = false">
       <strong>Success</strong>
-      <button 
-        type="button" 
-        class="btn-close" 
-        data-bs-dismiss="alert" 
-        aria-label="Close" 
-        @click="refreshTokensSuccess = false">
-      </button>
-    </div>         
+    </NxAlert>        
       
     <!-- Display refresh tokens object as an HTML table -->
-    <iamObjectsAsTable v-if="displayedTokens.length" 
+    <NxObjectAsTable v-if="displayedTokens.length"
       :data=displayedTokens
       :remove-edit="true"       
-      @delete="deleteThisToken($event)" 
-    />
+      @delete="deleteThisToken($event)"
+    />    
   </div>
 </template>
 
@@ -101,6 +76,7 @@ async function getAllRefreshTokens() {
  */
 async function deleteThisToken(token: RefreshToken){
   // Check for csrf token
+  // const csrfToken = myProfile.value?.csrf_token
   const csrfToken = myProfile.value?.csrf_token
 
   if (!csrfToken) {

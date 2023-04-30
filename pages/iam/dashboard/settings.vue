@@ -80,41 +80,21 @@
           </div>
         </div>
       </div>
-      <div class="col">
-        <div class="card mb-3 mx-10 my-10" style="max-width: 25rem">
-          <h4 class="card-header">Account</h4>
-          <div class="card-body">
-            <h5 class="card-title text-danger">Delete Account</h5>
-            <!-- Profile errors notification -->
-            <div
-              v-if="deleteError"
-              class="alert alert-danger alert-dismissible fade show"
-              role="alert"
-            >
-              <strong>{{ deleteError.message }}</strong>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-                @click="deleteError = null"
-              ></button>
-            </div>
-            <p>
-              Deleting your account is a permanent action and cannot be undone.
+
+      <NxCard 
+        header="Account" 
+        title="Delete Account" 
+        theme="danger"
+        text="Deleting your account is a permanent action and cannot be undone.
               If you are sure you want to delete your account, click the button
-              below.
-            </p>
-            <button
-              type="submit"
-              class="btn btn-danger"
-              @click.prevent="deleteMyAccount()"
-            >
-              Delete Account
-            </button>
-          </div>
-        </div>
-      </div>
+              below."
+      >
+        <NxAlert v-if="deleteError" theme="danger" @click="deleteError = null">
+          <strong>{{ deleteError.message }}</strong>
+        </NxAlert>
+
+        <NxButton theme="danger" @click="deleteMyAccount()">Delete Account</NxButton> 
+      </NxCard>      
     </div>
   </div>
 </template>
