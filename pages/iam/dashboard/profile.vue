@@ -1,158 +1,131 @@
 <template>
   <div>
-    <h1 class="mt-5">Profile</h1>
-    <p class="lead">Update your profile</p>
-  </div>
-  <!-- Profile errors notification -->
-  <div
-    v-if="profileError"
-    class="alert alert-danger alert-dismissible fade show"
-    role="alert"
-  >
-    <strong>{{ profileError.message }}</strong>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="alert"
-      aria-label="Close"
-      @click="profileError = null"
-    ></button>
-  </div>
-  <!-- Profile success notification -->
-  <div
-    v-if="updateSuccessful"
-    class="alert alert-success alert-dismissible fade show"
-    role="alert"
-  >
-    <strong>Profile updated successfully</strong>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="alert"
-      aria-label="Close"
-      @click="updateSuccessful = false"
-    ></button>
-  </div>
+    <div>
+      <h1>Profile</h1>
+      <p>Update your profile</p>
+    </div>
+    <!-- Profile errors notification -->  
+    <NxAlert v-if="profileError" @click="profileError = null">
+      <strong>{{ profileError.message }}</strong>
+    </NxAlert>
 
-  <div class="row">
-      <div class="col">
-        <div class="card mb-3 mx-10" style="max-width: 25rem">
-          <h4 class="card-header">Profile</h4>
-          <div class="card-body">
-            <h5 class="card-title">Update Profile</h5>
-            <p>Update your profile below.</p>
-            <!-- Data here-->
-            <form class="mb-5">
-              <div class="mb-3">
-                <label for="uuid" class="form-label">Uuid</label>
-                <input
-                  type="text"
-                  class="form-control mb-3"
-                  id="uuid"                
-                  :value="$attrs.profile.uuid"
-                  disabled
-                />
-                <label for="first_name" class="form-label">First name</label>
-                <input
-                  v-model="profile.firstName"
-                  type="text"
-                  class="form-control mb-3"
-                  id="first_name"                  
-                />
-                <label for="last_name" class="form-label">Last name</label>
-                <input
-                  v-model="profile.lastName"
-                  type="text"
-                  class="form-control mb-3"
-                  id="last_name"                  
-                />
-                <label for="email" class="form-label">Email address</label>
-                <input
-                  type="email"
-                  class="form-control mb-3"
-                  id="email"                  
-                  :value="$attrs.profile.email"
-                  disabled
-                />
-                <label for="role" class="form-label">Role</label>
-                <input
-                  type="text"
-                  class="form-control mb-3"
-                  id="role"                  
-                  :value="$attrs.profile.role"
-                  disabled
-                />
-                <label for="is_active" class="form-label">Is Active</label>
-                <input
-                  type="text"
-                  class="form-control mb-3"
-                  id="is_active"                  
-                  :value="$attrs.profile.isActive"
-                  disabled
-                />
-                <label for="permissions" class="form-label">Permissions</label>
-                <textarea
-                  type="text"
-                  class="form-control mb-3"
-                  id="permissions"                  
-                  :value="$attrs.profile.permissions"
-                  disabled
-                ></textarea>               
-              </div>
-              <button
-                type="submit"
-                class="btn btn-primary"
-                @click.prevent="updateMyProfile()"
-              >
-                Update My Profile
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-  </div>  
+    <!-- Profile success notification -->
+    <NxAlert v-if="updateSuccessful" theme="success" @click="updateSuccessful = false">
+      <strong>Profile updated successfully</strong>
+    </NxAlert> 
+
+    <!--Card and form to update profile-->
+    <NxCard
+      header="Profile" 
+      title="Update Profile" 
+      theme="primary"
+      text="Update your profile below."
+    >
+      <NxForm 
+      v-if="profile" 
+      :data="convertUserToForm(profile)" 
+      submit-text="Update Profile"
+      @submit="updateMyProfile"
+      />
+    </NxCard>
+  </div>    
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { User, NxFormInput } from "~~/iam/misc/types";
+
 const emit = defineEmits(["profileUpdate"]);
+
+// Disabled keys in user object
+const disabledKeys = [
+  'id',
+  'uuid',
+  'email',
+  'password',
+  'role',
+  'permissions',
+  'csrf_token',
+  'email_verified',   
+  'last_login',
+  'created_at',
+  'deleted_at',
+  'updated_at',
+]
+
+// Do not show the following keys
+const doNotShow = [
+  'id',
+  'password',
+  'created_at',
+  'deleted_at',
+  'updated_at',
+  'csrf_token',
+]
+
+// User roles
+const roles = [
+  'SUPER_ADMIN',
+  'ADMIN',
+  'GENERAL'
+]
 
 const { updateProfile } = useIam();
 const updateSuccessful = ref(false);
-let profileError = ref(null);
+const profileError = ref(<Error|null>(null))
 
-// Some profile values
-const profile = {
-  uuid: "",
-  firstName: "",
-  lastName: "",
-};
+// Get profile from attributes
+const profile = ref(<User>({}))
+profile.value = useAttrs().profile as User
 
-// Get profile passed through attributes
-const attrs = useAttrs();
-profile.uuid = attrs.profile.uuid;
-profile.firstName = attrs.profile.firstName;
-profile.lastName = attrs.profile.lastName;
+// Get csrf token and uuid
+const csrfToken = profile.value.csrf_token
+const uuid = profile.value.uuid
 
-// Csrf token should be part of profile
-const csrfToken = attrs.profile.csrfToken;
+/**
+ * @desc Convert user to NxFormInput
+ * @param user The user to edit 
+ */
+function convertUserToForm(user: User): Array<NxFormInput> {
+  const form = [] as Array<NxFormInput>
+  // Iterate through user
+  for (const key in user) {
+    const temp = {} as NxFormInput
+    temp.id = key;
+    temp.label = key;
+
+    // If key is 'roles', add select
+    if (key === 'role') {
+      temp.type = 'select'
+      temp.options = roles
+    } else if (key === 'is_active') {
+      temp.type = 'select'
+      temp.options = ['true', 'false']
+    } else {
+      temp.type = 'input:text'
+    }
+
+    // Do not show the following keys
+    if (doNotShow.includes(key)) temp.show = false
+    
+    /*@ts-ignore */
+    temp.value = user[key]
+
+    // Disable key if it should be disabled
+    if (disabledKeys.includes(key)) temp.disabled = true    
+
+    form.push(temp)
+  }
+  
+  return form
+}
 
 // Attempt to update user profile
-async function updateMyProfile() {
-  if (
-    profile.firstName === attrs.profile.firstName &&
-    profile.lastName === attrs.profile.lastName
-  )
-    return;
-
-  // Object with updatable values
-  const values = {
-    uuid: profile.uuid,
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    csrfToken: csrfToken,
-  };
-
-  const { error, data } = await updateProfile(values);
+async function updateMyProfile(profile: User) {  
+  // Add csrf token and uuid because they are required
+  profile.csrf_token = csrfToken
+  profile.uuid = uuid
+  
+  const { error } = await updateProfile(profile);
 
   // If error, display error
   if (error) {

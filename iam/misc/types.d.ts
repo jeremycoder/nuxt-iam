@@ -9,6 +9,8 @@ export type User = {
   avatar?: string | null;
   role: "SUPER_ADMIN" | "ADMIN" | "GENERAL";
   csrf_token?: string;
+  current_password?: string;
+  new_password?: string;
   email_verified: boolean;
   is_active: boolean;
   last_login: Date | null;
@@ -81,15 +83,6 @@ export type Session = {
   csrf_token: string;
   is_active: boolean;
   ip_address: string;
-};
-
-export type ProfileUpdateValues = {
-  uuid?: string;
-  firstName?: string;
-  lastName?: string;
-  csrfToken?: string;
-  currentPassword?: string;
-  newPassword?: string;
 };
 
 export enum Roles {

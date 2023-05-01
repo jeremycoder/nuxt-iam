@@ -1,4 +1,4 @@
-import { JSONResponse, ProfileUpdateValues } from "~~/iam/misc/types";
+import { JSONResponse, User } from "~~/iam/misc/types";
 
 // Composable to make authentication tasks easier
 export default function useIam() {
@@ -74,26 +74,17 @@ async function login(email: string, password: string): Promise<JSONResponse> {
 }
 
 /**
- * @desc Returns user profile if successful
+ * @desc Update user profile
  * @returns {Promise<JSONResponse>}
  */
 
-async function updateProfile(
-  values: ProfileUpdateValues
-): Promise<JSONResponse> {
+async function updateProfile(user: User): Promise<JSONResponse> {
   const response = await $fetch("/api/iam/authn/update", {
     method: "PUT",
     headers: {
       "client-platform": "browser",
     },
-    body: {
-      uuid: values.uuid,
-      first_name: values.firstName,
-      last_name: values.lastName,
-      csrf_token: values.csrfToken,
-      current_password: values.currentPassword,
-      new_password: values.newPassword,
-    },
+    body: user
   });
 
   return response;

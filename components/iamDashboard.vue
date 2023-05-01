@@ -2,28 +2,17 @@
   <div v-if="isLoaded">
     <div v-if="isLoggedIn && profile">
       <!-- Check if email is verified -->
-      <div
-        v-if="verifyRegistrations && !emailIsVerified"
-        class="container-xl px-4 mt-4"
-      >
-        <div class="container">
-          <h2>Email verification is required</h2>
+      <div v-if="verifyRegistrations && !emailIsVerified">
+        <div>
+          <h2 class="email-verification">Email verification is required</h2>
           <div v-if="!verificationEmailSent">
-            <p>Please click the button below to verify your email</p>
-            <button
-              class="btn btn-primary"
-              type="button"
-              @click="verifyMyEmail(profile.email)"
-            >
+            <p>Please click the button below to verify your email</p>            
+            <NxButton theme="primary" @click="verifyMyEmail(profile.email)">
               Send email verification
-            </button>
-            <button
-              class="btn btn-secondary ms-2"
-              type="button"
-              @click="logMeOut()"
-            >
+            </NxButton>
+            <NxButton theme="secondary" @click="logMeOut()">
               Log out
-            </button>
+            </NxButton>            
           </div>
           <div v-else>
             <p>
@@ -35,20 +24,25 @@
         </div>
       </div>
       <!-- Check if account is active -->
-      <div v-else-if="getProfileError" class="container my-5">
-        <div class="alert alert-danger" role="alert">
-          <h3 class="alert-heading">Get profile error</h3>
-          <p>
-            {{ getProfileError.message }}
-          </p>
-          <hr />
-          <button type="button" class="btn btn-secondary" @click="logMeOut">
+      <div v-else-if="profile && !profile.is_active">        
+        <NxAlert theme="danger">
+          <strong>Account is not active. Please contact an administrator.</strong>
+        </NxAlert>
+        <NxButton theme="secondary" @click="logMeOut">
             Log out
-          </button>
-        </div>
-      </div>      
-      <div v-else>        
-        <!-- Main content -->
+        </NxButton>        
+      </div>
+      <!-- If we getting profile results in error -->
+      <div v-else-if="getProfileError">        
+        <NxAlert theme="danger">
+          <strong>{{ getProfileError.message }}</strong>
+        </NxAlert>
+        <NxButton theme="secondary" @click="logMeOut">
+            Log out
+        </NxButton>        
+      </div>
+      <!-- Otherwise display profile -->      
+      <div v-else>       
         <main>
           <div class="container">
             <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />            
@@ -57,12 +51,13 @@
       </div>    
     </div>    
   </div>
-  <div v-else class="container-xl px-4 mt-4">
-    <div class="spinner-border" role="status"></div>
+  <div v-else>
+    <div class="loading-spinner" />
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { User } from "~~/iam/misc/types";
 import { useIamProfileStore } from '@/stores/useIamProfileStore'
 
 const iamStore = useIamProfileStore()
@@ -71,34 +66,19 @@ const { isAuthenticated, getProfile, logout, verifyEmail } = useIam();
 const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
 const showProfile = ref(false);
-let getProfileError = ref(null);
+const getProfileError = ref(<Error|null>(null))
 let verificationEmailSent = ref(false);
 
 // Profile variables
-const firstName = ref("");
-const lastName = ref("");
+const firstName = ref('');
+const lastName = ref('');
 
 // Check email verification
-const verifyRegistrations =
-  useRuntimeConfig().public.iamVerifyRegistrations === "true";
+const verifyRegistrations = useRuntimeConfig().public.iamVerifyRegistrations === "true";
 const emailIsVerified = ref(false);
 
 // User profile
- const profile = {
-    id: "",
-    uuid: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "",
-    avatar: "",
-    csrfToken: "",
-    isActive: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmNewPassword: "",
-    permissions: "",
-  };
+const profile = ref(<User>({}))
 
 onMounted(async () => {
   await isLoggedIn();
@@ -138,20 +118,11 @@ async function getMyProfile() {
 
   // If successful, data will contain profile
   if (status === "success" && data) {
-    profile.id = data.id;
-    profile.uuid = data.uuid;
-    profile.firstName = data.first_name;
-    profile.lastName = data.last_name;
-    profile.email = data.email;
-    profile.avatar = data.avatar;
-    profile.csrfToken = data.csrf_token;
-    profile.isActive = data.is_active;
-    profile.role = data.role;
-    profile.permissions = data.permissions;
+    profile.value = data as User
 
     // Assign to local reactive variables
-    firstName.value = profile.firstName;
-    lastName.value = profile.lastName;
+    firstName.value = profile.value.first_name;
+    lastName.value = profile.value.last_name;
 
     // Check email verification status
     emailIsVerified.value = data.email_verified;
@@ -159,9 +130,9 @@ async function getMyProfile() {
 
     // Store some profile data in store
     iamStore.setProfile({
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      avatar: profile.avatar,
+      firstName: profile.value.first_name,
+      lastName: profile.value.last_name,
+      avatar: profile.value.avatar ?? '',
     })
     
     // Set log in true in store
@@ -174,7 +145,7 @@ async function getMyProfile() {
  * @desc Sends API request to verify email
  * @param email User email
  */
-async function verifyMyEmail(email) {  
+async function verifyMyEmail(email: string) {  
   verifyEmail(email);
   verificationEmailSent.value = true;
 }
@@ -183,4 +154,10 @@ useHead({
   title: "Nuxt IAM Dashboard",  
 });
 </script>
+
+<style scoped>
+.email-verification {
+  color: #dc3545;
+}
+</style>
 

@@ -3,7 +3,7 @@
   <form class="mb-5" :style="`width: ${width}rem;`">
     <div class="mb-3">
       <div v-for="(item, index) in data" :key="index">
-        <label v-if="item.label" :for="item.label" class="form-label"><strong>{{ item.label }}</strong></label>
+        <label v-if="item.label && item.show !== false" :for="item.label" class="form-label"><strong>{{ item.label }}</strong></label>
         <input v-if="item.type === 'input:text' && item.show !== false" type="text" class="form-control mb-3"
           :id="item.id" :disabled="item.disabled ?? false" :value="item.value ?? ''" @change="updateInputs" />
         <input v-if="item.type === 'input:password' && item.show !== false" type="password" class="form-control mb-3"
@@ -23,7 +23,7 @@
       </div>
     </div>
     <span @click.prevent="submit">
-      <NxButton>Submit</NxButton>
+      <NxButton :theme="buttonTheme">{{ submitText }}</NxButton>
     </span>
 
   </form>
@@ -52,7 +52,29 @@ const props = defineProps({
   },
   returnKeys: {
     type: Array<string>,
-  }
+  },
+  submitText: {
+    type: String,
+    default: 'Submit'
+  },
+  buttonTheme: {
+    validator(value: string) {
+      return [
+        'primary', 
+        'secondary', 
+        'success', 
+        'info', 
+        'warning', 
+        'danger', 
+        'dark', 
+        'light', 
+        'link', 
+        'primary-outline',
+        'success-outline'
+      ].includes(value)
+    },
+    default: 'primary',
+  },
 })
 
 const updatedInputs = {}
@@ -70,8 +92,10 @@ function updateInputs(event: Event) {
   if (id && value) updatedInputs[id] = value 
 }
 
-function submit() { 
-  
+/**
+ * @desc Process inputs and return submit
+ */
+function submit() {   
   // If we have return keys, get their values and add to updated inputs 
   if (props.returnKeys?.length && props.data?.length) {
     // Get inputs with keys

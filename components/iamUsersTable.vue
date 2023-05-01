@@ -82,19 +82,6 @@ const disabledKeys = [
   'updated_at',
 ]
 
-// Properties to remove before sending to backend
-// Any items that cannot be edited except the uuid which is required
-const removeBeforeSending = [
-  'id',
-  'email',
-  'password',
-  'email_verified',  
-  'last_login',
-  'created_at',
-  'deleted_at',
-  'updated_at',
-]
-
 // Keys that should always be returned from user update form
 const returnKeys = ['uuid']
 
@@ -123,7 +110,6 @@ onMounted(async () => {
   await getAllUsers();  
 });
 
-
 /**
  * @desc Get all users
  */
@@ -150,8 +136,7 @@ async function getAllUsers() {
     
   }
   else {
-    const createError = error as Error
-    usersError.value = createError
+    usersError.value = error
   }
 }
 
@@ -210,8 +195,7 @@ async function createThisUser(user: User) {
   
   // If error, show error
   if (error) {
-    const createError = error as Error
-    usersError.value = createError
+    usersError.value = error
   } else {
     // Flash success message 
     usersSuccess.value = true
@@ -247,10 +231,8 @@ async function updateThisUser(user: User) {
 
   // If error, show error
   if (error) {  
-    const updateError = error as Error
-    usersError.value = updateError 
-  } 
-   
+    usersError.value = error 
+  }    
 }
 
 /**
@@ -286,8 +268,7 @@ function createUserOutput(userData: User){
   createUserNow.value = false
 
   // Prepare error object
-  const createError = {} as Error
-  usersError.value = createError
+  usersError.value = {} as Error
 
   // Validate user input
   if ('first_name' in userData ===  false) {       
