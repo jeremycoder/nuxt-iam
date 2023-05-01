@@ -91,7 +91,7 @@ export enum Roles {
   'GENERAL'
 }
 
-type NxFormInput = {
+export type NxFormInput = {
   label?: string,
   id: string,
   type?: 'input:text' | 'input:password' | 'input:email' | 'input:number' | 'textarea' | 'select',
@@ -100,3 +100,15 @@ type NxFormInput = {
   show?: boolean,
   value?: string,
 }
+
+export type NxLink = {
+  name: string,
+  link?: string,
+  disabled?: Boolean,
+  show?: Boolean,
+  hasBorder?: Boolean,
+  showChildren?: Boolean,
+  children?: Links,
+}
+
+export type NxLinks = Array<NxLink>

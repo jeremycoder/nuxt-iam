@@ -30,15 +30,7 @@
 </template>
 
 <script setup lang="ts">
-type NxFormInput = {
-  label?: string,
-  id: string,
-  type?: 'input:text' | 'input:password' | 'input:email' | 'input:number' | 'textarea' | 'select',
-  options?: Array<string>,
-  disabled?: boolean,
-  show?: boolean,
-  value?: string,
-}
+import { NxFormInput } from "~~/iam/misc/types";
 
 const emit = defineEmits(["submit"]);
 

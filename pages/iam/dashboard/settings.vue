@@ -10,7 +10,7 @@
           text="Update your password below."
         >
           <!-- Profile errors alert -->
-          <NxAlert v-if="profileError" theme="danger" @click="profileError = null">
+          <NxAlert v-if="profileError !== null" theme="danger" @click="profileError = null">
             <strong>{{ profileError.message }}</strong>
           </NxAlert>            
           
