@@ -10,19 +10,8 @@
 </template>
 
 <script setup lang="ts">
+import { NxLink, NxLinks } from "~~/iam/misc/types";
 const emit = defineEmits(["clicked"])
-
-type NxLink = {
-  name: string,
-  link?: string,
-  disabled?: Boolean,
-  show?: Boolean,
-  hasBorder?: Boolean,
-  showChildren?: Boolean,
-  children?: NxLinks
-}
-
-type NxLinks = Array<NxLink>
 
 const props = defineProps({
   menu: Array<NxLink>,

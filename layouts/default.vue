@@ -1,39 +1,14 @@
 <template>
-  <div class="">
-    <nav class="">
-      <div class="">
-        <ul class="">          
-          <li><NuxtLink to="/" class="" aria-current="page"><strong>LOGO</strong></NuxtLink></li>
-          <li><NuxtLink to="/" class="" aria-current="page">Home</NuxtLink></li>
-          <li class="nav-link px-2 link-dark">
-            <span @click="toggleNuxtIamMenu()">Nuxt IAM</span>          
-            <iamMenu v-if="showNuxtIamMenu" :menu="nuxtIamMenu" :shadow="false" @clicked="menuClicked" />
-          </li>  
-          <li><NuxtLink to="/sample-page" class="">Sample Page</NuxtLink></li>  
-          <li><NuxtLink to="/protected-page" class="" title="You must be logged in to view this page">Protected Page</NuxtLink></li>  
-          <li><NuxtLink to="/contact" class="">Contact</NuxtLink></li>         
-        </ul>
-        <iamLoginMenu />    
-      </div>
-    </nav>      
-      <iamLoggedInHeader />
-      <slot />
- 
+  <div>  
+    <NxNavbar :menu="mainMenu" @clicked="menuClicked"/>   
+    <iamLoginMenu />          
+    <iamLoggedInHeader />
+    <slot /> 
   </div>
 </template>
 
 <script setup lang="ts">
-type Link = {
-  name: string,
-  link?: string,
-  disabled?: Boolean,
-  show?: Boolean,
-  hasBorder?: Boolean,
-  showChildren?: Boolean,
-  children?: Links
-}
-
-type Links = Array<Link>
+import { NxLink, NxLinks } from "~~/iam/misc/types";
 
 const nuxtIamMenu = [
   {
@@ -72,7 +47,34 @@ const nuxtIamMenu = [
     name: 'Files',
     link: '/iam/docs/files'
   }
-]
+] as NxLinks
+
+const mainMenu = [
+  {
+    name: 'LOGO',
+    bold: true,
+  },
+  {
+    name: 'Home',
+    link: '/',
+  },
+  {
+    name: 'Nuxt IAM',
+    children: nuxtIamMenu,
+  },
+  {
+    name: 'Sample',
+    link: '/sample',
+  },
+  {
+    name: 'Protected Page',
+    link: '/protected',
+  },
+  {
+    name: 'Contact',
+    link: '/contact',
+  }
+] as NxLinks
 
 const showMenu = ref(false);
 
@@ -96,9 +98,9 @@ const showNuxtIamMenu = ref(false);
  * @desc Receive clicked link from menu and navigate to that link
  * @param event Receive clicked link data
  */
- function menuClicked(menuItem: Link) {
+ function menuClicked(menuItem: NxLink) {
   showNuxtIamMenu.value = false
-  navigateTo(menuItem.link)
+  if (menuItem.link) navigateTo(menuItem.link)
 }
 
 useHead({  

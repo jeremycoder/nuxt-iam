@@ -104,11 +104,12 @@ export type NxFormInput = {
 export type NxLink = {
   name: string,
   link?: string,
-  disabled?: Boolean,
-  show?: Boolean,
-  hasBorder?: Boolean,
-  showChildren?: Boolean,
+  disabled?: boolean,
+  show?: boolean,
+  hasBorder?: boolean,
+  showChildren?: boolean,
   children?: Links,
+  bold?: boolean,
 }
 
 export type NxLinks = Array<NxLink>
