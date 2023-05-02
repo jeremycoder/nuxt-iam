@@ -12,7 +12,7 @@
           </span>
           <span v-if="item.children && item.showChildren !== false">
             <span @click="toggleShowChildren(showChildren)">&#9660;</span>
-            <nxMenu v-if="showChildren" :menu="item.children" />
+            <NxMenu v-if="showChildren" :menu="item.children" @clicked="clicked" />
           </span>
         </li>
       </ul>

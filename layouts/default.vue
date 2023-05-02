@@ -76,30 +76,12 @@ const mainMenu = [
   }
 ] as NxLinks
 
-const showMenu = ref(false);
-
-const showNuxtIamMenu = ref(false);
-
-/**
- * @Desc Toggle Nuxt IAM docs menu
- */
- async function toggleDocsMenu() {
-  showMenu.value = !showMenu.value;   
-}
-
-/**
- * @Desc Toggle Nuxt IAM docs menu
- */
- async function toggleNuxtIamMenu() {
-  showNuxtIamMenu.value = !showNuxtIamMenu.value;   
-}
 
 /**
  * @desc Receive clicked link from menu and navigate to that link
  * @param event Receive clicked link data
  */
- function menuClicked(menuItem: NxLink) {
-  showNuxtIamMenu.value = false
+ function menuClicked(menuItem: NxLink) {  
   if (menuItem.link) navigateTo(menuItem.link)
 }
 
