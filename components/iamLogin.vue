@@ -59,8 +59,7 @@ const loginForm = {
 
 // Try to log user in
 async function tryLogin() {
-  const { status, error } = await login(loginForm.email, loginForm.password);
-  
+  const { status, error } = await login(loginForm.email, loginForm.password);  
 
   // If error, log error and return
   if (status === 'fail'){

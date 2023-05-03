@@ -1,9 +1,14 @@
 <template>
-  <div v-if="!iAmLoggedIn">   
-      <ul>      
-        <li><NuxtLink to="/iam/login">Login</NuxtLink></li> 
-        <li><NuxtLink to="/iam/register">Register</NuxtLink></li>           
-      </ul>      
+  <div v-if="!iAmLoggedIn">
+    <div class="login-register">      
+      <NxNavbar
+       :menu="loginRegisterMenu" 
+       theme="none"
+       class="login-register-menu"
+       @clicked="menuClicked"
+      /> 
+    </div>
+              
   </div>
   <div v-else>         
     <div>      
@@ -15,9 +20,7 @@
           :show-arrow="true" 
         />
       </NxDropdown>      
-    </div> 
-    
-    <!---->
+    </div>    
   </div>        
 </template>
 
@@ -30,6 +33,18 @@ const iamStore = useIamProfileStore()
 const { logout } = useIam();
 
 const iAmLoggedIn = ref(false);
+
+// Login / Register Menu
+const loginRegisterMenu = [
+  {
+    name: 'Login',
+    link: '/iam/login'
+  },
+  {
+    name: 'Register',
+    link: '/iam/register'
+  },
+] as NxLinks
 
 // Menu when user is logged in
 const loggedInMenu = [
@@ -98,3 +113,15 @@ async function logMeOut() {
 }
 
 </script>
+
+<style scoped>
+.login-register {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+}
+
+.login-register-menu {
+  margin-left: auto;
+}
+
+</style>

@@ -1,8 +1,7 @@
 <template>
   <div>  
-    <NxNavbar :menu="mainMenu" @clicked="menuClicked"/>   
-    <iamLoginMenu />          
-    <iamLoggedInHeader />
+    <NxNavbar :menu="mainMenu" @clicked="menuClicked"/>          
+    <IamLoggedInHeader />
     <slot /> 
   </div>
 </template>

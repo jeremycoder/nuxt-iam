@@ -129,6 +129,7 @@ async function getMyProfile() {
     showProfile.value = true;    
 
     // Store some profile data in store
+    // TODO: Consider storing entire profile in store
     iamStore.setProfile({
       firstName: profile.value.first_name,
       lastName: profile.value.last_name,

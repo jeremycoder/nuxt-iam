@@ -2,9 +2,9 @@
   <div>
     <h1>Admin</h1>
     <p>This is your admin center.</p>
-    <iamUsersTable  />
+    <IamUsersTable  />
     <hr />
-    <iamRefreshTokensTable  />
+    <IamRefreshTokensTable  />
   </div>
 </template>
 
