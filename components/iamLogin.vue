@@ -1,73 +1,88 @@
 <template>
-  <div class="container">
-    <main class="form-signin w-100 m-auto">      
-      <form>
-        <div style="margin-left: 64px">
-        <NuxtLink to="/iam/"><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 150px"/></NuxtLink>
+  <div>
+    <!-- Error message -->
+    <NxAlert v-if="loginError" theme="danger" @click="loginError = null">
+      <strong>{{ loginError.message }}</strong>
+    </NxAlert>
+
+    <!-- Login Form -->
+    <NxCard
+      header="Login"
+      text="Login using Google or your email address and password"
+    >
+      <div v-if="allowGoogleAuth">
+        <GoogleSignInButton
+          @success="handleGoogleLoginSuccess"
+          @error="handleGoogleLoginError"
+        ></GoogleSignInButton>
       </div>
-        <h1 class="h3 mb-3 fw-normal">Login</h1>
-        <!-- Error message -->
-        <div v-if="loginError" class="alert alert-danger alert-dismissible fade show" role="alert">
-          <strong>Error: {{ loginError.message }}</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="loginError = null"></button>
+      <IamOrSeparator />
+      <NxForm :data="inputData" submit-text="Login" @submit="loginUser" />
+      <div class="register-forgot">
+        <div>
+          <NuxtLink to="/iam/register">Register</NuxtLink>
         </div>
-        <div v-if="allowGoogleAuth">
-          <div class="form-group">
-            <GoogleSignInButton
-              @success="handleGoogleLoginSuccess"
-              @error="handleGoogleLoginError"
-            ></GoogleSignInButton>
-          </div>
-          <div class="or-seperator"><i>or</i></div>
+        <div class="forgot">
+          <NuxtLink to="/iam/reset">Forgot Password?</NuxtLink>
         </div>
-        <div class="form-floating">
-          <input v-model="loginForm.email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-          <label for="floatingInput">Email address</label>
-        </div>
-        <div class="form-floating">
-          <input v-model="loginForm.password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
-          <label for="floatingPassword">Password</label>
-        </div>       
-        <button class="w-100 btn btn-lg btn-primary" @click.prevent="tryLogin">Log in</button>        
-        <div class="row my-2">
-          <div class="col"><NuxtLink class="text-decoration-none" to="/iam/register">Register</NuxtLink></div>
-          <div class="col"><NuxtLink class="text-decoration-none" to="/iam/reset">Forgot Password?</NuxtLink></div>          
-        </div>       
-      </form>      
-    </main>
+      </div>
+    </NxCard>
   </div>
 </template>
 
 <script setup lang="ts">
-import { GoogleSignInButton, 
+import { User, NxFormInput } from "~~/iam/misc/types";
+import {
+  GoogleSignInButton,
   type CredentialResponse,
 } from "vue3-google-signin";
-import { useIamProfileStore } from '@/stores/useIamProfileStore'
+import { useIamProfileStore } from "@/stores/useIamProfileStore";
 
 // Get necessary functions from useIam composable
 const { login, loginWithGoogle } = useIam();
 const allowGoogleAuth = useRuntimeConfig().public.iamAllowGoogleAuth === "true";
-const iamStore = useIamProfileStore()
+const iamStore = useIamProfileStore();
 
-// These variables come from response from calling Nuxt IAM api
-let loginError = ref(<{ message: "" } | null>null);
+// Error variable
+const loginError = ref(<Error | null>null);
 
-const loginForm = {
-  email: "",
-  password: "",
-};
+// Data for login form
+const inputData = [
+  {
+    label: "Email",
+    id: "email",
+    type: "input:email",
+  },
+  {
+    label: "Password",
+    id: "password",
+    type: "input:password",
+  },
+] as Array<NxFormInput>;
 
-// Try to log user in
-async function tryLogin() {
-  const { status, error } = await login(loginForm.email, loginForm.password);  
+async function loginUser(user: User) {
+  // Validation
+  if (!user.email) {
+    loginError.value = {} as Error;
+    loginError.value.message = "Email is required";
+    return;
+  }
+
+  if (!user.password) {
+    loginError.value = {} as Error;
+    loginError.value.message = "Password is required";
+    return;
+  }
+
+  const { status, error } = await login(user);
 
   // If error, log error and return
-  if (status === 'fail'){
-    loginError.value = error
-    console.error(error); 
-    return
+  if (status === "fail") {
+    loginError.value = error;
+    console.error(error);
+    return;
   }
-  
+
   // If successful, navigate to dashboard
   if (status === "success") navigateTo("/iam/dashboard");
 }
@@ -82,7 +97,7 @@ const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
   if (res?.error) {
     loginError.value = res.error;
   } else {
-    iamStore.setIsLoggedIn(true)    
+    iamStore.setIsLoggedIn(true);
     navigateTo("/iam/dashboard");
   }
 };
@@ -92,44 +107,21 @@ const handleGoogleLoginError = () => {
   console.error("Login failed");
 };
 
-// If you're using the same version of Bootstrap in your whole app, you can remove the links and scripts below
 useHead({
-  title: "Nuxt IAM Login",  
+  title: "Login",
 });
 </script>
 
 <style scoped>
-.form-signin {
-  max-width: 330px;
-  padding: 15px;
+.register-forgot {
+  display: flex;
 }
 
-.form-signin .form-floating:focus-within {
-  z-index: 2;
+.register-forgot a {
+  text-decoration: none;
 }
 
-.form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-.or-seperator {
-  margin: 20px 0 10px;
-  text-align: center;
-  border-top: 1px solid #ccc;
-  font-weight: bold;
-}
-.or-seperator i {
-  padding: 0 10px;
-  background: #f7f7f7;
-  position: relative;
-  top: -11px;
-  z-index: 1;
+.forgot {
+  margin-left: auto;
 }
 </style>

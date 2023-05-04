@@ -21,30 +21,17 @@ export default function useIam() {
 
 /**
  * @desc Register new user
- * @param firstName User's first name
- * @param lastName User's last name
- * @param email User's email address
- * @param password User's password
+ * @param user User to register
  * @returns {Promise<JSONResponse>}
  */
-async function register(
-  firstName: string,
-  lastName: string,
-  email: string,
-  password: string
-): Promise<JSONResponse> {
+async function register(user: User): Promise<JSONResponse> {
   // Attempt register
   const response = await $fetch("/api/iam/authn/register", {
     method: "POST",
     headers: {
       "client-platform": "browser",
     },
-    body: {
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-      password: password,
-    },
+    body: user,
   });
 
   return response;
@@ -52,22 +39,16 @@ async function register(
 
 /**
  * @desc Register new user
- * @param firstName User's first name
- * @param lastName User's last name
- * @param email User's email address
- * @param password User's password
+ * @param user User to log in
  * @returns {Promise<JSONResponse>}
  */
-async function login(email: string, password: string): Promise<JSONResponse> {
+async function login(user: User): Promise<JSONResponse> {
   const response = await $fetch("/api/iam/authn/login", {
     method: "POST",
     headers: {
       "client-platform": "browser",
     },
-    body: {
-      email: email,
-      password: password,
-    },
+    body: user,
   });
 
   return response;
@@ -84,7 +65,7 @@ async function updateProfile(user: User): Promise<JSONResponse> {
     headers: {
       "client-platform": "browser",
     },
-    body: user
+    body: user,
   });
 
   return response;
@@ -148,10 +129,10 @@ async function isAuthenticated(): Promise<boolean> {
     headers: {
       "client-platform": "browser",
     },
-  }); 
+  });
 
   // If status is success, then user is authenticated, and return true, otherwise return false
-  return status === "success"
+  return status === "success";
 }
 
 /**
