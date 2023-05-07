@@ -6,13 +6,11 @@
         <div>
           <h2 class="email-verification">Email verification is required</h2>
           <div v-if="!verificationEmailSent">
-            <p>Please click the button below to verify your email</p>            
+            <p>Please click the button below to verify your email</p>
             <NxButton theme="primary" @click="verifyMyEmail(profile.email)">
               Send email verification
             </NxButton>
-            <NxButton theme="secondary" @click="logMeOut()">
-              Log out
-            </NxButton>            
+            <NxButton theme="secondary" @click="logMeOut()"> Log out </NxButton>
           </div>
           <div v-else>
             <p>
@@ -24,32 +22,36 @@
         </div>
       </div>
       <!-- Check if account is active -->
-      <div v-else-if="profile && !profile.is_active">        
+      <div v-else-if="profile && !profile.is_active">
         <NxAlert theme="danger">
-          <strong>Account is not active. Please contact an administrator.</strong>
+          <strong
+            >Account is not active. Please contact an administrator.</strong
+          >
         </NxAlert>
-        <NxButton theme="secondary" @click="logMeOut">
-            Log out
-        </NxButton>        
+        <NxButton theme="secondary" @click="logMeOut"> Log out </NxButton>
       </div>
       <!-- If we getting profile results in error -->
-      <div v-else-if="getProfileError">        
+      <div v-else-if="getProfileError">
         <NxAlert theme="danger">
           <strong>{{ getProfileError.message }}</strong>
         </NxAlert>
-        <NxButton theme="secondary" @click="logMeOut">
-            Log out
-        </NxButton>        
+        <NxButton theme="secondary" @click="logMeOut"> Log out </NxButton>
       </div>
-      <!-- Otherwise display profile -->      
-      <div v-else>       
+      <!-- Otherwise display profile -->
+      <div v-else>
         <main>
           <div class="container">
-            <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />            
+            <NuxtPage :profile="profile" @profileUpdate="getMyProfile" />
           </div>
-        </main>      
-      </div>    
-    </div>    
+        </main>
+      </div>
+    </div>
+    <div v-else>
+      <NxAlert theme="danger" :show-close="false"
+        ><strong>User profile not found</strong></NxAlert
+      >
+      <NxButton theme="secondary" @click="logMeOut">Log out</NxButton>
+    </div>
   </div>
   <div v-else>
     <div class="loading-spinner" />
@@ -58,27 +60,23 @@
 
 <script setup lang="ts">
 import { User } from "~~/iam/misc/types";
-import { useIamProfileStore } from '@/stores/useIamProfileStore'
+import { useIamProfileStore } from "@/stores/useIamProfileStore";
 
-const iamStore = useIamProfileStore()
+const iamStore = useIamProfileStore();
 const { isAuthenticated, getProfile, logout, verifyEmail } = useIam();
 
 const isLoaded = ref(false);
 const iAmLoggedIn = ref(false);
-const showProfile = ref(false);
-const getProfileError = ref(<Error|null>(null))
+const getProfileError = ref(<Error | null>null);
 let verificationEmailSent = ref(false);
 
-// Profile variables
-const firstName = ref('');
-const lastName = ref('');
-
 // Check email verification
-const verifyRegistrations = useRuntimeConfig().public.iamVerifyRegistrations === "true";
+const verifyRegistrations =
+  useRuntimeConfig().public.iamVerifyRegistrations === "true";
 const emailIsVerified = ref(false);
 
 // User profile
-const profile = ref(<User>({}))
+const profile = ref(<User>{});
 
 onMounted(async () => {
   await isLoggedIn();
@@ -90,69 +88,56 @@ async function isLoggedIn() {
   iAmLoggedIn.value = await isAuthenticated();
 
   // If user is not authenticated, push to login page
-  if (!iAmLoggedIn.value) navigateTo("/iam/login");  
+  if (!iAmLoggedIn.value) navigateTo("/iam/login");
+}
+
+// Attempt to get user profile
+async function getMyProfile() {
+  const { status, error, data } = await getProfile();
+
+  // If error, show error
+  if (error) {
+    console.log("error: ", error);
+    getProfileError.value = error;
+    return;
+  }
+
+  // If successful, data will contain profile
+  if (status === "success" && data) {
+    profile.value = data as User;
+
+    // Check email verification status
+    emailIsVerified.value = data.email_verified;
+
+    // Store user profile
+    iamStore.setProfile(profile.value);
+    iamStore.setIsLoggedIn(true);
+    iamStore.setUpdateCount();
+  }
 }
 
 // Log user out
 async function logMeOut() {
   const { status } = await logout();
   if (status === "success") {
-    
     // Clear store variables
-    iamStore.setIsLoggedIn(false)
-    iamStore.clearProfile()
-
+    iamStore.clearProfile();
+    iamStore.setIsLoggedIn(false);
     navigateTo("/iam/login");
   }
-}
-
-// Attempt to get user profile
-async function getMyProfile() {
-  const { status, error, data } = await getProfile();  
-
-  // If error, show error
-  if (error) {
-    console.log("error: ", error);
-    getProfileError.value = error;
-  }
-
-  // If successful, data will contain profile
-  if (status === "success" && data) {
-    profile.value = data as User
-
-    // Assign to local reactive variables
-    firstName.value = profile.value.first_name;
-    lastName.value = profile.value.last_name;
-
-    // Check email verification status
-    emailIsVerified.value = data.email_verified;
-    showProfile.value = true;    
-
-    // Store some profile data in store
-    // TODO: Consider storing entire profile in store
-    iamStore.setProfile({
-      firstName: profile.value.first_name,
-      lastName: profile.value.last_name,
-      avatar: profile.value.avatar ?? '',
-    })
-    
-    // Set log in true in store
-    iamStore.setIsLoggedIn(true)
-    iamStore.setUpdateCount()    
-  }  
 }
 
 /**
  * @desc Sends API request to verify email
  * @param email User email
  */
-async function verifyMyEmail(email: string) {  
+async function verifyMyEmail(email: string) {
   verifyEmail(email);
   verificationEmailSent.value = true;
 }
 
 useHead({
-  title: "Nuxt IAM Dashboard",  
+  title: "Nuxt IAM Dashboard",
 });
 </script>
 
@@ -161,4 +146,3 @@ useHead({
   color: #dc3545;
 }
 </style>
-

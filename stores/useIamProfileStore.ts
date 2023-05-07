@@ -1,51 +1,54 @@
-// Store to store part of user profile for Nuxt IAM
-//! Do not store sensitive data in here. Only store data that can be made public.
+// Pinia store to store user profile
+//! Do not store sensitive data in here.
+//! Avoid storing permissions. Rather, always check permissions from backend.
 
-import { defineStore } from 'pinia'
+import { User, NxFormInput } from "~~/iam/misc/types";
+import { defineStore } from "pinia";
 
-interface SmallProfile {
-  firstName: string,
-  lastName: string,
-  avatar?: string,  
-}
+export const useIamProfileStore = defineStore("iamProfile", () => {
+  const myProfile = ref(<User | null>null);
+  const isLoggedIn = ref(false);
+  const updateCount = ref(0);
 
-export const useIamProfileStore = defineStore('iamProfile', () => {
-  const myProfile = ref(<SmallProfile|null>(null))  
-  const isLoggedIn = ref(false)
-  const updateCount = ref(0)  
-  
   // Returns the profile
-  const getProfile = computed(() => myProfile.value)
+  const getProfile = computed(() => myProfile.value);
 
   /**
    * @desc Sets profile
    * @param profile
    */
-  function setProfile(profile: SmallProfile) {    
-    if (profile) myProfile.value = profile    
+  function setProfile(profile: User) {
+    if (profile) myProfile.value = profile;
   }
 
   /**
-   * @desc Sets whether user is logged in  
+   * @desc Sets whether user is logged in
    */
-  function setIsLoggedIn(value: boolean) {    
-    isLoggedIn.value = value    
+  function setIsLoggedIn(value: boolean) {
+    isLoggedIn.value = value;
   }
 
   /**
    * @desc Clears profile
    */
   function clearProfile() {
-    myProfile.value = null
+    myProfile.value = null;
   }
 
   /**
    * @desc Increases updateCount whenever an update is made
    */
   function setUpdateCount() {
-    updateCount.value++
+    updateCount.value++;
   }
 
-
-  return { setProfile, getProfile, clearProfile, setIsLoggedIn, isLoggedIn, setUpdateCount, updateCount }
-})
+  return {
+    setProfile,
+    getProfile,
+    setIsLoggedIn,
+    isLoggedIn,
+    clearProfile,
+    setUpdateCount,
+    updateCount,
+  };
+});

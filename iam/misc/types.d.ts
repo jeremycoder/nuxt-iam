@@ -5,7 +5,7 @@ export type User = {
   uuid: string;
   email: string;
   password: string;
-  permissions: string|null;
+  permissions: string | null;
   avatar?: string | null;
   role: "SUPER_ADMIN" | "ADMIN" | "GENERAL";
   csrf_token?: string;
@@ -86,30 +86,37 @@ export type Session = {
 };
 
 export enum Roles {
-  'SUPER_ADMIN',
-  'ADMIN',
-  'GENERAL'
+  "SUPER_ADMIN",
+  "ADMIN",
+  "GENERAL",
 }
 
 export type NxFormInput = {
-  label?: string,
-  id: string,
-  type?: 'input:text' | 'input:password' | 'input:email' | 'input:number' | 'textarea' | 'select',
-  options?: Array<string>,
-  disabled?: boolean,
-  show?: boolean,
-  value?: string,
-}
+  label?: string;
+  id: string;
+  type?:
+    | "input:text"
+    | "input:password"
+    | "input:email"
+    | "input:number"
+    | "textarea"
+    | "select";
+  options?: Array<string>;
+  disabled?: boolean;
+  show?: boolean;
+  value?: string;
+};
 
 export type NxLink = {
-  name: string,
-  link?: string,
-  disabled?: boolean,
-  show?: boolean,
-  hasBorder?: boolean,
-  showChildren?: boolean,
-  children?: Links,
-  bold?: boolean,
-}
+  name: string;
+  link?: string;
+  disabled?: boolean;
+  show?: boolean;
+  hasBorder?: boolean;
+  showChildren?: boolean;
+  children?: Links;
+  bold?: boolean;
+  group?: string;
+};
 
-export type NxLinks = Array<NxLink>
+export type NxLinks = Array<NxLink>;

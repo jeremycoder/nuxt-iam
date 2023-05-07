@@ -5,7 +5,6 @@ body {
   color: #222;
 }
 
-
 /* Spinner */
 .loading-spinner {
   display: inline-block;
@@ -20,7 +19,7 @@ body {
   margin: 8px;
   border-radius: 50%;
   border: 6px solid #fff;
-  border-color: #fff transparent #fff transparent;
+  border-color: #184b81 transparent #184b81 transparent;
   animation: loading-spinner 1.2s linear infinite;
 }
 @keyframes loading-spinner {
