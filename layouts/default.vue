@@ -1,8 +1,14 @@
 <template>
-  <div>  
-    <NxNavbar :menu="mainMenu" @clicked="menuClicked"/>          
+  <div class="container">
+    <NxNavbar :menu="mainMenu" @clicked="menuClicked" />
     <IamLoggedInHeader />
-    <slot /> 
+    <div class="slot">
+      <slot />
+    </div>
+
+    <IamFooter>
+      <p>&copy; 2022 My Company, Inc</p>
+    </IamFooter>
   </div>
 </template>
 
@@ -11,97 +17,100 @@ import { NxLink, NxLinks } from "~~/iam/misc/types";
 
 const nuxtIamMenu = [
   {
-    name: 'What is it?',
-    link: '/iam/',
+    name: "What is it?",
+    link: "/iam/",
   },
   {
-    name: 'Introduction',
-    link: '/iam/docs',
+    name: "Introduction",
+    link: "/iam/docs",
   },
   {
-    name: 'Getting Started',
-    link: '/iam/docs/getting-started'
+    name: "Getting Started",
+    link: "/iam/docs/getting-started",
   },
   {
-    name: 'Concepts',
-    link: '/iam/docs/concepts'
+    name: "Concepts",
+    link: "/iam/docs/concepts",
   },
   {
-    name: 'Features',
-    link: '/iam/docs/features'
+    name: "Features",
+    link: "/iam/docs/features",
   },
   {
-    name: 'Front End',
-    link: '/iam/docs/frontend'
+    name: "Front End",
+    link: "/iam/docs/frontend",
   },
   {
-    name: 'Configuration',
-    link: '/iam/docs/configuration'
+    name: "Configuration",
+    link: "/iam/docs/configuration",
   },
   {
-    name: 'Backend',
-    link: '/iam/docs/backend'
+    name: "Backend",
+    link: "/iam/docs/backend",
   },
   {
-    name: 'Files',
-    link: '/iam/docs/files'
-  }
-] as NxLinks
+    name: "Files",
+    link: "/iam/docs/files",
+  },
+] as NxLinks;
 
 const mainMenu = [
   {
-    name: 'LOGO',
+    name: "LOGO",
     bold: true,
   },
   {
-    name: 'Home',
-    link: '/',
+    name: "Home",
+    link: "/",
   },
   {
-    name: 'Nuxt IAM',
+    name: "Nuxt IAM",
     children: nuxtIamMenu,
   },
   {
-    name: 'Sample',
-    link: '/sample',
+    name: "Sample",
+    link: "/sample",
   },
   {
-    name: 'Protected Page',
-    link: '/protected',
+    name: "Protected Page",
+    link: "/protected",
   },
   {
-    name: 'Contact',
-    link: '/contact',
-  }
-] as NxLinks
-
+    name: "Contact",
+    link: "/contact",
+  },
+] as NxLinks;
 
 /**
  * @desc Receive clicked link from menu and navigate to that link
  * @param event Receive clicked link data
  */
- function menuClicked(menuItem: NxLink) {  
-  if (menuItem.link) navigateTo(menuItem.link)
+function menuClicked(menuItem: NxLink) {
+  if (menuItem.link) navigateTo(menuItem.link);
 }
 
-useHead({  
+useHead({
   title: "Nuxt IAM Example Site",
 });
 </script>
 
 <style scoped>
-  .px-2 {
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
+.nuxt-iam-logo {
+  text-align: center;
+}
+
+.container {
+  margin: 0 3rem;
+  min-width: 360px;
+}
+
+.slot {
+  padding: 2rem 0;
+}
+
+@media (max-width: 525px) {
+  .container {
+    margin: 0 auto;
   }
-  .link-dark {
-    color: #212529;
-  }
-  .nav-link {
-    display: block;
-    padding: 0.5rem 1rem;
-    color: #0d6efd;
-    text-decoration: none;
-    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
-  }
+}
 </style>
