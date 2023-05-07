@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div>
     <div>
       <NuxtLink to="/iam/"
         ><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 200px"
@@ -15,5 +15,4 @@
 // This assumes route is [host]/iam/verifysuccessful?pass=[password]
 const route = useRoute();
 const tempPassword = route.fullPath.split("/iam/verifysuccessful?pass=")[1];
-console.log(tempPassword.split("/iam/verifysuccessful?pass="));
 </script>

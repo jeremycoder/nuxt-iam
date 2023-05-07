@@ -1,85 +1,88 @@
 <template>
-  <div class="container">
-    <main class="form-signin w-100 m-auto">
-      <div v-if="formSent === false">
-        <form>
-        <div style="margin-left: 64px">
-          <NuxtLink to="/iam/"><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 150px"/></NuxtLink>
-        </div>          
-        <h1 class="h3 mb-3 fw-normal">Password Reset</h1>
-        <p>
-          Enter your email address and we'll send you an email with
-          instructions to reset your password.
-        </p>       
-        <div class="form-floating">
-          <input v-model="resetForm.email" type="email" class="form-control" id="floatingEmail" placeholder="name@example.com">
-          <label for="floatingEmail">Email address</label>
-        </div>           
-        <button class="w-100 btn btn-lg btn-primary" @click.prevent="resetMyPassword">Reset Password</button>
-        <div class="row my-2">
-          <div class="col"><NuxtLink class="text-decoration-none" to="/iam/register">Register</NuxtLink></div>
-          <div class="col"><NuxtLink class="text-decoration-none" to="/iam/login">Login</NuxtLink></div>          
-        </div>              
-      </form>
-      </div>
-      <div v-else>
-        <p>Please check your email for reset instructions. Check your spam folder too.</p>
-      </div>            
-    </main>
+  <div>
+    <NxAlert v-if="resetError" @click="resetError = null">
+      <strong>{{ resetError.message }}</strong>
+    </NxAlert>
+    <div v-if="!formSent">
+      <NxCard
+        header="Reset Password"
+        text="Enter your email address and we'll send you an email with instructions
+        to reset your password."
+      >
+        <NxForm
+          :data="inputData"
+          submit-text="Reset Password"
+          @submit="resetMyPassword"
+        />
+        <div class="register-login">
+          <div>
+            <NuxtLink to="/iam/register">Register</NuxtLink>
+          </div>
+          <div class="login">
+            <NuxtLink to="/iam/login">Login</NuxtLink>
+          </div>
+        </div>
+      </NxCard>
+    </div>
+    <div v-else>
+      <NxAlert :show-close="false" theme="warning"
+        ><strong>Please check your email for reset instructions.</strong>
+      </NxAlert>
+      <p></p>
+    </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { User, NxFormInput } from "~~/iam/misc/types";
 const { resetPassword } = useIam();
+
 const formSent = ref(false);
+const resetError = ref(<Error | null>null);
 
-const resetForm = {
-  email: "",
-};
+// Data for register form
+const inputData = [
+  {
+    label: "Email",
+    id: "email",
+    type: "input:email",
+  },
+] as Array<NxFormInput>;
 
-
-async function resetMyPassword() {
-  // If nothing is in form, just return without sending anything to server
-  if (resetForm.email.length === 0) return;
+/**
+ * @desc Receive user obejct with email and send for password reset
+ * @param user User object with email
+ */
+async function resetMyPassword(user: User) {
+  // validation
+  if (!user.email) {
+    resetError.value = {} as Error;
+    resetError.value.message = "Missing email address";
+    return;
+  }
 
   // For security purposes, this always returns successful
-  // Check your server console logs for debugging purposes
-  const result = await resetPassword(resetForm.email);
+  // Check your server console logs for any errors
+  const result = await resetPassword(user.email);
   console.log("reset form: ", result);
   formSent.value = true;
 }
 
 useHead({
-  title: "Nuxt IAM Register", 
+  title: "Nuxt IAM Register",
 });
 </script>
 
 <style scoped>
-.form-signin {
-  max-width: 330px;
-  padding: 15px;
+.register-login {
+  display: flex;
 }
 
-.form-signin .form-floating:focus-within {
-  z-index: 2;
+.register-login a {
+  text-decoration: none;
 }
 
-.form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-.or-seperator i {
-  padding: 0 10px;
-  background: #f7f7f7;
-  position: relative;
-  top: -11px;
-  z-index: 1;
+.login {
+  margin-left: auto;
 }
 </style>

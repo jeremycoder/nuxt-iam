@@ -1,5 +1,5 @@
 <template>
   <div>
-    <iamRegister />
+    <IamRegister />
   </div>
 </template>

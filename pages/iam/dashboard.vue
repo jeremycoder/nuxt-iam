@@ -1,5 +1,5 @@
 <template>
   <div>
-    <iamDashboard />
+    <IamDashboard />
   </div>
 </template>
