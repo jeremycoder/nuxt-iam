@@ -1,25 +1,33 @@
 <template>
-  <div />
+  <div>
+    <NxAlert v-if="resetError" :show-close="false">
+      <strong>{{ resetError.message }}</strong>
+    </NxAlert>
+  </div>
 </template>
 
-<script setup>
-// Get token from route
+<script setup lang="ts">
 const route = useRoute();
-const router = useRouter();
+const { verifyEmailToken } = useIam();
+
+const resetError = ref(<Error | null>null);
 
 // Get token from url parameters
-const token = route.query.token;
+const token = route.query.token as string;
 
-// If verification fails
-if (!token) router.push(`/iam/verifyfailed`);
+if (!token) navigateTo("/iam/verifyfailed");
 
-// Verify token
-const { verifyEmailToken } = useIam();
-const { status, data, error } = await verifyEmailToken(token);
+try {
+  const { data, error } = await verifyEmailToken(token);
+  // If verification fails, navigate to a verify failed page
+  if (error) navigateTo("/iam/verifyfailed");
 
-// If verification fails, navigate to a verify failed page
-if (error) router.push(`/iam/verifyfailed`);
-
-// If successful, navigate to login page
-if (data) router.push(`/iam/login?email_verify=true`);
+  // If successful, navigate to login page
+  if (data) navigateTo(`/iam/login?email_verify=true`);
+} catch (e) {
+  // If other error, like a server error occurs, show generic error message
+  // console.log(e)
+  resetError.value = {} as Error;
+  resetError.value.message = "Error. Please contact an administrator.";
+}
 </script>

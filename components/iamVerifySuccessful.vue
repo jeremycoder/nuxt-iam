@@ -1,12 +1,10 @@
 <template>
   <div>
-    <div>
-      <NuxtLink to="/iam/"
-        ><img src="~~/iam/ui/img/nuxt-iam-logo.png/" style="width: 200px"
-      /></NuxtLink>
-    </div>
-    <h3>Your temporary password is {{ tempPassword }}</h3>
-    <h3>Copy it, log in, and change it.</h3>
+    <h3>Your temporary password is</h3>
+    <code>{{ tempPassword }}</code>
+    <h3>
+      Copy it, <NuxtLink to="/iam/login">log in</NuxtLink>, and change it.
+    </h3>
   </div>
 </template>
 
@@ -16,3 +14,9 @@
 const route = useRoute();
 const tempPassword = route.fullPath.split("/iam/verifysuccessful?pass=")[1];
 </script>
+
+<style scoped>
+code {
+  font-size: 200%;
+}
+</style>

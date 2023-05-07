@@ -6,8 +6,7 @@
     <div v-if="!formSent">
       <NxCard
         header="Reset Password"
-        text="Enter your email address and we'll send you an email with instructions
-        to reset your password."
+        text="Enter your email address and we'll send you an email with instructions to reset your password."
       >
         <NxForm
           :data="inputData"
@@ -25,8 +24,11 @@
       </NxCard>
     </div>
     <div v-else>
-      <NxAlert :show-close="false" theme="warning"
-        ><strong>Please check your email for reset instructions.</strong>
+      <NxAlert :show-close="false" theme="warning">
+        <strong>
+          Please check your email for reset instructions. Check your spam folder
+          too.
+        </strong>
       </NxAlert>
       <p></p>
     </div>

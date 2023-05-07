@@ -4,13 +4,23 @@
       <!-- Check if email is verified -->
       <div v-if="verifyRegistrations && !emailIsVerified">
         <div>
-          <h2 class="email-verification">Email verification is required</h2>
+          <h2 class="email-verification-text">
+            Email verification is required
+          </h2>
           <div v-if="!verificationEmailSent">
             <p>Please click the button below to verify your email</p>
-            <NxButton theme="primary" @click="verifyMyEmail(profile.email)">
-              Send email verification
-            </NxButton>
-            <NxButton theme="secondary" @click="logMeOut()"> Log out </NxButton>
+            <div class="email-verification-buttons">
+              <NxButton
+                class="email-verification-button"
+                theme="primary"
+                @click="verifyMyEmail(profile.email)"
+              >
+                Send email verification
+              </NxButton>
+              <NxButton theme="secondary" @click="logMeOut()">
+                Log out
+              </NxButton>
+            </div>
           </div>
           <div v-else>
             <p>
@@ -23,7 +33,7 @@
       </div>
       <!-- Check if account is active -->
       <div v-else-if="profile && !profile.is_active">
-        <NxAlert theme="danger">
+        <NxAlert theme="danger" :show-close="false">
           <strong
             >Account is not active. Please contact an administrator.</strong
           >
@@ -32,10 +42,10 @@
       </div>
       <!-- If we getting profile results in error -->
       <div v-else-if="getProfileError">
-        <NxAlert theme="danger">
+        <NxAlert theme="danger" :show-close="true">
           <strong>{{ getProfileError.message }}</strong>
         </NxAlert>
-        <NxButton theme="secondary" @click="logMeOut"> Log out </NxButton>
+        <NxButton theme="secondary" @click="logMeOut">Log out</NxButton>
       </div>
       <!-- Otherwise display profile -->
       <div v-else>
@@ -142,7 +152,15 @@ useHead({
 </script>
 
 <style scoped>
-.email-verification {
+.email-verification-text {
   color: #dc3545;
+}
+
+.email-verification-buttons {
+  display: flex;
+}
+
+.email-verification-button {
+  margin-right: 1rem;
 }
 </style>
