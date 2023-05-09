@@ -5,7 +5,6 @@
     <div class="slot">
       <slot />
     </div>
-
     <IamFooter>
       <p>&copy; 2022 My Company, Inc</p>
     </IamFooter>
