@@ -14,6 +14,7 @@
     <NxCard
       header="Login"
       text="Login using Google or your email address and password"
+      class="login-card"
     >
       <div v-if="allowGoogleAuth">
         <GoogleSignInButton
@@ -41,12 +42,10 @@ import {
   GoogleSignInButton,
   type CredentialResponse,
 } from "vue3-google-signin";
-import { useIamProfileStore } from "@/stores/useIamProfileStore";
 
 // Get necessary functions from useIam composable
 const { login, loginWithGoogle, getProfile } = useIam();
 const allowGoogleAuth = useRuntimeConfig().public.iamAllowGoogleAuth === "true";
-const iamStore = useIamProfileStore();
 
 // Error variable
 const loginError = ref(<Error | null>null);
@@ -135,5 +134,9 @@ useHead({
 
 .forgot {
   margin-left: auto;
+}
+
+.login-card {
+  margin: auto;
 }
 </style>

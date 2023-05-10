@@ -6,6 +6,7 @@
     <div v-if="!formSent">
       <NxCard
         header="Reset Password"
+        class="reset-card"
         text="Enter your email address and we'll send you an email with instructions to reset your password."
       >
         <NxForm
@@ -83,8 +84,11 @@ useHead({
 .register-login a {
   text-decoration: none;
 }
-
 .login {
   margin-left: auto;
+}
+
+.reset-card {
+  margin: auto;
 }
 </style>

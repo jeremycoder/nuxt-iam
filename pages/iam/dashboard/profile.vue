@@ -23,6 +23,7 @@
       header="Profile"
       title="Update Profile"
       theme="primary"
+      class="profile-card"
       text="Update your profile below."
     >
       <NxForm
@@ -141,3 +142,9 @@ async function updateMyProfile(profile: User) {
   emit("profileUpdate");
 }
 </script>
+
+<style scoped>
+.profile-card {
+  margin: auto;
+}
+</style>

@@ -27,72 +27,79 @@
       </ul>
     </div>
 
-    <div>
-      <h2>Features</h2>
-      <div class="features">
-        <div>
-          <NxCard
-            header="Authentication"
-            theme="primary"
-            text="Add full-stack authentication to your Nuxt app, both back end and front end."
-          />
-        </div>
-        <div>
-          <NxCard
-            header="Authorization"
-            theme="danger"
-            text="Add permission-based access control to both your front end and back end."
-          />
-        </div>
-        <div>
-          <NxCard
-            header="Secure Your API"
-            theme="secondary"
-            text="Add authentication and authorization to your API."
-          />
-        </div>
-        <div>
-          <NxCard
-            header="Register, Login, Logout Users"
-            theme="primary"
-            text="Scaffold components to register, login, and logout users."
-          />
-        </div>
-        <div>
-          <NxCard
-            header="Google Login"
-            text="Allow your users to easily login with Google."
-          />
-        </div>
-        <div>
-          <NxCard
-            header="Email Verification"
-            theme="danger"
-            text="Comes with optional email verification to your registration."
-          />
-        </div>
-        <div>
-          <NxCard
-            header="Password Recovery"
-            text="Allow your users to recover their lost password."
-          />
-        </div>
-        <div>
-          <NxCard
-            header="User Profile"
-            text="Add a user profile so your users can manage their data."
-          />
-        </div>
-        <div>
-          <NxCard
-            header="User Management"
-            text="Manage your users from an admin panel."
-          />
-        </div>
+    <h2>Features</h2>
+    <div class="features">
+      <div>
+        <NxCard
+          header="Authentication"
+          theme="primary"
+          max-width="22"
+          text="Add full-stack authentication to your Nuxt app, both back end and front end."
+        />
+      </div>
+      <div>
+        <NxCard
+          header="Authorization"
+          theme="danger"
+          max-width="22"
+          text="Add permission-based access control to both your front end and back end."
+        />
+      </div>
+      <div>
+        <NxCard
+          header="Secure Your API"
+          theme="secondary"
+          max-width="22"
+          text="Add authentication and authorization to your API."
+        />
+      </div>
+      <div>
+        <NxCard
+          header="Register, Login, Logout Users"
+          theme="primary"
+          max-width="22"
+          text="Scaffold components to register, login, and logout users."
+        />
+      </div>
+      <div>
+        <NxCard
+          header="Google Login"
+          max-width="22"
+          text="Allow your users to easily login with Google."
+        />
+      </div>
+      <div>
+        <NxCard
+          header="Email Verification"
+          theme="danger"
+          max-width="22"
+          text="Comes with optional email verification to your registration."
+        />
+      </div>
+      <div>
+        <NxCard
+          header="Password Recovery"
+          max-width="22"
+          text="Allow your users to recover their lost password."
+        />
+      </div>
+      <div>
+        <NxCard
+          header="User Profile"
+          max-width="22"
+          text="Add a user profile so your users can manage their data."
+        />
+      </div>
+      <div>
+        <NxCard
+          header="User Management"
+          max-width="22"
+          text="Manage your users from an admin panel."
+        />
       </div>
     </div>
 
-    <div class="container px-4 my-5 py-5 border shadow-lg" id="icon-grid">
+    <div>
       <h2 class="pb-2 border-bottom">MIT License</h2>
       <p>COPYRIGHT 2023 Nuxt-IAM</p>
       <p>
@@ -125,7 +132,12 @@ useHead({
 <style scoped>
 .features {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 768px) {
+  .features {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -1,18 +1,25 @@
 <template>
-  <nav v-if="menu" class="py-2 border-bottom" :class="themeClass">
+  <nav v-if="menu" :class="[themeClass, sizeClass]">
     <div class="container d-flex flex-wrap">
       <ul class="nav me-auto">
-        <li v-for="(item) in props.menu" :class="[
-          showClass(item),
-          disabledClass(item),
-        ]" @click.stop="clicked(item)">
-          <span class="nav-link px-2" :class=[hasChildrenClass(item)]>
-            <span v-if="item.bold"><strong>{{ item.name }}</strong></span>
+        <li
+          v-for="item in props.menu"
+          :class="[showClass(item), disabledClass(item)]"
+          @click.stop="clicked(item)"
+        >
+          <span class="nav-link px-2" :class="[hasChildrenClass(item)]">
+            <span v-if="item.bold"
+              ><strong>{{ item.name }}</strong></span
+            >
             <span v-else>{{ item.name }}</span>
           </span>
           <span v-if="item.children && item.showChildren !== false">
             <span @click="toggleShowChildren(showChildren)">&#9660;</span>
-            <NxMenu v-if="showChildren" :menu="item.children" @clicked="clicked" />
+            <nxMenu
+              v-if="showChildren"
+              :menu="item.children"
+              @clicked="clicked"
+            />
           </span>
         </li>
       </ul>
@@ -27,58 +34,96 @@ const props = defineProps({
   menu: Array<NxLink>,
   theme: {
     validator(value: string) {
-      return ['primary', 'secondary', 'success', 'info', 'warning', 'danger', 'dark', 'light', 'link', 'none'].includes(value)
+      return [
+        "primary",
+        "secondary",
+        "success",
+        "info",
+        "warning",
+        "danger",
+        "dark",
+        "light",
+        "link",
+        "none",
+      ].includes(value);
     },
-    default: 'light',
+    default: "light",
   },
-})
+  size: {
+    type: String,
+    validator(value: string) {
+      return ["small", "medium", "large"].includes(value);
+    },
+    default: "medium",
+  },
+});
 
-const emit = defineEmits(["clicked"])
-const showChildren = ref(false)
+const emit = defineEmits(["clicked"]);
+const showChildren = ref(false);
 
 const themeClasses = [
   {
-    name: 'light',
-    class: 'light',
+    name: "light",
+    class: "light",
   },
   {
-    name: 'dark',
-    class: 'dark',
+    name: "dark",
+    class: "dark",
   },
   {
-    name: 'primary',
-    class: 'primary',
+    name: "primary",
+    class: "primary",
   },
   {
-    name: 'secondary',
-    class: 'secondary',
+    name: "secondary",
+    class: "secondary",
   },
   {
-    name: 'info',
-    class: 'info',
+    name: "info",
+    class: "info",
   },
   {
-    name: 'warning',
-    class: 'warning',
+    name: "warning",
+    class: "warning",
   },
   {
-    name: 'danger',
-    class: 'danger',
-  }
-]
+    name: "danger",
+    class: "danger",
+  },
+];
+
+const sizeClasses = [
+  {
+    name: "small",
+    class: "small",
+  },
+  {
+    name: "medium",
+    class: "medium",
+  },
+  {
+    name: "large",
+    class: "large",
+  },
+];
 
 // Computed properties
 const themeClass = computed(() => {
-  const theme = themeClasses.find(theme => theme.name === props.theme)
-  return theme?.class
-})
+  const theme = themeClasses.find((theme) => theme.name === props.theme);
+  return theme?.class;
+});
+
+const sizeClass = computed(() => {
+  const size = sizeClasses.find((size) => size.name === props.size);
+  return size?.class;
+});
 
 /**
  * Receives object of menu item clicked and emits event
  * @param name Name of menu item that was clicked
  */
 function clicked(link: NxLink) {
-  emit('clicked', link)
+  emit("clicked", link);
 }
 
 /**
@@ -86,7 +131,7 @@ function clicked(link: NxLink) {
  * @param link A Link object
  */
 function showClass(link: NxLink) {
-  if (link.show === false) return 'hide'
+  if (link.show === false) return "hide";
 }
 
 /**
@@ -94,7 +139,7 @@ function showClass(link: NxLink) {
  * @param link A Link object
  */
 function disabledClass(link: NxLink) {
-  if (link.disabled === true) return 'disabled'
+  if (link.disabled === true) return "disabled";
 }
 
 /**
@@ -102,7 +147,7 @@ function disabledClass(link: NxLink) {
  * @param link A Link object
  */
 function hasChildrenClass(link: NxLink) {
-  if (link.children && link.showChildren !== false) return 'pr-0'
+  if (link.children && link.showChildren !== false) return "pr-0";
 }
 
 /**
@@ -110,18 +155,33 @@ function hasChildrenClass(link: NxLink) {
  * @param value Value of showChildren
  */
 function toggleShowChildren(value: boolean) {
-  showChildren.value = !value
+  showChildren.value = !value;
 }
 </script>
 
 <style scoped>
+nav {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
 li {
   cursor: pointer;
 }
 
-.py-2 {
+.small {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.medium {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.large {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .flex-wrap {
@@ -145,7 +205,8 @@ li {
 
 .nav-link {
   text-decoration: none;
-  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
 }
 
 .px-2 {

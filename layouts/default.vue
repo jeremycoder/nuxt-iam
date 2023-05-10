@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <NxNavbar :menu="mainMenu" @clicked="menuClicked" />
+    <NxNavbar :menu="mainMenu" small="" @clicked="menuClicked" />
     <IamLoggedInHeader />
     <div class="slot">
       <slot />

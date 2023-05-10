@@ -6,6 +6,7 @@
       <NxCard
         header="Passwords"
         title="Update Password"
+        class="password-card"
         theme="primary"
         text="Update your password below."
       >
@@ -41,6 +42,7 @@
         text="Deleting your account is a permanent action and cannot be undone.
               If you are sure you want to delete your account, click the button
               below."
+        class="account-card"
       >
         <NxAlert v-if="deleteError" theme="danger" @click="deleteError = null">
           <strong>{{ deleteError.message }}</strong>
@@ -157,3 +159,16 @@ async function deleteMyAccount() {
   navigateTo("/iam/register");
 }
 </script>
+
+<style scoped>
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 768px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

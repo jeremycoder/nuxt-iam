@@ -5,6 +5,7 @@
         :key="isLoggedInKey"
         :menu="isLoggedInMenu"
         theme="none"
+        size="small"
         @clicked="menuClicked"
       />
     </div>
@@ -25,6 +26,7 @@
     <NxNavbar
       :menu="isNotLoggedInMenu"
       theme="none"
+      size="small"
       class="login-register-menu"
       @clicked="menuClicked"
     />

@@ -16,7 +16,11 @@
     </NxAlert>
 
     <!-- Registration card and form -->
-    <NxCard header="Register" text="Enter all user information below">
+    <NxCard
+      header="Register"
+      class="register-card"
+      text="Enter all user information below"
+    >
       <NxForm :data="inputData" submit-text="Register" @submit="registerUser" />
       <div class="terms-account">
         <div>
@@ -134,5 +138,9 @@ useHead({
 
 .account {
   margin-left: auto;
+}
+
+.register-card {
+  margin: auto;
 }
 </style>
