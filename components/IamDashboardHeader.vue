@@ -23,6 +23,7 @@
     </div>
   </div>
   <div v-else class="is-not-logged-in">
+    <IamLogoLink />
     <NxNavbar
       :menu="isNotLoggedInMenu"
       theme="none"
@@ -36,6 +37,7 @@
 <script setup lang="ts">
 import { useIamProfileStore } from "@/stores/useIamProfileStore";
 import { NxLink, NxLinks, User } from "~~/iam/misc/types";
+const { isAuthenticated, getProfile } = useIam();
 
 const iamStore = useIamProfileStore();
 const { logout } = useIam();
@@ -96,12 +98,17 @@ const profileMenu = [
 // Profile variables
 const profile = ref(<User | null>null);
 
+onMounted(async () => {
+  await checkLoggedIn();
+});
+
 // Watch store for changes
 iamStore.$subscribe(async (mutation, state) => {
   isLoggedIn.value = state.isLoggedIn;
 
   hideAdminLinks(isLoggedInMenu);
   isLoggedInKey.value++;
+  isAdmin.value = false;
 
   // If user is logged in
   if (isLoggedIn.value) {
@@ -110,17 +117,35 @@ iamStore.$subscribe(async (mutation, state) => {
     // If user is admin
     try {
       isAdmin.value = await canAccessAdmin(profile.value);
+      if (isAdmin.value) {
+        showAdminLinks(isLoggedInMenu);
+        isLoggedInKey.value++;
+      }
     } catch (e) {
       console.log(e);
     }
-
-    if (isAdmin.value) {
-      showAdminLinks(isLoggedInMenu);
-      isLoggedInKey.value++;
-      return;
-    }
   }
 });
+
+/**
+ * Check if user is logged in
+ */
+async function checkLoggedIn() {
+  isLoggedIn.value = await isAuthenticated();
+  if (isLoggedIn.value) {
+    const { status, data } = await getProfile();
+    if (status === "success") {
+      profile.value = data as User;
+
+      // Check if user is admin
+      isAdmin.value = await canAccessAdmin(profile.value);
+      if (isAdmin.value) {
+        showAdminLinks(isLoggedInMenu);
+        isLoggedInKey.value++;
+      }
+    }
+  }
+}
 
 /**
  * @desc Processes clicked menu item

@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <NxNavbar :menu="mainMenu" small="" @clicked="menuClicked" />
-    <IamLoggedInHeader />
-    <div class="slot">
+    <NxNavbar :menu="mainMenu" @clicked="menuClicked" />
+    <IamDashboardHeader class="iam-dashboard-header" />
+    <div>
       <slot />
     </div>
     <IamFooter>
@@ -103,8 +103,8 @@ useHead({
   min-width: 360px;
 }
 
-.slot {
-  padding: 2rem 0;
+.iam-dashboard-header {
+  margin-bottom: 1.75rem;
 }
 
 @media (max-width: 525px) {

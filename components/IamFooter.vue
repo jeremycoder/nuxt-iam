@@ -1,9 +1,7 @@
 <template>
-  <div>
-    <footer>
-      <p class="text-muted text-center"><slot /></p>
-    </footer>
-  </div>
+  <footer>
+    <div class="text-muted text-center"><slot /></div>
+  </footer>
 </template>
 
 <style scoped>

@@ -1,12 +1,13 @@
 <template>
-  <NuxtLink to="/iam/dashboard">
+  <div class="group">
     <img src="~~/iam/ui/img/nuxt-iam-logo-symbol.png" />
     <span class="nuxt-iam">Nuxt<strong>IAM</strong></span>
-  </NuxtLink>
+  </div>
 </template>
 
 <style scoped>
-.nuxt-iam {
-  color: #184b81;
+.group {
+  display: flex;
+  align-items: center;
 }
 </style>
