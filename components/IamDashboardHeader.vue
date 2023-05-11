@@ -193,6 +193,7 @@ async function logMeOut() {
   const { status } = await logout();
   if (status === "success") {
     // Clear store variables
+    isLoggedIn.value = false;
     iamStore.clearProfile();
     iamStore.setIsLoggedIn(false);
     navigateTo("/iam/login");
