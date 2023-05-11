@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isLoggedIn">
+  <div v-if="isLoaded && isLoggedIn">
     <h1>Protected page</h1>
     <p>This is a protected page. If you can see it, then you are logged in!</p>
   </div>
@@ -7,9 +7,14 @@
 
 <script setup lang="ts">
 const { isAuthenticated } = useIam();
-const isLoggedIn = await isAuthenticated();
+const isLoggedIn = ref(false);
+const isLoaded = ref(false);
 
-if (!isLoggedIn) navigateTo("iam/login");
+onMounted(async () => {
+  isLoggedIn.value = await isAuthenticated();
+  if (!isLoggedIn.value) navigateTo("iam/login");
+  isLoaded.value = true;
+});
 
 useHead({
   title: "Sample protected page",
