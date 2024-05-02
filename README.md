@@ -2,6 +2,8 @@
 
 ## Download from **[Github](https://github.com/jeremycoder/nuxt-iam)** NOT npm.
 
+## **NOTE: Code is NO LONGER actively maintained**.
+
 Nuxt IAM, which stands for Nuxt Identity and Access Management, is an authentication and authorization framework for Nuxt that allows you to secure your app with industry best practices. Nuxt IAM, adds authentication and authorization logic to your Nuxt app.
 
 See a fully functional [example app](https://nuxtiam.com/).
